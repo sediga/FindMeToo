@@ -1,6 +1,7 @@
 package com.bluesky.findmetoo;
 
 import android.Manifest;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -13,15 +14,21 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.bluesky.findmetoo.ServiceInterfaces.ApiInterface;
+import com.bluesky.findmetoo.ServiceInterfaces.TokenBindingModel;
 import com.bluesky.findmetoo.model.CurrentActivity;
+import com.bluesky.findmetoo.model.Token;
 import com.bluesky.findmetoo.preference.PrefConst;
 import com.bluesky.findmetoo.preference.Preference;
+import com.bluesky.findmetoo.uitls.CallBackHelper;
 import com.bluesky.findmetoo.uitls.Global;
 import com.bluesky.findmetoo.uitls.HttpClient;
+import com.bluesky.findmetoo.uitls.SQLHelper;
 import com.bluesky.findmetoo.uitls.SQLiteManager;
 import com.bluesky.findmetoo.model.UserModel;
 
 import java.util.List;
+
+import javax.security.auth.callback.CallbackHandler;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -124,9 +131,46 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             return true;
         }
     }
+    private void loginToAPI(String username, String password, final CallBackHelper helper)
+    {
+        final ApiInterface apiService =
+                HttpClient.getClient().create(ApiInterface.class);
+//        TokenBindingModel tokenBindingModel = new TokenBindingModel(username, "password", password);
+        Call<Token> tokenCall = apiService.getToken(username, password, "password");
+        tokenCall.enqueue((new Callback<Token>() {
+            @Override
+            public void onResponse(Call<Token> call, Response<Token> response) {
+                if(response.isSuccessful()) {
+                    helper.registerToken(response.body());
+                }
+            }
 
-    private void doLogin(String username, String password) {
+            @Override
+            public void onFailure(Call<Token> call, Throwable t) {
+                System.out.println(t.getMessage());
+            }
+        }));
+    }
 
+    private void doLogin(final String username, String password) {
+
+        CallBackHelper callBackHelper = new CallBackHelper() {
+            @Override
+            public void registerToken(Token token) {
+                ContentValues values = new ContentValues();
+                values.put("deviceid", token.userName);
+                values.put("token", token.access_token);
+                SQLHelper.Insert("apiuser", values);
+                saveToken(token.access_token);
+            }
+        };
+        this.loginToAPI(username, password, callBackHelper);
+        if (!getUser(username, password)) return;
+        startActivity(new Intent(this, MapsActivity.class));
+        finish();
+    }
+
+    private boolean getUser(String username, String password) {
         Cursor c = Global.mdb.rawQuery(
                 "SELECT *    " +
                         "FROM t_user " +
@@ -135,8 +179,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                      null);
 
         if (c == null || c.getCount() == 0) {
-            Global.showShortToast(this, "First name or password is invalid.");
-            return;
+            Global.showShortToast(this, "user name or password is invalid.");
+            return false;
         }
 
         Global.preference.put(this, PrefConst.USERNAME, username);
@@ -147,12 +191,17 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 c.getInt(0),
                 c.getString(1),
                 c.getString(2),
-                c.getDouble(4),
-                c.getDouble(5)
+                c.getDouble(3),
+                c.getDouble(4)
         );
-
-        startActivity(new Intent(this, MapsActivity.class));
-        finish();
+        return true;
     }
 
+    private void saveToken(String token) {
+
+        String savedToken = Global.preference.getValue(this, PrefConst.TOKEN, "");
+        if (savedToken == null || savedToken == "") {
+                Global.preference.put(this, PrefConst.TOKEN, token);
+        }
+    }
 }

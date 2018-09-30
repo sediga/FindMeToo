@@ -13,6 +13,8 @@ import com.bluesky.findmetoo.uitls.GPSTracker;
 import com.bluesky.findmetoo.uitls.Global;
 import com.bluesky.findmetoo.uitls.HttpClient;
 
+import java.io.Console;
+import java.io.IOException;
 import java.util.List;
 
 import retrofit2.Call;
@@ -20,6 +22,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 import com.bluesky.findmetoo.ServiceInterfaces.*;
+import com.bluesky.findmetoo.uitls.SQLHelper;
 
 public class RegisterActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -49,20 +52,38 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
 
     }
 
-    private void registerApiUser(String email, String password)
+    private void registerApiUser(final String email, final String password)
     {
+        Token token = null;
         RegisterBindingModel registerBindingModel = new RegisterBindingModel(email, password, password);
-        ApiInterface apiService =
+        final ApiInterface apiService =
                 HttpClient.getClient().create(ApiInterface.class);
-        Call<Token> call = apiService.registerExternal(registerBindingModel);
-        call.enqueue(new Callback<Token>() {
+        Call<Void> call = apiService.registerExternal(registerBindingModel);
+        call.enqueue(new Callback<Void>() {
             @Override
-            public void onResponse(Call<Token> call, Response<Token> response) {
-                Token token = response.body();
+            public void onResponse(Call<Void> call, Response<Void> response) {
+//                System.out.println(response.toString());
+                if(response.isSuccessful())
+                {
+                    TokenBindingModel tokenBindingModel = new TokenBindingModel(email, "password", password);
+                    Call<Token> tokenCall = apiService.getToken(email, password, "password");
+                    tokenCall.enqueue((new Callback<Token>() {
+                        @Override
+                        public void onResponse(Call<Token> call, Response<Token> response) {
+                            Token token = response.body();
+                        }
+
+                        @Override
+                        public void onFailure(Call<Token> call, Throwable t) {
+                            System.out.println(t.getMessage());
+                        }
+                    }));
+                }
             }
 
             @Override
-            public void onFailure(Call<Token> call, Throwable t) {
+            public void onFailure(Call<Void> call, Throwable t) {
+                System.out.println(t.getMessage());
             }
         });
     }
@@ -91,7 +112,8 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         values.put("password", password);
         values.put("latitude", gpsTracker.latitude);
         values.put("longitude", gpsTracker.longitude);
-        Global.mdb.insert("t_user", null, values);
+
+        SQLHelper.Insert("t_user", values);
 
         Global.showShortToast(this, "User registered successfully.");
         this.registerApiUser(email, password);

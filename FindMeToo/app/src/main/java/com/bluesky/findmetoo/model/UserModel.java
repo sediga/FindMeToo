@@ -6,10 +6,10 @@ public class UserModel {
 
     @SerializedName("id")
     private int id;
-    @SerializedName("firstName")
-    private String first_name;
-    @SerializedName("lastName")
-    private String last_name;
+    @SerializedName("username")
+    private String username;
+    @SerializedName("password")
+    private String password;
     @SerializedName("latitude")
     private double latitude;
     @SerializedName("longitude")
@@ -17,8 +17,8 @@ public class UserModel {
 
     public UserModel(int id, String first_name, String last_name, double latitude, double longitude) {
         this.id = id;
-        this.first_name = first_name;
-        this.last_name = last_name;
+        this.username = first_name;
+        this.password = last_name;
         this.latitude = latitude;
         this.longitude = longitude;
     }
@@ -31,20 +31,20 @@ public class UserModel {
         this.id = id;
     }
 
-    public String getFirst_name() {
-        return first_name;
+    public String getUsername() {
+        return username;
     }
 
-    public void setFirst_name(String first_name) {
-        this.first_name = first_name;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
-    public String getLast_name() {
-        return last_name;
+    public String getPassword() {
+        return password;
     }
 
-    public void setLast_name(String last_name) {
-        this.last_name = last_name;
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public double getLatitude() {
