@@ -3,16 +3,21 @@ package com.bluesky.findmetoo;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener;
 import com.arlib.floatingsearchview.FloatingSearchView;
 import com.arlib.floatingsearchview.suggestions.model.SearchSuggestion;
 import com.bluesky.findmetoo.model.CurrentActivity;
@@ -23,6 +28,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
@@ -34,6 +40,7 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import com.bluesky.findmetoo.ServiceInterfaces.*;
@@ -41,13 +48,17 @@ import com.bluesky.findmetoo.uitls.*;
 import retrofit2.Call;
 import retrofit2.*;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, FloatingSearchView.OnMenuItemClickListener, FloatingSearchView.OnSearchListener, FloatingSearchView.OnHomeActionClickListener {
+public class MapsActivity extends FragmentActivity implements
+        OnMapReadyCallback,
+        FloatingSearchView.OnMenuItemClickListener,
+        FloatingSearchView.OnSearchListener,
+        FloatingSearchView.OnHomeActionClickListener,
+        OnInfoWindowClickListener {
 
     private GoogleMap mMap;
-    private List<Marker> markers;
-    private List<Circle> circles;
+    private HashMap<Integer, Marker> markers;
+    private HashMap<Circle, Integer> circles;
     private FloatingSearchView mSearchView;
-    private ViewGroup infoWindow;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,6 +92,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         showMarkerOfUsers("");
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(Global.current_user.getLatitude(), Global.current_user.getLongitude()), 12));
         //mMap.setMyLocationEnabled(true);
+        mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter());
+        mMap.setOnInfoWindowClickListener(this);
     }
 
 
@@ -142,20 +155,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private void showMarkerOfUsers(String search_text) {
         String username = Global.preference.getValue(this, PrefConst.USERNAME, "");
-
+        mMap.clear();
         // all markers remove
         if (markers != null) {
-            for (Marker marker : markers) marker.remove();
+            markers.clear();
+//            for (Marker marker : markers) marker.remove();
         }
         else {
-            markers = new ArrayList<>();
+            markers = new HashMap<Integer, Marker>();
         }
 
         if (circles != null) {
-            for (Circle circle : circles) circle.remove();
+            circles.clear();
+//            for (Circle circle : circles) circle.remove();
         }
         else {
-            circles = new ArrayList<>();
+            circles = new HashMap<Circle, Integer>();
         }
 
         search_text = search_text.toLowerCase();
@@ -175,10 +190,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     Object[] locations = (response.body().toArray());
                     for (int i = 0; i < locations.length; i++) {
                         LatLng pos = new LatLng(((CurrentActivity) locations[i]).latitude, ((CurrentActivity) locations[i]).longitude);
-//                        Marker marker = mMap.addMarker(new MarkerOptions()
-//                                .position(pos)
-//                                .title(((CurrentActivity) locations[i]).activity));
-//                        markers.add(marker);
+                        final Marker marker = mMap.addMarker(new MarkerOptions()
+                                .position(pos).icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("custom_info_bubble",1,1)))
+                                .visible(false)
+                                .snippet("Test")
+                                .title(((CurrentActivity) locations[i]).activity));
+                        markers.put(i, marker);
                         Circle circle = mMap.addCircle(new CircleOptions()
                                 .center(new LatLng(((CurrentActivity) locations[i]).latitude, ((CurrentActivity) locations[i]).longitude))
                                 .radius(500)
@@ -190,6 +207,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                             @Override
                             public void onCircleClick(Circle circle) {
+                                Marker marker = markers.get(circles.get(circle));
+                                marker.setVisible(true);
+                                marker.showInfoWindow();
+//                                marker.setVisible(false);
                                 //infoWindow.setVisibility(View.VISIBLE);
                                 circle.setTag("test");
                                 // Flip the r, g and b components of the circle's
@@ -199,9 +220,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                              }
                         });
-                            circles.add(circle);
+                            circles.put(circle, i);
                     }
                 }
+            }
+
+            public Bitmap resizeMapIcons(String iconName, int width, int height){
+                Bitmap imageBitmap = BitmapFactory.decodeResource(getResources(),getResources().getIdentifier(iconName, "drawable", getPackageName()));
+                Bitmap resizedBitmap = Bitmap.createScaledBitmap(imageBitmap, width, height, false);
+                return resizedBitmap;
             }
 
             @Override
@@ -275,6 +302,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //            average_lng /= count;
 //            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(average_lat, average_lng), 6));
 //        }
+    }
+
+    @Override
+    public void onInfoWindowClick(Marker marker) {
+        Toast.makeText(this, "Click Info Window", Toast.LENGTH_SHORT).show();
     }
 
     private void addKeyword() {
@@ -355,4 +387,87 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         builder.show();
     }
 
+    class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
+
+        // These are both viewgroups containing an ImageView with id "badge" and two TextViews with id
+        // "title" and "snippet".
+        private final View mWindow;
+
+        private final View mContents;
+
+        CustomInfoWindowAdapter() {
+            mWindow = getLayoutInflater().inflate(R.layout.custom_info_window, null);
+            mContents = getLayoutInflater().inflate(R.layout.custom_info_contents, null);
+        }
+
+        @Override
+        public View getInfoWindow(Marker marker) {
+//        if (mOptions.getCheckedRadioButtonId() != R.id.custom_info_window) {
+//            // This means that getInfoContents will be called.
+//            return null;
+//        }
+            render(marker, mWindow);
+            return mWindow;
+        }
+
+        @Override
+        public View getInfoContents(Marker marker) {
+//        if (mOptions.getCheckedRadioButtonId() != R.id.custom_info_contents) {
+//            // This means that the default info contents will be used.
+//            return null;
+//        }
+            render(marker, mContents);
+            return mContents;
+        }
+
+        private void render(Marker marker, View view) {
+            int badge;
+            // Use the equals() method on a Marker to check for equals.  Do not use ==.
+//        if (marker.equals(mBrisbane)) {
+//            badge = R.drawable.badge_qld;
+//        } else if (marker.equals(mAdelaide)) {
+//            badge = R.drawable.badge_sa;
+//        } else if (marker.equals(mSydney)) {
+//            badge = R.drawable.badge_nsw;
+//        } else if (marker.equals(mMelbourne)) {
+//            badge = R.drawable.badge_victoria;
+//        } else if (marker.equals(mPerth)) {
+//            badge = R.drawable.badge_wa;
+//        } else if (marker.equals(mDarwin1)) {
+//            badge = R.drawable.badge_nt;
+//        } else if (marker.equals(mDarwin2)) {
+//            badge = R.drawable.badge_nt;
+//        } else if (marker.equals(mDarwin3)) {
+//            badge = R.drawable.badge_nt;
+//        } else if (marker.equals(mDarwin4)) {
+//            badge = R.drawable.badge_nt;
+//        } else {
+//            // Passing 0 to setImageResource will clear the image view.
+//            badge = 0;
+//        }
+//        ((ImageView) view.findViewById(R.id.badge)).setImageResource(badge);
+
+            String title = marker.getTitle();
+            TextView titleUi = ((TextView) view.findViewById(R.id.title));
+            if (title != null) {
+                // Spannable string allows us to edit the formatting of the text.
+                SpannableString titleText = new SpannableString(title);
+                titleText.setSpan(new ForegroundColorSpan(Color.RED), 0, titleText.length(), 0);
+                titleUi.setText(titleText);
+            } else {
+                titleUi.setText("");
+            }
+
+            String snippet = marker.getSnippet();
+//        TextView snippetUi = ((TextView) view.findViewById(R.id.snippet));
+//        if (snippet != null && snippet.length() > 12) {
+//            SpannableString snippetText = new SpannableString(snippet);
+//            snippetText.setSpan(new ForegroundColorSpan(Color.MAGENTA), 0, 10, 0);
+//            snippetText.setSpan(new ForegroundColorSpan(Color.BLUE), 12, snippet.length(), 0);
+//            snippetUi.setText(snippetText);
+//        } else {
+//            snippetUi.setText("");
+//        }
+        }
+    }
 }
