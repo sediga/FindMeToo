@@ -1,6 +1,7 @@
 package com.bluesky.findmetoo;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -13,7 +14,10 @@ import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewTreeObserver;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -52,13 +56,13 @@ public class MapsActivity extends FragmentActivity implements
         OnMapReadyCallback,
         FloatingSearchView.OnMenuItemClickListener,
         FloatingSearchView.OnSearchListener,
-        FloatingSearchView.OnHomeActionClickListener,
-        OnInfoWindowClickListener {
+        FloatingSearchView.OnHomeActionClickListener {
 
     private GoogleMap mMap;
     private HashMap<Integer, Marker> markers;
     private HashMap<Circle, Integer> circles;
     private FloatingSearchView mSearchView;
+    private Button infoButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,9 +97,20 @@ public class MapsActivity extends FragmentActivity implements
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(Global.current_user.getLatitude(), Global.current_user.getLongitude()), 12));
         //mMap.setMyLocationEnabled(true);
         mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter());
-        mMap.setOnInfoWindowClickListener(this);
+//        mMap.setOnInfoWindowClickListener(this);
+//        final MapWrapperLayout mapWrapperLayout = (MapWrapperLayout)findViewById(R.id.map_relative_layout);
+//
+//        // MapWrapperLayout initialization
+//        // 39 - default marker height
+//        // 20 - offset between the default InfoWindow bottom edge and it's content bottom edge
+//        mapWrapperLayout.init(mMap, getPixelsFromDp(this, 39 + 20));
+
     }
 
+    public static int getPixelsFromDp(Context context, float dp) {
+        final float scale = context.getResources().getDisplayMetrics().density;
+        return (int)(dp * scale + 0.5f);
+    }
 
     @Override
     public void onActionMenuItemSelected(MenuItem item) {
@@ -193,7 +208,7 @@ public class MapsActivity extends FragmentActivity implements
                         final Marker marker = mMap.addMarker(new MarkerOptions()
                                 .position(pos).icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("custom_info_bubble",1,1)))
                                 .visible(false)
-                                .snippet("Test")
+                                .snippet("Sample Description of an activity")
                                 .title(((CurrentActivity) locations[i]).activity));
                         markers.put(i, marker);
                         Circle circle = mMap.addCircle(new CircleOptions()
@@ -203,6 +218,10 @@ public class MapsActivity extends FragmentActivity implements
                                 .strokeColor(Color.MAGENTA)
                                 .fillColor(0x220000FF));
 
+                        if(i==0) {
+                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(circle.getCenter(), 11));
+                        }
+
                         mMap.setOnCircleClickListener(new GoogleMap.OnCircleClickListener() {
 
                             @Override
@@ -210,6 +229,7 @@ public class MapsActivity extends FragmentActivity implements
                                 Marker marker = markers.get(circles.get(circle));
                                 marker.setVisible(true);
                                 marker.showInfoWindow();
+                                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(circle.getCenter(), 11));
 //                                marker.setVisible(false);
                                 //infoWindow.setVisibility(View.VISIBLE);
                                 circle.setTag("test");
@@ -304,10 +324,10 @@ public class MapsActivity extends FragmentActivity implements
 //        }
     }
 
-    @Override
-    public void onInfoWindowClick(Marker marker) {
-        Toast.makeText(this, "Click Info Window", Toast.LENGTH_SHORT).show();
-    }
+//    @Override
+//    public void onInfoWindowClick(Marker marker) {
+//        Toast.makeText(this, "Click Info Window", Toast.LENGTH_SHORT).show();
+//    }
 
     private void addKeyword() {
 
@@ -387,6 +407,7 @@ public class MapsActivity extends FragmentActivity implements
         builder.show();
     }
 
+
     class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
 
         // These are both viewgroups containing an ImageView with id "badge" and two TextViews with id
@@ -395,9 +416,42 @@ public class MapsActivity extends FragmentActivity implements
 
         private final View mContents;
 
+        private Button infoButton;
+
+        private OnInfoWindowElemTouchListener infoButtonListener;
+
+        private ViewTreeObserver.OnGlobalLayoutListener infoWindowLayoutListener;
+
+        private int popupXOffset;
+        private int popupYOffset;
+
+        private class InfoWindowLayoutListener implements ViewTreeObserver.OnGlobalLayoutListener {
+            @Override
+            public void onGlobalLayout() {
+                //размеры окна изменились, обновляем смещения
+                popupXOffset = mWindow.getWidth() / 2;
+                popupYOffset = mWindow.getHeight();
+            }
+        }
+
         CustomInfoWindowAdapter() {
             mWindow = getLayoutInflater().inflate(R.layout.custom_info_window, null);
+//            infoWindowLayoutListener = new InfoWindowLayoutListener();
+//            mWindow.getViewTreeObserver().addOnGlobalLayoutListener(infoWindowLayoutListener);
             mContents = getLayoutInflater().inflate(R.layout.custom_info_contents, null);
+            this.infoButton = (Button)mWindow.findViewById(R.id.button);
+            this.infoButtonListener = new OnInfoWindowElemTouchListener(this.infoButton,
+                    getResources().getDrawable(R.drawable.round_but_green_sel), //btn_default_normal_holo_light
+                    getResources().getDrawable(R.drawable.round_but_red_sel)) //btn_default_pressed_holo_light
+            {
+                @Override
+                protected void onClickConfirmed(View v, Marker marker) {
+                    // Here we can perform some action triggered after clicking the button
+                    Toast.makeText(MapsActivity.this, marker.getTitle() + "'s button clicked!", Toast.LENGTH_SHORT).show();
+                }
+            };
+            this.infoButton.setOnTouchListener(infoButtonListener);
+
         }
 
         @Override
@@ -445,7 +499,7 @@ public class MapsActivity extends FragmentActivity implements
 //            // Passing 0 to setImageResource will clear the image view.
 //            badge = 0;
 //        }
-//        ((ImageView) view.findViewById(R.id.badge)).setImageResource(badge);
+        ((ImageView) view.findViewById(R.id.badge)).setImageResource(R.drawable.badge_sa);
 
             String title = marker.getTitle();
             TextView titleUi = ((TextView) view.findViewById(R.id.title));
@@ -459,15 +513,15 @@ public class MapsActivity extends FragmentActivity implements
             }
 
             String snippet = marker.getSnippet();
-//        TextView snippetUi = ((TextView) view.findViewById(R.id.snippet));
-//        if (snippet != null && snippet.length() > 12) {
-//            SpannableString snippetText = new SpannableString(snippet);
+        TextView snippetUi = ((TextView) view.findViewById(R.id.snippet));
+        if (snippet != null && snippet.length() > 12) {
+            SpannableString snippetText = new SpannableString(snippet);
 //            snippetText.setSpan(new ForegroundColorSpan(Color.MAGENTA), 0, 10, 0);
-//            snippetText.setSpan(new ForegroundColorSpan(Color.BLUE), 12, snippet.length(), 0);
-//            snippetUi.setText(snippetText);
-//        } else {
-//            snippetUi.setText("");
-//        }
+            snippetText.setSpan(new ForegroundColorSpan(Color.BLUE), 0, snippet.length(), 0);
+            snippetUi.setText(snippetText);
+        } else {
+            snippetUi.setText("");
+        }
         }
     }
 }

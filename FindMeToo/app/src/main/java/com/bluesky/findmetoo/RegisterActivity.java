@@ -7,15 +7,10 @@ import android.view.View;
 import android.widget.EditText;
 
 import com.bluesky.findmetoo.ServiceInterfaces.ApiInterface;
-import com.bluesky.findmetoo.model.CurrentActivity;
 import com.bluesky.findmetoo.model.Token;
 import com.bluesky.findmetoo.uitls.GPSTracker;
 import com.bluesky.findmetoo.uitls.Global;
 import com.bluesky.findmetoo.uitls.HttpClient;
-
-import java.io.Console;
-import java.io.IOException;
-import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -32,6 +27,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         setContentView(R.layout.activity_register);
 
         findViewById(R.id.button_register).setOnClickListener(this);
+        findViewById(R.id.button_profile).setOnClickListener(this);
         findViewById(R.id.button_login).setOnClickListener(this);
 
     }
@@ -45,11 +41,18 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
             case R.id.button_register:
                 doRegister();
                 break;
+            case R.id.button_profile:
+                addProfile();
+                break;
             case R.id.button_login:
                 finish();
                 break;
         }
 
+    }
+
+    private void addProfile() {
+        setContentView(R.layout.activity_profile);
     }
 
     private void registerApiUser(final String email, final String password)

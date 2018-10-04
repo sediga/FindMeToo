@@ -19,5 +19,7 @@
     <string name="add">Add</string>
     <string name="keyword">KeyWord : </string>
     <string name="Description" />
+    <string name="profile">PROFILE</string>
     <string name="todo">TODO</string>
+    <string name="About">About Me</string>
 </resources>
