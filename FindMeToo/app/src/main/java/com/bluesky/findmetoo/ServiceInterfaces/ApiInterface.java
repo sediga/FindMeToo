@@ -9,6 +9,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
 import retrofit2.http.Path;
 
 import java.util.*;
@@ -25,6 +26,12 @@ public interface ApiInterface {
     Call<Void> postCurrentLocation(@Header("Authorization") String authorization, @Body CurrentActivity location);
     @POST("JoinServer/Activity")
     Call<Void> postActivity(@Header("Authorization") String authorization, @Body ActivityModel activity);
+    @POST("JoinServer/Profile")
+    Call<Void> postProfile(@Header("Authorization") String authorization, @Body ProfileModel profile);
+    @PUT("JoinServer/Profile/{deviceId}")
+    Call<Void> putProfile(@Header("Authorization") String authorization, @Path("deviceId") String deviceId, @Body ProfileModel profile);
+    @GET("JoinServer/Profile/{deviceId}")
+    Call<ProfileModel> getProfile(@Header("Authorization") String authorization, @Path("deviceId") String deviceId);
 
 //    @GET("movie/{id}")
 //    Call<MoviesResponse> getMovieDetails(@Path("id") int id, @Query("api_key") String apiKey);

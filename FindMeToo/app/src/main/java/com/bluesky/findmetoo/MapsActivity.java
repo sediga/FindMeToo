@@ -3,6 +3,7 @@ package com.bluesky.findmetoo;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -15,6 +16,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -121,6 +123,9 @@ public class MapsActivity extends FragmentActivity implements
         } else if (id == R.id.action_add) {
             addKeyword();
         }
+        else if (id == R.id.menu_profile){
+            startActivity(new Intent(this, ProfileActivity.class));
+        }
 
     }
 
@@ -161,6 +166,7 @@ public class MapsActivity extends FragmentActivity implements
 
         if (c == null || c.getCount() == 0) {
             Global.showShortToast(this, "Api User not found!");
+            finish();
         } else {
             c.moveToFirst();
             token = c.getString(2);
@@ -208,7 +214,7 @@ public class MapsActivity extends FragmentActivity implements
                         final Marker marker = mMap.addMarker(new MarkerOptions()
                                 .position(pos).icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("custom_info_bubble",1,1)))
                                 .visible(false)
-                                .snippet("Sample Description of an activity")
+                                .snippet(((CurrentActivity) locations[i]).description)
                                 .title(((CurrentActivity) locations[i]).activity));
                         markers.put(i, marker);
                         Circle circle = mMap.addCircle(new CircleOptions()
@@ -333,21 +339,23 @@ public class MapsActivity extends FragmentActivity implements
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         View view = LayoutInflater.from(this).inflate(R.layout.dialog_keyword, null);
-        final EditText edit_keyword = view.findViewById(R.id.edit_keyword);
-//        final String username = Global.preference.getValue(this, PrefConst.USERNAME, "");
+        final EditText edit_title = view.findViewById(R.id.edit_activity_title);
+        final EditText edit_description = view.findViewById(R.id.edit_activity_description);
+//      final String username = Global.preference.getValue(this, PrefConst.USERNAME, "");
         final String token = Global.preference.getValue(this, PrefConst.TOKEN, "");
 
-        builder.setTitle("Add Keyword")
+        builder.setTitle("Add Activity")
                 .setView(view)
                 .setCancelable(false)
                 .setPositiveButton("Add", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
-                        String keyword = edit_keyword.getText().toString().trim();
-                        if (keyword.isEmpty()) {
-                            Global.showShortToast(MapsActivity.this, "Keyword is required.");
-                            edit_keyword.requestFocus();
+                        String description = edit_description.getText().toString().trim();
+                        String title = edit_title.getText().toString().trim();
+                        if (title.isEmpty()) {
+                            Global.showShortToast(MapsActivity.this, "activity is required.");
+                            edit_title.requestFocus();
                             return;
                         }
 
@@ -357,33 +365,33 @@ public class MapsActivity extends FragmentActivity implements
 //                        Global.mdb.insert("t_keyword", null, values);
                         GPSTracker gpsTracker = new GPSTracker(MapsActivity.this);
                         gpsTracker.getLocation();
-                        CurrentActivity currentActivity = new CurrentActivity(String.valueOf(Global.current_user.getId()), keyword, gpsTracker.latitude, gpsTracker.longitude);
+//                        CurrentActivity currentActivity = new CurrentActivity(String.valueOf(Global.current_user.getId()), keyword, gpsTracker.latitude, gpsTracker.longitude);
                         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                         String currentDateandTime = sdf.format(new Date());
-                        ActivityModel activity = new ActivityModel(String.valueOf(Global.current_user.getId()), keyword,currentDateandTime );
+                        ActivityModel activity = new ActivityModel(String.valueOf(Global.current_user.getId()), title, description, currentDateandTime, gpsTracker.latitude, gpsTracker.longitude);
 
 //                        if (token == null || token == "") {
 //                            token = getToken(username);
 //                        }
 
+//                        ApiInterface apiService =
+//                                HttpClient.getClient().create(ApiInterface.class);
+//                        Call<Void> call = apiService.postCurrentLocation("Bearer " + token, currentActivity);
+//                        call.enqueue(new Callback<Void>() {
+//                            @Override
+//                            public void onResponse(Call<Void> call, Response<Void> response) {
+//                                if(response.isSuccessful()) {
+//                                }
+//                            }
+//
+//                            @Override
+//                            public void onFailure(Call<Void> call, Throwable t) {
+//                            }
+//                        });
+
                         ApiInterface apiService =
                                 HttpClient.getClient().create(ApiInterface.class);
-                        Call<Void> call = apiService.postCurrentLocation("Bearer " + token, currentActivity);
-                        call.enqueue(new Callback<Void>() {
-                            @Override
-                            public void onResponse(Call<Void> call, Response<Void> response) {
-                                if(response.isSuccessful()) {
-                                }
-                            }
-
-                            @Override
-                            public void onFailure(Call<Void> call, Throwable t) {
-                            }
-                        });
-
-                        apiService =
-                                HttpClient.getClient().create(ApiInterface.class);
-                        call = apiService.postActivity("Bearer " + token, activity);
+                        Call<Void> call = apiService.postActivity("Bearer " + token, activity);
                         call.enqueue(new Callback<Void>() {
                             @Override
                             public void onResponse(Call<Void> call, Response<Void> response) {

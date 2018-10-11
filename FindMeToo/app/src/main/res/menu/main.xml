@@ -16,5 +16,10 @@
         android:visible="true"
         app:showAsAction="ifRoom" />
 
+    <group android:id="@+id/group_id">
+        <item android:id="@+id/menu_profile"
+            android:title="Profile"/>
+    </group>
+
 
 </menu>

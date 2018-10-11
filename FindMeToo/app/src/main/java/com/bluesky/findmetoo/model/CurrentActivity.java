@@ -4,11 +4,12 @@ import com.google.gson.annotations.SerializedName;
 
 public class CurrentActivity {
 
-    public CurrentActivity(String deviceId, String activity, double latitude, double longitude){
+    public CurrentActivity(String deviceId, String activity, double latitude, double longitude, String description){
         this.DeviceId = deviceId;
         this.activity = activity;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.description = description;
     }
 
     @SerializedName("DeviceID")
@@ -19,5 +20,7 @@ public class CurrentActivity {
     public double latitude;
     @SerializedName("Long")
     public double longitude;
+    @SerializedName("description")
+    public String description;
 
 }

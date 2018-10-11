@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    tools:context=".ProfileActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -67,34 +68,49 @@
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="0.6">
+            android:layout_weight="0.4">
 
             <RatingBar
+                android:id="@+id/profile_rating"
+                style="@style/Widget.AppCompat.RatingBar.Indicator"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent"
+                android:isIndicator="true"
+                android:numStars="5"
+                android:rating="4"
+                android:stepSize="0.1"
+                android:visibility="visible" />
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="0.2">
+            android:layout_weight="0.3">
+
             <TextView
                 android:id="@+id/txt_view_reviews"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:gravity="center"
                 android:text="reviews"
-                android:textAlignment="center" />
+                android:textAlignment="center"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                android:autoLink="web"/>
         </LinearLayout>
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="0.2">
+            android:layout_weight="0.3">
+
             <TextView
                 android:id="@+id/txt_view_views"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:gravity="center"
                 android:text="views"
-                android:textAlignment="center" />
+                android:textAlignment="center"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                android:autoLink="web"/>
         </LinearLayout>
     </LinearLayout>
     <LinearLayout
