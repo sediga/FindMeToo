@@ -1,5 +1,6 @@
 package com.bluesky.findmetoo;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -8,22 +9,25 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.net.Uri;
+import android.provider.MediaStore;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener;
 import com.arlib.floatingsearchview.FloatingSearchView;
 import com.arlib.floatingsearchview.suggestions.model.SearchSuggestion;
 import com.bluesky.findmetoo.model.CurrentActivity;
@@ -41,10 +45,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.io.FileNotFoundException;
 import java.text.SimpleDateFormat;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -64,7 +66,19 @@ public class MapsActivity extends FragmentActivity implements
     private HashMap<Integer, Marker> markers;
     private HashMap<Circle, Integer> circles;
     private FloatingSearchView mSearchView;
-    private Button infoButton;
+    private View mWindow;
+
+//        private final View mContents;
+
+    private Button imIn;
+    private ImageButton infoImage;
+
+    private OnInfoWindowElemTouchListener infoButtonListener;
+    private OnInfoWindowElemTouchListener infoImageButtonListener;
+
+    private ViewTreeObserver.OnGlobalLayoutListener infoWindowLayoutListener;
+
+    private MapWrapperLayout mapWrapperLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,6 +89,8 @@ public class MapsActivity extends FragmentActivity implements
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        mWindow = getLayoutInflater().inflate(R.layout.custom_info_window, null);
 
         mSearchView = findViewById(R.id.floating_search_view);
         mSearchView.setOnMenuItemClickListener(this);
@@ -97,17 +113,82 @@ public class MapsActivity extends FragmentActivity implements
         mMap = googleMap;
         showMarkerOfUsers("");
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(Global.current_user.getLatitude(), Global.current_user.getLongitude()), 12));
-        //mMap.setMyLocationEnabled(true);
-        mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter());
-//        mMap.setOnInfoWindowClickListener(this);
-//        final MapWrapperLayout mapWrapperLayout = (MapWrapperLayout)findViewById(R.id.map_relative_layout);
-//
-//        // MapWrapperLayout initialization
-//        // 39 - default marker height
-//        // 20 - offset between the default InfoWindow bottom edge and it's content bottom edge
-//        mapWrapperLayout.init(mMap, getPixelsFromDp(this, 39 + 20));
+        final MapWrapperLayout mapWrapperLayout = (MapWrapperLayout) findViewById(R.id.map_relative_layout);
+        mapWrapperLayout.init(mMap, getPixelsFromDp(this, 20));
 
+        this.imIn = (Button) mWindow.findViewById(R.id.iammin);
+        this.infoImage = ((ImageButton) mWindow.findViewById(R.id.info_badge));
+        this.infoButtonListener = new OnInfoWindowElemTouchListener(this.imIn,
+                getResources().getDrawable(R.drawable.btn_bg), //btn_default_normal_holo_light
+                getResources().getDrawable(R.drawable.btn_bg)) //btn_default_pressed_holo_light
+        {
+            @Override
+            protected void onClickConfirmed(View v, Marker marker) {
+                // Here we can perform some action triggered after clicking the button
+//                Toast.makeText(MapsActivity.this, marker.getTitle() + "'s button clicked!", Toast.LENGTH_SHORT).show();
+            }
+        };
+        this.imIn.setOnTouchListener(infoButtonListener);
+
+        this.infoImageButtonListener = new OnInfoWindowElemTouchListener(this.infoImage,
+                getResources().getDrawable(R.drawable.badge_sa), //btn_default_normal_holo_light
+                getResources().getDrawable(R.drawable.badge_sa)) //btn_default_pressed_holo_light
+        {
+            @Override
+            protected void onClickConfirmed(View v, Marker marker) {
+                // Here we can perform some action triggered after clicking the button
+//                Toast.makeText(MapsActivity.this, marker.getTitle() + "'s image button clicked!", Toast.LENGTH_SHORT).show();
+            }
+        };
+        this.infoImage.setOnTouchListener(infoImageButtonListener);
+
+        mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
+
+            @Override
+            public View getInfoWindow(Marker marker) {
+                return null;
+            }
+
+            @Override
+            public View getInfoContents(Marker marker) {
+//            Toast.makeText(MapsActivity.this, "getInfoContents Called", Toast.LENGTH_SHORT).show();
+                render(marker, mWindow);
+                infoButtonListener.setMarker(marker);
+                infoImageButtonListener.setMarker(marker);
+                mapWrapperLayout.setMarkerWithInfoWindow(marker, mWindow);
+                return mWindow;
+            }
+
+        });
     }
+
+    private void render(Marker marker, View view) {
+            ((ImageButton) view.findViewById(R.id.info_badge)).setImageResource(R.drawable.badge_sa);
+
+            String title = marker.getTitle();
+            TextView titleUi = ((TextView) view.findViewById(R.id.title));
+            if (title != null) {
+                // Spannable string allows us to edit the formatting of the text.
+                SpannableString titleText = new SpannableString(title);
+                titleText.setSpan(new ForegroundColorSpan(Color.RED), 0, titleText.length(), 0);
+                titleUi.setText(titleText);
+            } else {
+                titleUi.setText("");
+            }
+
+            String snippet = marker.getSnippet();
+            TextView snippetUi = ((TextView) view.findViewById(R.id.snippet));
+            Toast.makeText(MapsActivity.this, "Snippet : ", Toast.LENGTH_SHORT).show();
+            if (snippet != null) {
+                SpannableString snippetText = new SpannableString(snippet);
+                Toast.makeText(MapsActivity.this, "Snippet : " + snippetText, Toast.LENGTH_SHORT).show();
+//            snippetText.setSpan(new ForegroundColorSpan(Color.MAGENTA), 0, 10, 0);
+                snippetText.setSpan(new ForegroundColorSpan(Color.BLUE), 0, snippet.length(), 0);
+                snippetUi.setText(snippetText);
+            } else {
+                snippetUi.setText("");
+            }
+        }
 
     public static int getPixelsFromDp(Context context, float dp) {
         final float scale = context.getResources().getDisplayMetrics().density;
@@ -181,16 +262,14 @@ public class MapsActivity extends FragmentActivity implements
         if (markers != null) {
             markers.clear();
 //            for (Marker marker : markers) marker.remove();
-        }
-        else {
+        } else {
             markers = new HashMap<Integer, Marker>();
         }
 
         if (circles != null) {
             circles.clear();
 //            for (Circle circle : circles) circle.remove();
-        }
-        else {
+        } else {
             circles = new HashMap<Circle, Integer>();
         }
 
@@ -207,12 +286,12 @@ public class MapsActivity extends FragmentActivity implements
         call.enqueue(new Callback<List<CurrentActivity>>() {
             @Override
             public void onResponse(Call<List<CurrentActivity>> call, Response<List<CurrentActivity>> response) {
-                if(response.isSuccessful()) {
+                if (response.isSuccessful()) {
                     Object[] locations = (response.body().toArray());
                     for (int i = 0; i < locations.length; i++) {
                         LatLng pos = new LatLng(((CurrentActivity) locations[i]).latitude, ((CurrentActivity) locations[i]).longitude);
                         final Marker marker = mMap.addMarker(new MarkerOptions()
-                                .position(pos).icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("custom_info_bubble",1,1)))
+                                .position(pos).icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("custom_info_bubble", 1, 1)))
                                 .visible(false)
                                 .snippet(((CurrentActivity) locations[i]).description)
                                 .title(((CurrentActivity) locations[i]).activity));
@@ -223,8 +302,8 @@ public class MapsActivity extends FragmentActivity implements
                                 .clickable(true)
                                 .strokeColor(Color.MAGENTA)
                                 .fillColor(0x220000FF));
-
-                        if(i==0) {
+//                        Log.e("Desctiption", ((CurrentActivity) locations[i]).description);
+                        if (i == 0) {
                             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(circle.getCenter(), 11));
                         }
 
@@ -244,15 +323,15 @@ public class MapsActivity extends FragmentActivity implements
 //                                int strokeColor = circle.getStrokeColor() ^ 0x00ffffff;
 //                                circle.setStrokeColor(strokeColor);
 
-                             }
+                            }
                         });
-                            circles.put(circle, i);
+                        circles.put(circle, i);
                     }
                 }
             }
 
-            public Bitmap resizeMapIcons(String iconName, int width, int height){
-                Bitmap imageBitmap = BitmapFactory.decodeResource(getResources(),getResources().getIdentifier(iconName, "drawable", getPackageName()));
+            public Bitmap resizeMapIcons(String iconName, int width, int height) {
+                Bitmap imageBitmap = BitmapFactory.decodeResource(getResources(), getResources().getIdentifier(iconName, "drawable", getPackageName()));
                 Bitmap resizedBitmap = Bitmap.createScaledBitmap(imageBitmap, width, height, false);
                 return resizedBitmap;
             }
@@ -262,78 +341,7 @@ public class MapsActivity extends FragmentActivity implements
             }
         });
 
-
-//        int count = c.getCount();
-//        markers = new ArrayList<>();
-//
-//        boolean is_contain_current_user = false;
-//        double average_lat = 0, average_lng = 0;
-//
-//        for (int i = 0; i < count; i++) {
-//
-//            c.moveToPosition(i);
-//            Cursor c1 = Global.mdb.rawQuery("SELECT * FROM t_keyword WHERE uid = " + c.getInt(0), null);
-//
-//            int count1 = c1.getCount();
-//
-//            if (c.getString(1).toLowerCase().contains(search_text) ||
-//                    c.getString(2).toLowerCase().contains(search_text) ||
-//                    search_text.isEmpty()) {
-//
-//                if (c.getInt(0) == Global.current_user.getId()) is_contain_current_user = true;
-//                String full_name = String.format("%s %s", c.getString(1), c.getString(2));
-//
-//                double latitude = c.getDouble(4);
-//                double longitude = c.getDouble(5);
-//                average_lat += latitude;
-//                average_lng += longitude;
-//
-//                LatLng pos = new LatLng(latitude, longitude);
-//                Marker marker = mMap.addMarker(new MarkerOptions()
-//                        .position(pos)
-//                        .title(full_name));
-//                markers.add(marker);
-//
-//            } else {
-//
-//                for (int j = 0; j < count1; j++) {
-//
-//                    c1.moveToPosition(j);
-//
-//                    if (c1.getString(2).toLowerCase().contains(search_text)) {
-//
-//                        if (c.getInt(0) == Global.current_user.getId()) is_contain_current_user = true;
-//                        String full_name = String.format("%s %s", c.getString(1), c.getString(2));
-//
-//                        double latitude = c.getDouble(4);
-//                        double longitude = c.getDouble(5);
-//                        average_lat += latitude;
-//                        average_lng += longitude;
-//
-//                        LatLng pos = new LatLng(latitude, longitude);
-//                        Marker marker = mMap.addMarker(new MarkerOptions()
-//                                .position(pos)
-//                                .title(full_name));
-//                        markers.add(marker);
-//                        break;
-//                    }
-//                }
-//            }
-//        }
-
-//        if (is_contain_current_user) {
-//            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(Global.current_user.getLatitude(), Global.current_user.getLongitude()), 6));
-//        } else {
-//            average_lat /= count;
-//            average_lng /= count;
-//            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(average_lat, average_lng), 6));
-//        }
     }
-
-//    @Override
-//    public void onInfoWindowClick(Marker marker) {
-//        Toast.makeText(this, "Click Info Window", Toast.LENGTH_SHORT).show();
-//    }
 
     private void addKeyword() {
 
@@ -392,15 +400,18 @@ public class MapsActivity extends FragmentActivity implements
                         ApiInterface apiService =
                                 HttpClient.getClient().create(ApiInterface.class);
                         Call<Void> call = apiService.postActivity("Bearer " + token, activity);
+                        Log.e("PostActivity", "Post Activity called");
                         call.enqueue(new Callback<Void>() {
                             @Override
                             public void onResponse(Call<Void> call, Response<Void> response) {
                                 if(response.isSuccessful()) {
+                                    Log.e("PostActivity", "success returned");
                                 }
                             }
 
                             @Override
                             public void onFailure(Call<Void> call, Throwable t) {
+                                Log.e("PostActivity", "Error on postActivity" + t.getMessage());
                             }
                         });
 //                        values = new ContentValues();
@@ -413,123 +424,5 @@ public class MapsActivity extends FragmentActivity implements
                 .setNegativeButton("Cancel", null);
 
         builder.show();
-    }
-
-
-    class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
-
-        // These are both viewgroups containing an ImageView with id "badge" and two TextViews with id
-        // "title" and "snippet".
-        private final View mWindow;
-
-        private final View mContents;
-
-        private Button infoButton;
-
-        private OnInfoWindowElemTouchListener infoButtonListener;
-
-        private ViewTreeObserver.OnGlobalLayoutListener infoWindowLayoutListener;
-
-        private int popupXOffset;
-        private int popupYOffset;
-
-        private class InfoWindowLayoutListener implements ViewTreeObserver.OnGlobalLayoutListener {
-            @Override
-            public void onGlobalLayout() {
-                //размеры окна изменились, обновляем смещения
-                popupXOffset = mWindow.getWidth() / 2;
-                popupYOffset = mWindow.getHeight();
-            }
-        }
-
-        CustomInfoWindowAdapter() {
-            mWindow = getLayoutInflater().inflate(R.layout.custom_info_window, null);
-//            infoWindowLayoutListener = new InfoWindowLayoutListener();
-//            mWindow.getViewTreeObserver().addOnGlobalLayoutListener(infoWindowLayoutListener);
-            mContents = getLayoutInflater().inflate(R.layout.custom_info_contents, null);
-            this.infoButton = (Button)mWindow.findViewById(R.id.button);
-            this.infoButtonListener = new OnInfoWindowElemTouchListener(this.infoButton,
-                    getResources().getDrawable(R.drawable.round_but_green_sel), //btn_default_normal_holo_light
-                    getResources().getDrawable(R.drawable.round_but_red_sel)) //btn_default_pressed_holo_light
-            {
-                @Override
-                protected void onClickConfirmed(View v, Marker marker) {
-                    // Here we can perform some action triggered after clicking the button
-                    Toast.makeText(MapsActivity.this, marker.getTitle() + "'s button clicked!", Toast.LENGTH_SHORT).show();
-                }
-            };
-            this.infoButton.setOnTouchListener(infoButtonListener);
-
-        }
-
-        @Override
-        public View getInfoWindow(Marker marker) {
-//        if (mOptions.getCheckedRadioButtonId() != R.id.custom_info_window) {
-//            // This means that getInfoContents will be called.
-//            return null;
-//        }
-            render(marker, mWindow);
-            return mWindow;
-        }
-
-        @Override
-        public View getInfoContents(Marker marker) {
-//        if (mOptions.getCheckedRadioButtonId() != R.id.custom_info_contents) {
-//            // This means that the default info contents will be used.
-//            return null;
-//        }
-            render(marker, mContents);
-            return mContents;
-        }
-
-        private void render(Marker marker, View view) {
-            int badge;
-            // Use the equals() method on a Marker to check for equals.  Do not use ==.
-//        if (marker.equals(mBrisbane)) {
-//            badge = R.drawable.badge_qld;
-//        } else if (marker.equals(mAdelaide)) {
-//            badge = R.drawable.badge_sa;
-//        } else if (marker.equals(mSydney)) {
-//            badge = R.drawable.badge_nsw;
-//        } else if (marker.equals(mMelbourne)) {
-//            badge = R.drawable.badge_victoria;
-//        } else if (marker.equals(mPerth)) {
-//            badge = R.drawable.badge_wa;
-//        } else if (marker.equals(mDarwin1)) {
-//            badge = R.drawable.badge_nt;
-//        } else if (marker.equals(mDarwin2)) {
-//            badge = R.drawable.badge_nt;
-//        } else if (marker.equals(mDarwin3)) {
-//            badge = R.drawable.badge_nt;
-//        } else if (marker.equals(mDarwin4)) {
-//            badge = R.drawable.badge_nt;
-//        } else {
-//            // Passing 0 to setImageResource will clear the image view.
-//            badge = 0;
-//        }
-        ((ImageView) view.findViewById(R.id.badge)).setImageResource(R.drawable.badge_sa);
-
-            String title = marker.getTitle();
-            TextView titleUi = ((TextView) view.findViewById(R.id.title));
-            if (title != null) {
-                // Spannable string allows us to edit the formatting of the text.
-                SpannableString titleText = new SpannableString(title);
-                titleText.setSpan(new ForegroundColorSpan(Color.RED), 0, titleText.length(), 0);
-                titleUi.setText(titleText);
-            } else {
-                titleUi.setText("");
-            }
-
-            String snippet = marker.getSnippet();
-        TextView snippetUi = ((TextView) view.findViewById(R.id.snippet));
-        if (snippet != null && snippet.length() > 12) {
-            SpannableString snippetText = new SpannableString(snippet);
-//            snippetText.setSpan(new ForegroundColorSpan(Color.MAGENTA), 0, 10, 0);
-            snippetText.setSpan(new ForegroundColorSpan(Color.BLUE), 0, snippet.length(), 0);
-            snippetUi.setText(snippetText);
-        } else {
-            snippetUi.setText("");
-        }
-        }
     }
 }

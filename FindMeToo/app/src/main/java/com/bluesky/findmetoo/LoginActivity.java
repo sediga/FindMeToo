@@ -9,6 +9,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -131,7 +132,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             return true;
         }
     }
-    private void loginToAPI(String username, String password, final CallBackHelper helper)
+    private void loginToAPI(final String username, final String password, final CallBackHelper helper)
     {
         final ApiInterface apiService =
                 HttpClient.getClient().create(ApiInterface.class);
@@ -142,12 +143,19 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             public void onResponse(Call<Token> call, Response<Token> response) {
                 if(response.isSuccessful()) {
                     helper.registerToken(response.body());
+                    if (!getUser(username, password)) {
+                        return;
+                    }
+                    startActivity(new Intent(LoginActivity.this, MapsActivity.class));
+                    finish();
                 }
             }
 
             @Override
             public void onFailure(Call<Token> call, Throwable t) {
                 System.out.println(t.getMessage());
+                Toast.makeText(LoginActivity.this   ,"Login Failed" + t.getMessage(), Toast.LENGTH_SHORT );
+                Log.e("login", "Login Failed : " + t.getMessage());
             }
         }));
     }
@@ -165,9 +173,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             }
         };
         this.loginToAPI(username, password, callBackHelper);
-        if (!getUser(username, password)) return;
-        startActivity(new Intent(this, MapsActivity.class));
-        finish();
+//        if (!getUser(username, password)) return;
     }
 
     private boolean getUser(String username, String password) {

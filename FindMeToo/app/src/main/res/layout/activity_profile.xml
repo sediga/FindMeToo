@@ -18,10 +18,11 @@
             android:layout_weight="0.4"
             android:orientation="vertical">
 
-            <ImageButton
+            <ImageView
                 android:id="@+id/imgPhoto"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:onClick="onClick"
                 tools:srcCompat="@drawable/badge_sa" />
         </LinearLayout>
 
@@ -141,10 +142,12 @@
 
             <Button
                 android:id="@+id/btn_cancel"
+                style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:text="CANCEL"
-                android:layout_weight="0.495"/>
+                android:layout_weight="0.495"
+                android:background="@drawable/btn_bg"
+                android:text="CANCEL" />
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -153,10 +156,12 @@
 
             <Button
                 android:id="@+id/btn_save"
+                style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:text="SAVE"
-                android:layout_weight="0.495"/>
+                android:layout_weight="0.495"
+                android:background="@drawable/btn_bg"
+                android:text="SAVE" />
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

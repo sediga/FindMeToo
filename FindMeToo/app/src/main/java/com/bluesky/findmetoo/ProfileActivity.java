@@ -1,13 +1,22 @@
 package com.bluesky.findmetoo;
 
+import android.app.Activity;
 import android.content.ContentValues;
+import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.bluesky.findmetoo.ServiceInterfaces.ApiInterface;
 import com.bluesky.findmetoo.ServiceInterfaces.RegisterBindingModel;
@@ -29,14 +38,19 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.io.File;
 import java.util.List;
 
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class ProfileActivity extends AppCompatActivity implements View.OnClickListener {
 
+    private String imageFilePath;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,6 +58,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
 
         findViewById(R.id.btn_save).setOnClickListener(this);
         findViewById(R.id.btn_cancel).setOnClickListener(this);
+        findViewById(R.id.imgPhoto).setOnClickListener(this);
 
         fillProfile();
     }
@@ -60,8 +75,62 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
             case R.id.btn_save:
                 addProfile();
                 break;
+            case R.id.imgPhoto:
+                photoClicked();
+                break;
         }
 
+    }
+
+    private  void photoClicked()
+    {
+        Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
+        photoPickerIntent.setType("image/*");
+        startActivityForResult(photoPickerIntent, 1);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.e("Test", "OnActivityResult Called");
+        Toast.makeText(ProfileActivity.this, "onActivityResult called", Toast.LENGTH_SHORT);
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1)
+            if (resultCode == Activity.RESULT_OK) {
+                Uri selectedImage = data.getData();
+
+                this.imageFilePath = getPath(selectedImage);
+                Log.e("FilePath", this.imageFilePath);
+                String file_extn = this.imageFilePath.substring(this.imageFilePath.lastIndexOf(".") + 1);
+//                image_name_tv.setText(imageFilePath);
+
+//                try {
+                if (file_extn.equals("img") || file_extn.equals("jpg") || file_extn.equals("jpeg") || file_extn.equals("gif") || file_extn.equals("png")) {
+                    Toast.makeText(ProfileActivity.this,"filename: " + this.imageFilePath, Toast.LENGTH_SHORT);
+                    //FINE
+                    BitmapFactory.Options options = new BitmapFactory.Options();
+                    options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+                    Bitmap bitmap = BitmapFactory.decodeFile(this.imageFilePath, options);
+                    ((ImageView) findViewById(R.id.imgPhoto)).setImageBitmap(bitmap);
+                } else {
+                    Log.e("ImageError", "Unknown photo file format");
+                    //NOT IN REQUIRED FORMAT
+                }
+//                } catch (FileNotFoundException e) {
+//                    // TODO Auto-generated catch block
+//                    e.printStackTrace();
+//                }
+            }
+    }
+
+    public String getPath(Uri uri) {
+        String[] projection = {MediaStore.MediaColumns.DATA};
+        Cursor cursor = managedQuery(uri, projection, null, null, null);
+        int column_index = cursor
+                .getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
+        cursor.moveToFirst();
+        String imagePath = cursor.getString(column_index);
+
+        return cursor.getString(column_index);
     }
 
     private void fillProfile()
@@ -95,7 +164,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
     }
 
     private void addProfile() {
-        String deviceId = String.valueOf(Global.current_user.getId());
+        final String deviceId = String.valueOf(Global.current_user.getId());
         String profilName = ((EditText) findViewById(R.id.txt_name)).getText().toString();
         String hobies = ((EditText) findViewById(R.id.txt_hobies)).getText().toString();
         String about = ((EditText) findViewById(R.id.txt_about)).getText().toString();
@@ -108,6 +177,27 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         ApiInterface apiService =
                 HttpClient.getClient().create(ApiInterface.class);
         Call<Void> call = apiService.putProfile("Bearer " + token, deviceId, profileModel);
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if(response.isSuccessful()) {
+                    uploadImage(deviceId, token);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+            }
+        });
+    }
+    private void uploadImage(String deviceId, String token) {
+        File file = new File(this.imageFilePath);
+        RequestBody reqFile = RequestBody.create(MediaType.parse("image/*"), file);
+        MultipartBody.Part body = MultipartBody.Part.createFormData("upload", file.getName(), reqFile);
+        RequestBody name = RequestBody.create(MediaType.parse("text/plain"), "upload_test");
+        ApiInterface apiService =
+                HttpClient.getClient().create(ApiInterface.class);
+        Call<Void> call = apiService.postImage("Bearer " + token, deviceId, body);
         call.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {

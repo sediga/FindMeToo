@@ -37,7 +37,8 @@
 
         <activity
             android:name=".MapsActivity"
-            android:label="@string/title_activity_maps" />
+            android:label="@string/title_activity_maps"
+            android:configChanges="orientation|screenSize|keyboardHidden"/>
         <activity
             android:name=".LoginActivity"
             android:label="@string/title_activity_maps">
@@ -47,7 +48,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".RegisterActivity"></activity>
+        <activity android:name=".RegisterActivity"
+            android:label="@string/title_activity_maps"
+            android:configChanges="orientation|screenSize|keyboardHidden"/>
         <activity android:name=".ProfileActivity"></activity>
     </application>
 

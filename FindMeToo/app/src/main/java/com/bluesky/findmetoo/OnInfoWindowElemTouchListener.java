@@ -61,8 +61,8 @@ public abstract class OnInfoWindowElemTouchListener implements OnTouchListener {
             pressed = true;
             handler.removeCallbacks(confirmClickRunnable);
             view.setBackgroundDrawable(bgDrawablePressed);
-            if (marker != null)
-                marker.showInfoWindow();
+//            if (marker != null)
+//                marker.showInfoWindow();
         }
     }
 
@@ -71,8 +71,8 @@ public abstract class OnInfoWindowElemTouchListener implements OnTouchListener {
             this.pressed = false;
             handler.removeCallbacks(confirmClickRunnable);
             view.setBackgroundDrawable(bgDrawableNormal);
-            if (marker != null)
-                marker.showInfoWindow();
+//            if (marker != null)
+//                marker.showInfoWindow();
             return true;
         } else
             return false;
