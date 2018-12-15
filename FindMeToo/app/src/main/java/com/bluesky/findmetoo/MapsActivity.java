@@ -45,7 +45,11 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -53,6 +57,8 @@ import java.util.List;
 
 import com.bluesky.findmetoo.ServiceInterfaces.*;
 import com.bluesky.findmetoo.uitls.*;
+
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.*;
 
@@ -163,32 +169,110 @@ public class MapsActivity extends FragmentActivity implements
     }
 
     private void render(Marker marker, View view) {
-            ((ImageButton) view.findViewById(R.id.info_badge)).setImageResource(R.drawable.badge_sa);
-
-            String title = marker.getTitle();
-            TextView titleUi = ((TextView) view.findViewById(R.id.title));
-            if (title != null) {
-                // Spannable string allows us to edit the formatting of the text.
-                SpannableString titleText = new SpannableString(title);
-                titleText.setSpan(new ForegroundColorSpan(Color.RED), 0, titleText.length(), 0);
-                titleUi.setText(titleText);
-            } else {
-                titleUi.setText("");
-            }
-
-            String snippet = marker.getSnippet();
-            TextView snippetUi = ((TextView) view.findViewById(R.id.snippet));
-            Toast.makeText(MapsActivity.this, "Snippet : ", Toast.LENGTH_SHORT).show();
-            if (snippet != null) {
-                SpannableString snippetText = new SpannableString(snippet);
-                Toast.makeText(MapsActivity.this, "Snippet : " + snippetText, Toast.LENGTH_SHORT).show();
-//            snippetText.setSpan(new ForegroundColorSpan(Color.MAGENTA), 0, 10, 0);
-                snippetText.setSpan(new ForegroundColorSpan(Color.BLUE), 0, snippet.length(), 0);
-                snippetUi.setText(snippetText);
-            } else {
-                snippetUi.setText("");
-            }
+        String title = marker.getTitle();
+        TextView titleUi = ((TextView) view.findViewById(R.id.title));
+        if (title != null) {
+            // Spannable string allows us to edit the formatting of the text.
+            SpannableString titleText = new SpannableString(title);
+            titleText.setSpan(new ForegroundColorSpan(Color.RED), 0, titleText.length(), 0);
+            titleUi.setText(titleText);
+        } else {
+            titleUi.setText("");
         }
+
+        String snippet = marker.getSnippet();
+        TextView snippetUi = ((TextView) view.findViewById(R.id.snippet));
+        Toast.makeText(MapsActivity.this, "Snippet : ", Toast.LENGTH_SHORT).show();
+        if (snippet != null) {
+            SpannableString snippetText = new SpannableString(snippet);
+            Toast.makeText(MapsActivity.this, "Snippet : " + snippetText, Toast.LENGTH_SHORT).show();
+//            snippetText.setSpan(new ForegroundColorSpan(Color.MAGENTA), 0, 10, 0);
+            snippetText.setSpan(new ForegroundColorSpan(Color.BLUE), 0, snippet.length(), 0);
+            snippetUi.setText(snippetText);
+        } else {
+            snippetUi.setText("");
+        }
+
+        String username = Global.preference.getValue(this, PrefConst.USERNAME, "");
+        String token = Global.preference.getValue(this, PrefConst.TOKEN, "");
+        if (token == null || token == "") {
+            token = getToken(username);
+        }
+
+        ApiInterface apiService =
+                HttpClient.getClient().create(ApiInterface.class);
+        Call<ResponseBody> call = apiService.getMatchingImages("Bearer " + token, title);
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+
+                try {
+
+                    Log.d("onResponse", "Response came from server");
+
+                    boolean FileDownloaded = DownloadImage(response.body());
+
+                    Log.d("onResponse", "Image is downloaded and saved ? " + FileDownloaded);
+
+                } catch (Exception e) {
+                    Log.d("onResponse", "There is an error");
+                    e.printStackTrace();
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Log.d("onFailure", t.toString());
+            }
+        });
+//        ((ImageButton) view.findViewById(R.id.info_badge)).setImageResource(R.drawable.badge_sa);
+    }
+
+    private boolean DownloadImage(ResponseBody body) {
+
+        try {
+            Log.d("DownloadImage", "Reading and writing file");
+            InputStream in = null;
+            FileOutputStream out = null;
+
+            try {
+                in = body.byteStream();
+                out = new FileOutputStream(getExternalFilesDir(null) + File.separator + "AndroidTutorialPoint.jpg");
+                int c;
+
+                while ((c = in.read()) != -1) {
+                    out.write(c);
+                }
+            }
+            catch (IOException e) {
+                Log.d("DownloadImage",e.toString());
+                return false;
+            }
+            finally {
+                if (in != null) {
+                    in.close();
+                }
+                if (out != null) {
+                    out.close();
+                }
+            }
+
+            int width, height;
+            ImageView image = (ImageView) findViewById(R.id.info_badge);
+            Bitmap bMap = BitmapFactory.decodeFile(getExternalFilesDir(null) + File.separator + "AndroidTutorialPoint.jpg");
+            width = 2*bMap.getWidth();
+            height = 6*bMap.getHeight();
+            Bitmap bMap2 = Bitmap.createScaledBitmap(bMap, width, height, false);
+            image.setImageBitmap(bMap2);
+
+            return true;
+
+        } catch (IOException e) {
+            Log.d("DownloadImage",e.toString());
+            return false;
+        }
+    }
 
     public static int getPixelsFromDp(Context context, float dp) {
         final float scale = context.getResources().getDisplayMetrics().density;

@@ -3,6 +3,7 @@ package com.bluesky.findmetoo.ServiceInterfaces;
 import com.bluesky.findmetoo.model.*;
 
 import okhttp3.MultipartBody;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.Field;
@@ -26,6 +27,8 @@ public interface ApiInterface {
     Call<Token> getToken(@Field("username") String username, @Field("password") String password, @Field("grant_type") String grantType);
     @GET("JoinServer/Activity/{activity}")
     Call<List<CurrentActivity>> getMatchingActivities(@Header("Authorization") String authorization, @Path("activity") String activity);
+    @GET("JoinServer/Activity/{activity}")
+    Call<ResponseBody> getMatchingImages(@Header("Authorization") String authorization, @Path("activity") String activity);
     @POST("JoinServer/Location")
     Call<Void> postCurrentLocation(@Header("Authorization") String authorization, @Body CurrentActivity location);
     @POST("JoinServer/Activity")
