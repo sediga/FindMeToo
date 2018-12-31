@@ -17,6 +17,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:background="@drawable/custom_info_bubble"
+    android:gravity="center"
     android:orientation="vertical">
 
     <LinearLayout
@@ -24,48 +25,51 @@
         android:layout_height="0dp"
         android:layout_weight="0.8"
         android:orientation="horizontal">
+
         <ImageButton
             android:id="@+id/info_badge"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_marginRight="5dp"
-            android:adjustViewBounds="true"
-            android:layout_weight="0.3"></ImageButton>
+            android:layout_weight="0.3"
+            android:adjustViewBounds="true"></ImageButton>
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:layout_weight="0.7">
+            android:layout_weight="0.7"
+            android:orientation="vertical">
 
             <TextView
                 android:id="@+id/title"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_gravity="center_horizontal"
+                android:layout_weight="0.25"
                 android:ellipsize="end"
                 android:singleLine="false"
                 android:textColor="#ff000000"
                 android:textSize="14dp"
-                android:textStyle="bold"
-                android:layout_weight="0.25"/>
+                android:textStyle="bold" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="0.1"/>
+                android:layout_weight="0.1" />
+
             <TextView
                 android:id="@+id/snippet"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
+                android:layout_weight="0.65"
                 android:ellipsize="end"
                 android:singleLine="false"
                 android:textColor="#ff7f7f7f"
-                android:textSize="14dp"
-                android:layout_weight="0.65"/>
+                android:textSize="14dp" />
 
         </LinearLayout>
     </LinearLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -78,12 +82,12 @@
             android:layout_height="match_parent"
             android:fitsSystemWindows="true"
             android:numStars="5"
-            android:stepSize="0.1"/>
+            android:stepSize="0.1" />
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="0.1"/>
+            android:layout_weight="0.1" />
 
         <Button
             android:id="@+id/iammin"
@@ -97,7 +101,7 @@
 
     </LinearLayout>
     <!--<TextView-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="0dp"-->
-        <!--android:layout_weight="0.04"/>-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="0dp"-->
+    <!--android:layout_weight="0.04"/>-->
 </LinearLayout>

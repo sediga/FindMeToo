@@ -20,7 +20,9 @@ public class CurrentActivity {
     public double latitude;
     @SerializedName("Long")
     public double longitude;
-    @SerializedName("description")
+    @SerializedName("Description")
     public String description;
+    @SerializedName("ImagePath")
+    public String ImagePath;
 
 }

@@ -131,7 +131,7 @@ public class MapsActivity extends FragmentActivity implements
             @Override
             protected void onClickConfirmed(View v, Marker marker) {
                 // Here we can perform some action triggered after clicking the button
-//                Toast.makeText(MapsActivity.this, marker.getTitle() + "'s button clicked!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MapsActivity.this, marker.getTitle() + "'s button clicked!", Toast.LENGTH_SHORT).show();
             }
         };
         this.imIn.setOnTouchListener(infoButtonListener);
@@ -158,10 +158,20 @@ public class MapsActivity extends FragmentActivity implements
             @Override
             public View getInfoContents(Marker marker) {
 //            Toast.makeText(MapsActivity.this, "getInfoContents Called", Toast.LENGTH_SHORT).show();
+//                mWindow.setTag();
+                ImageButton image = ((ImageButton) mWindow.findViewById(R.id.info_badge));
                 render(marker, mWindow);
                 infoButtonListener.setMarker(marker);
                 infoImageButtonListener.setMarker(marker);
                 mapWrapperLayout.setMarkerWithInfoWindow(marker, mWindow);
+                if(image.getTag(R.id.info_badge) == "loaded") {
+//                    if(image.getTag(1) == "yes") {
+//                        marker.showInfoWindow();
+//                        image.setTag(1, "no");
+//                    }
+                    marker.showInfoWindow();
+                    image.setTag(R.id.info_badge, "DontReload");
+                }
                 return mWindow;
             }
 
@@ -182,10 +192,10 @@ public class MapsActivity extends FragmentActivity implements
 
         String snippet = marker.getSnippet();
         TextView snippetUi = ((TextView) view.findViewById(R.id.snippet));
-        Toast.makeText(MapsActivity.this, "Snippet : ", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(MapsActivity.this, "Snippet : ", Toast.LENGTH_SHORT).show();
         if (snippet != null) {
             SpannableString snippetText = new SpannableString(snippet);
-            Toast.makeText(MapsActivity.this, "Snippet : " + snippetText, Toast.LENGTH_SHORT).show();
+//            Toast.makeText(MapsActivity.this, "Snippet : " + snippetText, Toast.LENGTH_SHORT).show();
 //            snippetText.setSpan(new ForegroundColorSpan(Color.MAGENTA), 0, 10, 0);
             snippetText.setSpan(new ForegroundColorSpan(Color.BLUE), 0, snippet.length(), 0);
             snippetUi.setText(snippetText);
@@ -199,33 +209,38 @@ public class MapsActivity extends FragmentActivity implements
             token = getToken(username);
         }
 
-        ApiInterface apiService =
-                HttpClient.getClient().create(ApiInterface.class);
-        Call<ResponseBody> call = apiService.getMatchingImages("Bearer " + token, title);
-        call.enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+        ImageButton image = ((ImageButton) mWindow.findViewById(R.id.info_badge));
+        if(image.getTag(R.id.info_badge) != "loaded") {
+            ApiInterface apiService =
+                    HttpClient.getClient().create(ApiInterface.class);
+            Call<ResponseBody> call = apiService.getMatchingImages("Bearer " + token, title);
+            call.enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
 
-                try {
+                    try {
 
-                    Log.d("onResponse", "Response came from server");
+                        Log.d("onResponse", "Response came from server");
 
-                    boolean FileDownloaded = DownloadImage(response.body());
+                        boolean FileDownloaded = false;
+                        if (response.body() != null) {
+                            FileDownloaded = DownloadImage(response.body());
+                        }
+                        Log.d("onResponse", "Image is downloaded and saved ? " + FileDownloaded);
 
-                    Log.d("onResponse", "Image is downloaded and saved ? " + FileDownloaded);
+                    } catch (Exception e) {
+                        Log.d("onResponse", "There is an error");
+                        e.printStackTrace();
+                    }
 
-                } catch (Exception e) {
-                    Log.d("onResponse", "There is an error");
-                    e.printStackTrace();
                 }
 
-            }
-
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Log.d("onFailure", t.toString());
-            }
-        });
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    Log.d("onFailure", t.toString());
+                }
+            });
+        }
 //        ((ImageButton) view.findViewById(R.id.info_badge)).setImageResource(R.drawable.badge_sa);
     }
 
@@ -259,13 +274,19 @@ public class MapsActivity extends FragmentActivity implements
             }
 
             int width, height;
-            ImageView image = (ImageView) findViewById(R.id.info_badge);
-            Bitmap bMap = BitmapFactory.decodeFile(getExternalFilesDir(null) + File.separator + "AndroidTutorialPoint.jpg");
-            width = 2*bMap.getWidth();
-            height = 6*bMap.getHeight();
-            Bitmap bMap2 = Bitmap.createScaledBitmap(bMap, width, height, false);
-            image.setImageBitmap(bMap2);
-
+            ImageButton image = ((ImageButton) mWindow.findViewById(R.id.info_badge));
+            if(image.getTag(R.id.info_badge) != "loaded") {
+                Bitmap bMap = BitmapFactory.decodeFile(getExternalFilesDir(null) + File.separator + "AndroidTutorialPoint.jpg");
+                width = 4 * bMap.getWidth();
+                height = 4 * bMap.getHeight();
+                Bitmap bMap2 = Bitmap.createScaledBitmap(bMap, width, height, false);
+                image.setImageBitmap(bMap2);
+//            image.invalidate();
+//                if(image.getTag(R.id.imgPhoto) == null) {
+//                    image.setTag(R.id.info_badge, "loaded");
+//                }
+//                image.setTag(1, "yes");
+            }
             return true;
 
         } catch (IOException e) {
@@ -371,8 +392,9 @@ public class MapsActivity extends FragmentActivity implements
             @Override
             public void onResponse(Call<List<CurrentActivity>> call, Response<List<CurrentActivity>> response) {
                 if (response.isSuccessful()) {
-                    Object[] locations = (response.body().toArray());
+                    final Object[] locations = (response.body().toArray());
                     for (int i = 0; i < locations.length; i++) {
+                        final String imagePath = ((CurrentActivity) locations[i]).ImagePath;
                         LatLng pos = new LatLng(((CurrentActivity) locations[i]).latitude, ((CurrentActivity) locations[i]).longitude);
                         final Marker marker = mMap.addMarker(new MarkerOptions()
                                 .position(pos).icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("custom_info_bubble", 1, 1)))
@@ -401,7 +423,7 @@ public class MapsActivity extends FragmentActivity implements
                                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(circle.getCenter(), 11));
 //                                marker.setVisible(false);
                                 //infoWindow.setVisibility(View.VISIBLE);
-                                circle.setTag("test");
+                                marker.setTag(imagePath);
                                 // Flip the r, g and b components of the circle's
                                 // stroke color.
 //                                int strokeColor = circle.getStrokeColor() ^ 0x00ffffff;
@@ -433,8 +455,28 @@ public class MapsActivity extends FragmentActivity implements
         View view = LayoutInflater.from(this).inflate(R.layout.dialog_keyword, null);
         final EditText edit_title = view.findViewById(R.id.edit_activity_title);
         final EditText edit_description = view.findViewById(R.id.edit_activity_description);
+        final ImageView image = view.findViewById(R.id.edit_activity_badge);
 //      final String username = Global.preference.getValue(this, PrefConst.USERNAME, "");
         final String token = Global.preference.getValue(this, PrefConst.TOKEN, "");
+
+        OnInfoWindowElemTouchListener imageListener;
+
+        image.setClickable(true);
+        imageListener = new OnInfoWindowElemTouchListener(image,
+                getResources().getDrawable(R.drawable.badge_sa), //btn_default_normal_holo_light
+                getResources().getDrawable(R.drawable.badge_sa)) //btn_default_pressed_holo_light
+        {
+            @Override
+            protected void onClickConfirmed(View v, Marker marker) {
+                // Here we can perform some action triggered after clicking the button
+//                Toast.makeText(MapsActivity.this, "image button clicked!", Toast.LENGTH_SHORT).show();
+                Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
+                photoPickerIntent.setType("image/*");
+                startActivityForResult(photoPickerIntent, 1);
+            }
+        };
+        image.setOnTouchListener(imageListener);
+
 
         builder.setTitle("Add Activity")
                 .setView(view)
@@ -509,4 +551,50 @@ public class MapsActivity extends FragmentActivity implements
 
         builder.show();
     }
+
+    private String imageFilePath;
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.e("Test", "OnActivityResult Called");
+        Toast.makeText(MapsActivity.this, "onActivityResult called", Toast.LENGTH_SHORT);
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1)
+            if (resultCode == Activity.RESULT_OK) {
+                Uri selectedImage = data.getData();
+
+                this.imageFilePath = getPath(selectedImage);
+                Log.e("FilePath", this.imageFilePath);
+                String file_extn = this.imageFilePath.substring(this.imageFilePath.lastIndexOf(".") + 1);
+//                image_name_tv.setText(imageFilePath);
+
+//                try {
+                if (file_extn.equals("img") || file_extn.equals("jpg") || file_extn.equals("jpeg") || file_extn.equals("gif") || file_extn.equals("png")) {
+                    Toast.makeText(MapsActivity.this,"filename: " + this.imageFilePath, Toast.LENGTH_SHORT);
+                    //FINE
+                    BitmapFactory.Options options = new BitmapFactory.Options();
+                    options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+                    Bitmap bitmap = BitmapFactory.decodeFile(this.imageFilePath, options);
+                    ((ImageView) findViewById(R.id.imgPhoto)).setImageBitmap(bitmap);
+                } else {
+                    Log.e("ImageError", "Unknown photo file format");
+                    //NOT IN REQUIRED FORMAT
+                }
+//                } catch (FileNotFoundException e) {
+//                    // TODO Auto-generated catch block
+//                    e.printStackTrace();
+//                }
+            }
+    }
+
+    public String getPath(Uri uri) {
+        String[] projection = {MediaStore.MediaColumns.DATA};
+        Cursor cursor = managedQuery(uri, projection, null, null, null);
+        int column_index = cursor
+                .getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
+        cursor.moveToFirst();
+        String imagePath = cursor.getString(column_index);
+
+        return cursor.getString(column_index);
+    }
+
 }
