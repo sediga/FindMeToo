@@ -58,6 +58,9 @@ import java.util.List;
 import com.bluesky.findmetoo.ServiceInterfaces.*;
 import com.bluesky.findmetoo.uitls.*;
 
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.*;
@@ -119,11 +122,11 @@ public class MapsActivity extends FragmentActivity implements
         mMap = googleMap;
         showMarkerOfUsers("");
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(Global.current_user.getLatitude(), Global.current_user.getLongitude()), 12));
-        final MapWrapperLayout mapWrapperLayout = (MapWrapperLayout) findViewById(R.id.map_relative_layout);
+        final MapWrapperLayout mapWrapperLayout = findViewById(R.id.map_relative_layout);
         mapWrapperLayout.init(mMap, getPixelsFromDp(this, 20));
 
-        this.imIn = (Button) mWindow.findViewById(R.id.iammin);
-        this.infoImage = ((ImageButton) mWindow.findViewById(R.id.info_badge));
+        this.imIn = mWindow.findViewById(R.id.iammin);
+        this.infoImage = mWindow.findViewById(R.id.info_badge);
         this.infoButtonListener = new OnInfoWindowElemTouchListener(this.imIn,
                 getResources().getDrawable(R.drawable.btn_bg), //btn_default_normal_holo_light
                 getResources().getDrawable(R.drawable.btn_bg)) //btn_default_pressed_holo_light
@@ -136,9 +139,9 @@ public class MapsActivity extends FragmentActivity implements
         };
         this.imIn.setOnTouchListener(infoButtonListener);
 
-        this.infoImageButtonListener = new OnInfoWindowElemTouchListener(this.infoImage,
-                getResources().getDrawable(R.drawable.badge_sa), //btn_default_normal_holo_light
-                getResources().getDrawable(R.drawable.badge_sa)) //btn_default_pressed_holo_light
+        this.infoImageButtonListener = new OnInfoWindowElemTouchListener(this.infoImage, null, null)
+//                getResources().getDrawable(R.drawable.badge_sa), //btn_default_normal_holo_light
+//                getResources().getDrawable(R.drawable.badge_sa)) //btn_default_pressed_holo_light
         {
             @Override
             protected void onClickConfirmed(View v, Marker marker) {
@@ -159,7 +162,7 @@ public class MapsActivity extends FragmentActivity implements
             public View getInfoContents(Marker marker) {
 //            Toast.makeText(MapsActivity.this, "getInfoContents Called", Toast.LENGTH_SHORT).show();
 //                mWindow.setTag();
-                ImageButton image = ((ImageButton) mWindow.findViewById(R.id.info_badge));
+                ImageButton image = mWindow.findViewById(R.id.info_badge);
                 render(marker, mWindow);
                 infoButtonListener.setMarker(marker);
                 infoImageButtonListener.setMarker(marker);
@@ -169,18 +172,21 @@ public class MapsActivity extends FragmentActivity implements
 //                        marker.showInfoWindow();
 //                        image.setTag(1, "no");
 //                    }
-                    marker.showInfoWindow();
+//                        marker.showInfoWindow();
+//                    }
+//                    marker.showInfoWindow();
                     image.setTag(R.id.info_badge, "DontReload");
                 }
+
                 return mWindow;
             }
 
         });
     }
 
-    private void render(Marker marker, View view) {
+    private void render(final Marker marker, View view) {
         String title = marker.getTitle();
-        TextView titleUi = ((TextView) view.findViewById(R.id.title));
+        TextView titleUi = view.findViewById(R.id.title);
         if (title != null) {
             // Spannable string allows us to edit the formatting of the text.
             SpannableString titleText = new SpannableString(title);
@@ -191,7 +197,7 @@ public class MapsActivity extends FragmentActivity implements
         }
 
         String snippet = marker.getSnippet();
-        TextView snippetUi = ((TextView) view.findViewById(R.id.snippet));
+        TextView snippetUi = view.findViewById(R.id.snippet);
 //        Toast.makeText(MapsActivity.this, "Snippet : ", Toast.LENGTH_SHORT).show();
         if (snippet != null) {
             SpannableString snippetText = new SpannableString(snippet);
@@ -208,88 +214,95 @@ public class MapsActivity extends FragmentActivity implements
         if (token == null || token == "") {
             token = getToken(username);
         }
+        final Marker tempMarker = marker;
+//        final ImageButton image = mWindow.findViewById(R.id.info_badge);
+//        if(image.getTag(R.id.info_badge) != "loaded") {
+        ApiInterface apiService =
+                HttpClient.getClient().create(ApiInterface.class);
+        Call<ResponseBody> call = apiService.getMatchingImages("Bearer " + token, title);
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
 
-        ImageButton image = ((ImageButton) mWindow.findViewById(R.id.info_badge));
-        if(image.getTag(R.id.info_badge) != "loaded") {
-            ApiInterface apiService =
-                    HttpClient.getClient().create(ApiInterface.class);
-            Call<ResponseBody> call = apiService.getMatchingImages("Bearer " + token, title);
-            call.enqueue(new Callback<ResponseBody>() {
-                @Override
-                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                try {
 
-                    try {
+                    Log.d("onResponse", "Response came from server");
 
-                        Log.d("onResponse", "Response came from server");
-
-                        boolean FileDownloaded = false;
-                        if (response.body() != null) {
-                            FileDownloaded = DownloadImage(response.body());
-                        }
-                        Log.d("onResponse", "Image is downloaded and saved ? " + FileDownloaded);
-
-                    } catch (Exception e) {
-                        Log.d("onResponse", "There is an error");
-                        e.printStackTrace();
+                    boolean FileDownloaded = false;
+                    if (response.body() != null && (marker.getTag() == null || marker.getTag() == "")) {
+                        FileDownloaded = DownloadImage(response.body());
+                            marker.showInfoWindow();
+                            marker.setTag("downloaded");
                     }
+                    Log.d("onResponse", "Image is downloaded and saved ? " + FileDownloaded);
 
+                } catch (Exception e) {
+                    Log.d("onResponse", "There is an error");
+                    e.printStackTrace();
                 }
 
-                @Override
-                public void onFailure(Call<ResponseBody> call, Throwable t) {
-                    Log.d("onFailure", t.toString());
-                }
-            });
-        }
-//        ((ImageButton) view.findViewById(R.id.info_badge)).setImageResource(R.drawable.badge_sa);
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Log.d("onFailure", t.toString());
+            }
+        });
     }
+//        ((ImageButton) view.findViewById(R.id.info_badge)).setImageResource(R.drawable.badge_sa);
+//    }
 
     private boolean DownloadImage(ResponseBody body) {
 
         try {
             Log.d("DownloadImage", "Reading and writing file");
-            InputStream in = null;
-            FileOutputStream out = null;
+            if (body != null) {
+                // display the image data in a ImageView or save it
+                Bitmap bmp = BitmapFactory.decodeStream(body.byteStream());
+//            InputStream in = null;
+//            FileOutputStream out = null;
+//
+//                in = body.byteStream();
+//                out = new FileOutputStream(getExternalFilesDir(null) + File.separator + "AndroidTutorialPoint.jpeg");
+//                int c;
+//
+//                while ((c = in.read()) != -1) {
+//                    out.write(c);
+//                }
+//            }
+//            catch (IOException e) {
+//                Log.d("DownloadImage",e.toString());
+//                return false;
+//            }
+//            finally {
+//                if (in != null) {
+//                    in.close();
+//                }
+//                if (out != null) {
+//                    out.close();
+//                }
+//            }
 
-            try {
-                in = body.byteStream();
-                out = new FileOutputStream(getExternalFilesDir(null) + File.separator + "AndroidTutorialPoint.jpg");
-                int c;
-
-                while ((c = in.read()) != -1) {
-                    out.write(c);
-                }
-            }
-            catch (IOException e) {
-                Log.d("DownloadImage",e.toString());
-                return false;
-            }
-            finally {
-                if (in != null) {
-                    in.close();
-                }
-                if (out != null) {
-                    out.close();
-                }
-            }
-
-            int width, height;
-            ImageButton image = ((ImageButton) mWindow.findViewById(R.id.info_badge));
-            if(image.getTag(R.id.info_badge) != "loaded") {
-                Bitmap bMap = BitmapFactory.decodeFile(getExternalFilesDir(null) + File.separator + "AndroidTutorialPoint.jpg");
-                width = 4 * bMap.getWidth();
-                height = 4 * bMap.getHeight();
-                Bitmap bMap2 = Bitmap.createScaledBitmap(bMap, width, height, false);
-                image.setImageBitmap(bMap2);
+                int width, height;
+                ImageButton image1 = ((ImageButton) mWindow.findViewById(R.id.info_badge));
+//                if (image.getTag(R.id.info_badge) != "loaded") {
+//                Bitmap bMap = BitmapFactory.decodeFile(getExternalFilesDir(null) + File.separator + "AndroidTutorialPoint.jpeg");
+//                width = 4 * bMap.getWidth();
+//                height = 4 * bMap.getHeight();
+//                Bitmap bMap2 = Bitmap.createScaledBitmap(bMap, width, height, false);
+//                image1.setImageURI(null);
+                    image1.setImageBitmap(bmp);
+//                    mWindow.invalidate();
 //            image.invalidate();
 //                if(image.getTag(R.id.imgPhoto) == null) {
 //                    image.setTag(R.id.info_badge, "loaded");
 //                }
 //                image.setTag(1, "yes");
+//                }
             }
             return true;
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             Log.d("DownloadImage",e.toString());
             return false;
         }
@@ -448,23 +461,24 @@ public class MapsActivity extends FragmentActivity implements
         });
 
     }
-
+    View view = null;
+    ImageView image = null;
     private void addKeyword() {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        View view = LayoutInflater.from(this).inflate(R.layout.dialog_keyword, null);
+        view = LayoutInflater.from(this).inflate(R.layout.dialog_keyword, null);
         final EditText edit_title = view.findViewById(R.id.edit_activity_title);
         final EditText edit_description = view.findViewById(R.id.edit_activity_description);
-        final ImageView image = view.findViewById(R.id.edit_activity_badge);
+        image = view.findViewById(R.id.edit_activity_badge);
 //      final String username = Global.preference.getValue(this, PrefConst.USERNAME, "");
         final String token = Global.preference.getValue(this, PrefConst.TOKEN, "");
 
         OnInfoWindowElemTouchListener imageListener;
 
         image.setClickable(true);
-        imageListener = new OnInfoWindowElemTouchListener(image,
-                getResources().getDrawable(R.drawable.badge_sa), //btn_default_normal_holo_light
-                getResources().getDrawable(R.drawable.badge_sa)) //btn_default_pressed_holo_light
+        imageListener = new OnInfoWindowElemTouchListener(image, null, null)
+//                getResources().getDrawable(R.drawable.badge_sa), //btn_default_normal_holo_light
+//                getResources().getDrawable(R.drawable.badge_sa)) //btn_default_pressed_holo_light
         {
             @Override
             protected void onClickConfirmed(View v, Marker marker) {
@@ -485,6 +499,7 @@ public class MapsActivity extends FragmentActivity implements
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
+                        final String deviceId = String.valueOf(Global.current_user.getId());
                         String description = edit_description.getText().toString().trim();
                         String title = edit_title.getText().toString().trim();
                         if (title.isEmpty()) {
@@ -502,7 +517,7 @@ public class MapsActivity extends FragmentActivity implements
 //                        CurrentActivity currentActivity = new CurrentActivity(String.valueOf(Global.current_user.getId()), keyword, gpsTracker.latitude, gpsTracker.longitude);
                         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                         String currentDateandTime = sdf.format(new Date());
-                        ActivityModel activity = new ActivityModel(String.valueOf(Global.current_user.getId()), title, description, currentDateandTime, gpsTracker.latitude, gpsTracker.longitude);
+                        final ActivityModel activity = new ActivityModel(String.valueOf(Global.current_user.getId()), title, description, currentDateandTime, gpsTracker.latitude, gpsTracker.longitude);
 
 //                        if (token == null || token == "") {
 //                            token = getToken(username);
@@ -531,7 +546,9 @@ public class MapsActivity extends FragmentActivity implements
                             @Override
                             public void onResponse(Call<Void> call, Response<Void> response) {
                                 if(response.isSuccessful()) {
+                                    uploadImage(deviceId, activity.What, token);
                                     Log.e("PostActivity", "success returned");
+
                                 }
                             }
 
@@ -571,10 +588,19 @@ public class MapsActivity extends FragmentActivity implements
                 if (file_extn.equals("img") || file_extn.equals("jpg") || file_extn.equals("jpeg") || file_extn.equals("gif") || file_extn.equals("png")) {
                     Toast.makeText(MapsActivity.this,"filename: " + this.imageFilePath, Toast.LENGTH_SHORT);
                     //FINE
+                    this.imageFilePath = ImageUtility.resizeAndCompressImageBeforeSend(this, this.imageFilePath, "tempImage."+file_extn);
                     BitmapFactory.Options options = new BitmapFactory.Options();
                     options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-                    Bitmap bitmap = BitmapFactory.decodeFile(this.imageFilePath, options);
-                    ((ImageView) findViewById(R.id.imgPhoto)).setImageBitmap(bitmap);
+                    Bitmap bitmap = BitmapFactory.decodeFile(imageFilePath, options);
+                    try {
+//                        View view = LayoutInflater.from(this).inflate(R.layout.dialog_keyword, null);
+//                        ((ImageView) view.findViewById(R.id.edit_activity_badge)).setImageBitmap(bitmap);
+                        if(image != null){
+                            image.setImageBitmap(bitmap);
+                        }
+                    }catch (Exception ex){
+                        Log.e("ActivityImage", ex.getMessage());
+                    }
                 } else {
                     Log.e("ImageError", "Unknown photo file format");
                     //NOT IN REQUIRED FORMAT
@@ -595,6 +621,39 @@ public class MapsActivity extends FragmentActivity implements
         String imagePath = cursor.getString(column_index);
 
         return cursor.getString(column_index);
+    }
+
+    private void uploadImage(String deviceId, String activity, String token) {
+        try {
+            File file = new File(this.imageFilePath);
+//            RequestBody reqFile = RequestBody.create(MediaType.parse("image/*"), file);
+            RequestBody requestBody = RequestBody.create(MediaType.parse("multipart/form-data"), file);
+
+            MultipartBody.Part body = MultipartBody.Part.createFormData("upload", file.getName(), requestBody);
+
+            RequestBody name = RequestBody.create(MediaType.parse("text/plain"), "upload_test");
+
+//            File file = new File(imagePath);
+//            MultipartBody.Part imageFileBody = MultipartBody.Part.createFormData("media", file.getName(), requestBody);
+//            RequestBody id = RequestBody.create(MediaType.parse("text/plain"),addOfferRequest.getCar_id());
+//            ApiCallback.MyCall<BaseResponse> myCall = apiRequest.editOfferImage(imageFileBody,id);
+            ApiInterface apiService =
+                    HttpClient.getClient().create(ApiInterface.class);
+            Call<Void> call = apiService.postActivityImage("Bearer " + token, deviceId, activity, body);
+            call.enqueue(new Callback<Void>() {
+                @Override
+                public void onResponse(Call<Void> call, Response<Void> response) {
+                    if (response.isSuccessful()) {
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Void> call, Throwable t) {
+                }
+            });
+        }catch (Exception ex){
+            Log.e("ActivityImageUpload", ex.getMessage());
+        }
     }
 
 }

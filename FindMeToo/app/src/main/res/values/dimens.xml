@@ -1,57 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Common control size -->
-    <dimen name="dimen_1">1dp</dimen>
     <dimen name="dimen_2">2dp</dimen>
-    <dimen name="dimen_3">3dp</dimen>
-    <dimen name="dimen_4">4dp</dimen>
     <dimen name="dimen_5">5dp</dimen>
-    <dimen name="dimen_6">6dp</dimen>
-    <dimen name="dimen_7">7dp</dimen>
-    <dimen name="dimen_8">8dp</dimen>
-    <dimen name="dimen_9">9dp</dimen>
     <dimen name="dimen_10">10dp</dimen>
-    <dimen name="dimen_15">15dp</dimen>
     <dimen name="dimen_20">20dp</dimen>
-    <dimen name="dimen_25">26dp</dimen>
     <dimen name="dimen_30">30dp</dimen>
-    <dimen name="dimen_35">35dp</dimen>
-    <dimen name="dimen_40">40dp</dimen>
-    <dimen name="dimen_45">45dp</dimen>
-    <dimen name="dimen_50">50dp</dimen>
-    <dimen name="dimen_60">60dp</dimen>
-    <dimen name="dimen_70">70dp</dimen>
-    <dimen name="dimen_80">80dp</dimen>
-    <dimen name="dimen_90">90dp</dimen>
     <dimen name="dimen_100">100dp</dimen>
-    <dimen name="dimen_120">120dp</dimen>
-    <dimen name="dimen_140">140dp</dimen>
-    <dimen name="dimen_150">150dp</dimen>
-    <dimen name="dimen_160">160dp</dimen>
-    <dimen name="dimen_180">180dp</dimen>
-    <dimen name="dimen_200">200dp</dimen>
-    <dimen name="dimen_250">250dp</dimen>
-    <dimen name="dimen_300">300dp</dimen>
-    <dimen name="dimen_330">340dp</dimen>
-    <dimen name="dimen_350">350dp</dimen>
-    <dimen name="dimen_400">400dp</dimen>
-    <dimen name="dimen_500">500dp</dimen>
 
 
     <!-- Common font size -->
     <dimen name="font_13">13sp</dimen>
-    <dimen name="font_14">14sp</dimen>
-    <dimen name="font_15">15sp</dimen>
-    <dimen name="font_16">16sp</dimen>
-    <dimen name="font_24">24sp</dimen>
-    <dimen name="font_34">34sp</dimen>
-    <dimen name="font_45">45sp</dimen>
 
     <!-- Text sizes -->
-    <dimen name="text_size_extra_micro">@dimen/font_13</dimen>
-    <dimen name="text_size_micro">@dimen/font_15</dimen>
-    <dimen name="text_size_small">@dimen/font_24</dimen>
-    <dimen name="text_size_medium">@dimen/font_34</dimen>
-    <dimen name="text_size_large">@dimen/font_45</dimen>
 
 </resources>

@@ -24,7 +24,9 @@ public abstract class OnInfoWindowElemTouchListener implements OnTouchListener {
     }
 
     public void setMarker(Marker marker) {
+
         this.marker = marker;
+        marker.hideInfoWindow();
     }
 
     @Override

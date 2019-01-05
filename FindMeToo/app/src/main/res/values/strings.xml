@@ -1,25 +1,16 @@
 <resources>
     <string name="app_name">FindMeToo</string>
     <string name="title_activity_maps">Find Me</string>
-    <string name="user_name">User Name</string>
     <string name="email">Email</string>
     <string name="password">Password</string>
     <string name="login">Login</string>
     <string name="do_you_have_account">Do you have account?</string>
     <string name="if_don_t_have_account">If don\'t have account</string>
     <string name="click_here">Click Here!</string>
-    <string name="first_name">First Name</string>
-    <string name="last_name">Last Name</string>
     <string name="confirm_password">Confirm Password</string>
     <string name="register">Register</string>
     <string name="you_already_have_account">You already have account</string>
-    <string name="enter_user_name">Enter User Name …</string>
-    <string name="enter_activity">What do you want to do today?</string>
     <string name="search">Search</string>
     <string name="add">Add</string>
-    <string name="keyword">KeyWord : </string>
-    <string name="Description" />
     <string name="profile">PROFILE</string>
-    <string name="todo">TODO</string>
-    <string name="About">About Me</string>
 </resources>

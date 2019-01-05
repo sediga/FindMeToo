@@ -38,11 +38,11 @@ public interface ApiInterface {
     @Multipart
     @POST("JoinServer/Profile/{deviceId}")
     Call<Void> postImage(@Header("Authorization") String authorization, @Path("deviceId") String deviceId, @Part MultipartBody.Part image);
+    @Multipart
+    @POST("JoinServer/images/{deviceId}/{activity}")
+    Call<Void> postActivityImage(@Header("Authorization") String authorization, @Path("deviceId") String deviceId, @Path("activity") String activity, @Part MultipartBody.Part image);
     @PUT("JoinServer/Profile/{deviceId}")
     Call<Void> putProfile(@Header("Authorization") String authorization, @Path("deviceId") String deviceId, @Body ProfileModel profile);
     @GET("JoinServer/Profile/{deviceId}")
     Call<ProfileModel> getProfile(@Header("Authorization") String authorization, @Path("deviceId") String deviceId);
-
-//    @GET("movie/{id}")
-//    Call<MoviesResponse> getMovieDetails(@Path("id") int id, @Query("api_key") String apiKey);
 }
