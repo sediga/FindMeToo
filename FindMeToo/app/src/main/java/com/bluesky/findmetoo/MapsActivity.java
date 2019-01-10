@@ -1,18 +1,23 @@
 package com.bluesky.findmetoo;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
@@ -50,6 +55,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -105,6 +112,11 @@ public class MapsActivity extends FragmentActivity implements
         mSearchView.setOnMenuItemClickListener(this);
         mSearchView.setOnSearchListener(this);
         mSearchView.setOnHomeActionClickListener(this);
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+                == PackageManager.PERMISSION_DENIED)
+        {
+            ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.CAMERA}, 100);
+        }
     }
 
 
@@ -161,30 +173,24 @@ public class MapsActivity extends FragmentActivity implements
             @Override
             public View getInfoContents(Marker marker) {
 //            Toast.makeText(MapsActivity.this, "getInfoContents Called", Toast.LENGTH_SHORT).show();
-//                mWindow.setTag();
                 ImageButton image = mWindow.findViewById(R.id.info_badge);
-                render(marker, mWindow);
+                try {
+                    render(marker, mWindow);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 infoButtonListener.setMarker(marker);
                 infoImageButtonListener.setMarker(marker);
                 mapWrapperLayout.setMarkerWithInfoWindow(marker, mWindow);
-                if(image.getTag(R.id.info_badge) == "loaded") {
-//                    if(image.getTag(1) == "yes") {
-//                        marker.showInfoWindow();
-//                        image.setTag(1, "no");
-//                    }
-//                        marker.showInfoWindow();
-//                    }
-//                    marker.showInfoWindow();
+                if (image.getTag(R.id.info_badge) == "loaded") {
                     image.setTag(R.id.info_badge, "DontReload");
                 }
-
                 return mWindow;
             }
-
         });
     }
 
-    private void render(final Marker marker, View view) {
+    private void render(final Marker marker, View view) throws IOException {
         String title = marker.getTitle();
         TextView titleUi = view.findViewById(R.id.title);
         if (title != null) {
@@ -202,7 +208,6 @@ public class MapsActivity extends FragmentActivity implements
         if (snippet != null) {
             SpannableString snippetText = new SpannableString(snippet);
 //            Toast.makeText(MapsActivity.this, "Snippet : " + snippetText, Toast.LENGTH_SHORT).show();
-//            snippetText.setSpan(new ForegroundColorSpan(Color.MAGENTA), 0, 10, 0);
             snippetText.setSpan(new ForegroundColorSpan(Color.BLUE), 0, snippet.length(), 0);
             snippetUi.setText(snippetText);
         } else {
@@ -214,43 +219,43 @@ public class MapsActivity extends FragmentActivity implements
         if (token == null || token == "") {
             token = getToken(username);
         }
-        final Marker tempMarker = marker;
-//        final ImageButton image = mWindow.findViewById(R.id.info_badge);
-//        if(image.getTag(R.id.info_badge) != "loaded") {
-        ApiInterface apiService =
-                HttpClient.getClient().create(ApiInterface.class);
-        Call<ResponseBody> call = apiService.getMatchingImages("Bearer " + token, title);
-        call.enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+//        final Marker tempMarker = marker;
+        if(marker.getTag() != "downloaded" && marker.getTag() != "") {
+            String deviceId = marker.getTag().toString().split("/")[0];
+            String fileName = marker.getTag().toString().split("/")[1];
+            ApiInterface apiService =
+                    HttpClient.getClient().create(ApiInterface.class);
+            Call<ResponseBody> call = apiService.getMatchingImages("Bearer " + token, deviceId, fileName);
+            call.enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
 
-                try {
+                    try {
 
-                    Log.d("onResponse", "Response came from server");
+                        Log.d("onResponse", "Response came from server");
 
-                    boolean FileDownloaded = false;
-                    if (response.body() != null && (marker.getTag() == null || marker.getTag() == "")) {
-                        FileDownloaded = DownloadImage(response.body());
+                        boolean FileDownloaded = false;
+                        if (response.body() != null && (marker.getTag() == null || marker.getTag() != "downloaded")) {
+                            FileDownloaded = DownloadImage(response.body());
                             marker.showInfoWindow();
                             marker.setTag("downloaded");
-                    }
-                    Log.d("onResponse", "Image is downloaded and saved ? " + FileDownloaded);
+                        }
+                        Log.d("onResponse", "Image is downloaded and saved ? " + FileDownloaded);
 
-                } catch (Exception e) {
-                    Log.d("onResponse", "There is an error");
-                    e.printStackTrace();
+                    } catch (Exception e) {
+                        Log.d("onResponse", "There is an error");
+                        e.printStackTrace();
+                    }
+
                 }
 
-            }
-
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Log.d("onFailure", t.toString());
-            }
-        });
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    Log.d("onFailure", t.toString());
+                }
+            });
+        }
     }
-//        ((ImageButton) view.findViewById(R.id.info_badge)).setImageResource(R.drawable.badge_sa);
-//    }
 
     private boolean DownloadImage(ResponseBody body) {
 
@@ -259,58 +264,22 @@ public class MapsActivity extends FragmentActivity implements
             if (body != null) {
                 // display the image data in a ImageView or save it
                 Bitmap bmp = BitmapFactory.decodeStream(body.byteStream());
-//            InputStream in = null;
-//            FileOutputStream out = null;
-//
-//                in = body.byteStream();
-//                out = new FileOutputStream(getExternalFilesDir(null) + File.separator + "AndroidTutorialPoint.jpeg");
-//                int c;
-//
-//                while ((c = in.read()) != -1) {
-//                    out.write(c);
-//                }
-//            }
-//            catch (IOException e) {
-//                Log.d("DownloadImage",e.toString());
-//                return false;
-//            }
-//            finally {
-//                if (in != null) {
-//                    in.close();
-//                }
-//                if (out != null) {
-//                    out.close();
-//                }
-//            }
 
                 int width, height;
                 ImageButton image1 = ((ImageButton) mWindow.findViewById(R.id.info_badge));
-//                if (image.getTag(R.id.info_badge) != "loaded") {
-//                Bitmap bMap = BitmapFactory.decodeFile(getExternalFilesDir(null) + File.separator + "AndroidTutorialPoint.jpeg");
-//                width = 4 * bMap.getWidth();
-//                height = 4 * bMap.getHeight();
-//                Bitmap bMap2 = Bitmap.createScaledBitmap(bMap, width, height, false);
-//                image1.setImageURI(null);
-                    image1.setImageBitmap(bmp);
-//                    mWindow.invalidate();
-//            image.invalidate();
-//                if(image.getTag(R.id.imgPhoto) == null) {
-//                    image.setTag(R.id.info_badge, "loaded");
-//                }
-//                image.setTag(1, "yes");
-//                }
+                image1.setImageBitmap(bmp);
             }
             return true;
 
         } catch (Exception e) {
-            Log.d("DownloadImage",e.toString());
+            Log.d("DownloadImage", e.toString());
             return false;
         }
     }
 
     public static int getPixelsFromDp(Context context, float dp) {
         final float scale = context.getResources().getDisplayMetrics().density;
-        return (int)(dp * scale + 0.5f);
+        return (int) (dp * scale + 0.5f);
     }
 
     @Override
@@ -321,15 +290,15 @@ public class MapsActivity extends FragmentActivity implements
             showMarkerOfUsers(mSearchView.getQuery());
         } else if (id == R.id.action_add) {
             addKeyword();
-        }
-        else if (id == R.id.menu_profile){
+        } else if (id == R.id.menu_profile) {
             startActivity(new Intent(this, ProfileActivity.class));
         }
 
     }
 
     @Override
-    public void onSuggestionClicked(SearchSuggestion searchSuggestion) {}
+    public void onSuggestionClicked(SearchSuggestion searchSuggestion) {
+    }
 
     @Override
     public void onSearchAction(String currentQuery) {
@@ -379,14 +348,12 @@ public class MapsActivity extends FragmentActivity implements
         // all markers remove
         if (markers != null) {
             markers.clear();
-//            for (Marker marker : markers) marker.remove();
         } else {
             markers = new HashMap<Integer, Marker>();
         }
 
         if (circles != null) {
             circles.clear();
-//            for (Circle circle : circles) circle.remove();
         } else {
             circles = new HashMap<Circle, Integer>();
         }
@@ -415,13 +382,13 @@ public class MapsActivity extends FragmentActivity implements
                                 .snippet(((CurrentActivity) locations[i]).description)
                                 .title(((CurrentActivity) locations[i]).activity));
                         markers.put(i, marker);
+                        marker.setTag(((CurrentActivity) locations[i]).ImagePath);
                         Circle circle = mMap.addCircle(new CircleOptions()
                                 .center(new LatLng(((CurrentActivity) locations[i]).latitude, ((CurrentActivity) locations[i]).longitude))
                                 .radius(500)
                                 .clickable(true)
                                 .strokeColor(Color.MAGENTA)
                                 .fillColor(0x220000FF));
-//                        Log.e("Desctiption", ((CurrentActivity) locations[i]).description);
                         if (i == 0) {
                             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(circle.getCenter(), 11));
                         }
@@ -434,14 +401,7 @@ public class MapsActivity extends FragmentActivity implements
                                 marker.setVisible(true);
                                 marker.showInfoWindow();
                                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(circle.getCenter(), 11));
-//                                marker.setVisible(false);
-                                //infoWindow.setVisibility(View.VISIBLE);
                                 marker.setTag(imagePath);
-                                // Flip the r, g and b components of the circle's
-                                // stroke color.
-//                                int strokeColor = circle.getStrokeColor() ^ 0x00ffffff;
-//                                circle.setStrokeColor(strokeColor);
-
                             }
                         });
                         circles.put(circle, i);
@@ -461,8 +421,10 @@ public class MapsActivity extends FragmentActivity implements
         });
 
     }
+
     View view = null;
     ImageView image = null;
+
     private void addKeyword() {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -470,11 +432,27 @@ public class MapsActivity extends FragmentActivity implements
         final EditText edit_title = view.findViewById(R.id.edit_activity_title);
         final EditText edit_description = view.findViewById(R.id.edit_activity_description);
         image = view.findViewById(R.id.edit_activity_badge);
-//      final String username = Global.preference.getValue(this, PrefConst.USERNAME, "");
         final String token = Global.preference.getValue(this, PrefConst.TOKEN, "");
 
+        image.setImageResource(R.drawable.takeaphoto);
         OnInfoWindowElemTouchListener imageListener;
-
+        Button btnPick = view.findViewById(R.id.button_pick);
+        btnPick.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                try {
+                    Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
+                    photoPickerIntent.setType("image/*");
+                    startActivityForResult(photoPickerIntent, 1);
+                }catch (Exception ex)
+                {
+                    Log.e("cameraintenterror", ex.getMessage());
+                }
+            }
+        }
+        );
         image.setClickable(true);
         imageListener = new OnInfoWindowElemTouchListener(image, null, null)
 //                getResources().getDrawable(R.drawable.badge_sa), //btn_default_normal_holo_light
@@ -484,13 +462,12 @@ public class MapsActivity extends FragmentActivity implements
             protected void onClickConfirmed(View v, Marker marker) {
                 // Here we can perform some action triggered after clicking the button
 //                Toast.makeText(MapsActivity.this, "image button clicked!", Toast.LENGTH_SHORT).show();
-                Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
-                photoPickerIntent.setType("image/*");
-                startActivityForResult(photoPickerIntent, 1);
+                Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                String filePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)+"/tempImage.jpeg";
+                startActivityForResult(takePicture, 0);
             }
         };
         image.setOnTouchListener(imageListener);
-
 
         builder.setTitle("Add Activity")
                 .setView(view)
@@ -508,35 +485,11 @@ public class MapsActivity extends FragmentActivity implements
                             return;
                         }
 
-//                        ContentValues values = new ContentValues();
-//                        values.put("uid", Global.current_user.getId());
-//                        values.put("keyword", keyword);
-//                        Global.mdb.insert("t_keyword", null, values);
                         GPSTracker gpsTracker = new GPSTracker(MapsActivity.this);
                         gpsTracker.getLocation();
-//                        CurrentActivity currentActivity = new CurrentActivity(String.valueOf(Global.current_user.getId()), keyword, gpsTracker.latitude, gpsTracker.longitude);
                         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                         String currentDateandTime = sdf.format(new Date());
                         final ActivityModel activity = new ActivityModel(String.valueOf(Global.current_user.getId()), title, description, currentDateandTime, gpsTracker.latitude, gpsTracker.longitude);
-
-//                        if (token == null || token == "") {
-//                            token = getToken(username);
-//                        }
-
-//                        ApiInterface apiService =
-//                                HttpClient.getClient().create(ApiInterface.class);
-//                        Call<Void> call = apiService.postCurrentLocation("Bearer " + token, currentActivity);
-//                        call.enqueue(new Callback<Void>() {
-//                            @Override
-//                            public void onResponse(Call<Void> call, Response<Void> response) {
-//                                if(response.isSuccessful()) {
-//                                }
-//                            }
-//
-//                            @Override
-//                            public void onFailure(Call<Void> call, Throwable t) {
-//                            }
-//                        });
 
                         ApiInterface apiService =
                                 HttpClient.getClient().create(ApiInterface.class);
@@ -545,10 +498,9 @@ public class MapsActivity extends FragmentActivity implements
                         call.enqueue(new Callback<Void>() {
                             @Override
                             public void onResponse(Call<Void> call, Response<Void> response) {
-                                if(response.isSuccessful()) {
+                                if (response.isSuccessful()) {
                                     uploadImage(deviceId, activity.What, token);
                                     Log.e("PostActivity", "success returned");
-
                                 }
                             }
 
@@ -557,59 +509,77 @@ public class MapsActivity extends FragmentActivity implements
                                 Log.e("PostActivity", "Error on postActivity" + t.getMessage());
                             }
                         });
-//                        values = new ContentValues();
-//                        values.put("latitude", gpsTracker.latitude);
-//                        values.put("longitude", gpsTracker.longitude);
-//                        Global.mdb.update("t_user", values, "id = " + Global.current_user.getId(), null);
-
                     }
                 })
                 .setNegativeButton("Cancel", null);
-
         builder.show();
+//        AlertDialog dialog = builder.create();
+//        dialog.getWindow().setLayout(900, 900); //Controlling width and height.
+//        dialog.show();
     }
 
     private String imageFilePath;
+    private String imageFileName;
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.e("Test", "OnActivityResult Called");
         Toast.makeText(MapsActivity.this, "onActivityResult called", Toast.LENGTH_SHORT);
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 1)
-            if (resultCode == Activity.RESULT_OK) {
-                Uri selectedImage = data.getData();
+        Uri selectedImage = null;
+        try {
+            Bitmap bitmap = null;
+            this.imageFilePath = null;
+            this.imageFileName = null;
+            switch (requestCode) {
+                case 1: {
+                    if (resultCode == Activity.RESULT_OK) {
+                        selectedImage = data.getData();
+                        this.imageFilePath = getPath(selectedImage);
+                        Log.e("FilePath", this.imageFilePath);
+                        String file_extn = this.imageFilePath.substring(this.imageFilePath.lastIndexOf(".") + 1);
+                        this.imageFileName = "tempImage." + file_extn;
 
-                this.imageFilePath = getPath(selectedImage);
-                Log.e("FilePath", this.imageFilePath);
-                String file_extn = this.imageFilePath.substring(this.imageFilePath.lastIndexOf(".") + 1);
-//                image_name_tv.setText(imageFilePath);
-
-//                try {
-                if (file_extn.equals("img") || file_extn.equals("jpg") || file_extn.equals("jpeg") || file_extn.equals("gif") || file_extn.equals("png")) {
-                    Toast.makeText(MapsActivity.this,"filename: " + this.imageFilePath, Toast.LENGTH_SHORT);
-                    //FINE
-                    this.imageFilePath = ImageUtility.resizeAndCompressImageBeforeSend(this, this.imageFilePath, "tempImage."+file_extn);
-                    BitmapFactory.Options options = new BitmapFactory.Options();
-                    options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-                    Bitmap bitmap = BitmapFactory.decodeFile(imageFilePath, options);
-                    try {
-//                        View view = LayoutInflater.from(this).inflate(R.layout.dialog_keyword, null);
-//                        ((ImageView) view.findViewById(R.id.edit_activity_badge)).setImageBitmap(bitmap);
-                        if(image != null){
-                            image.setImageBitmap(bitmap);
-                        }
-                    }catch (Exception ex){
-                        Log.e("ActivityImage", ex.getMessage());
-                    }
-                } else {
-                    Log.e("ImageError", "Unknown photo file format");
-                    //NOT IN REQUIRED FORMAT
+                        if (file_extn.equals("img") || file_extn.equals("jpg") || file_extn.equals("jpeg") || file_extn.equals("gif") || file_extn.equals("png")) {
+                            Toast.makeText(MapsActivity.this, "filename: " + this.imageFilePath, Toast.LENGTH_SHORT);
+                            //FINE
+                        } else {
+                            Log.e("ImageError", "Unknown photo file format");
+                            //NOT IN REQUIRED FORMAT
+                        }                    }
                 }
-//                } catch (FileNotFoundException e) {
-//                    // TODO Auto-generated catch block
-//                    e.printStackTrace();
-//                }
+                break;
+                case 0: {
+                    if (resultCode == RESULT_OK) {
+                            if (data != null && data.getExtras() != null) {
+                                this.imageFileName = "/tempImage.jpeg";
+                                this.imageFilePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)+this.imageFileName;
+                                File file = new File(this.imageFilePath);
+                                Bitmap imageBitmap = (Bitmap) data.getExtras().get("data");
+                                FileOutputStream out = new FileOutputStream(file);
+                                imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+                                out.flush();
+                                out.close();
+//                                imageBitmap.s
+//                                mImageView.setImageBitmap(imageBitmap);
+                        }
+//                        selectedImage = data.getData();
+//                        this.imageFilePath = selectedImage.getPath();
+                    }
+                }
+                break;
             }
+
+            if (image != null && this.imageFileName != null && this.imageFilePath != null) {
+                this.imageFilePath = ImageUtility.resizeAndCompressImageBeforeSend(this, this.imageFilePath, this.imageFileName);
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+                bitmap = BitmapFactory.decodeFile(imageFilePath, options);
+                image.setImageBitmap(bitmap);
+            }
+        }catch (Exception ex){
+            Log.e("imageselector", ex.getMessage());
+        }
     }
 
     public String getPath(Uri uri) {
@@ -633,10 +603,6 @@ public class MapsActivity extends FragmentActivity implements
 
             RequestBody name = RequestBody.create(MediaType.parse("text/plain"), "upload_test");
 
-//            File file = new File(imagePath);
-//            MultipartBody.Part imageFileBody = MultipartBody.Part.createFormData("media", file.getName(), requestBody);
-//            RequestBody id = RequestBody.create(MediaType.parse("text/plain"),addOfferRequest.getCar_id());
-//            ApiCallback.MyCall<BaseResponse> myCall = apiRequest.editOfferImage(imageFileBody,id);
             ApiInterface apiService =
                     HttpClient.getClient().create(ApiInterface.class);
             Call<Void> call = apiService.postActivityImage("Bearer " + token, deviceId, activity, body);
@@ -651,9 +617,8 @@ public class MapsActivity extends FragmentActivity implements
                 public void onFailure(Call<Void> call, Throwable t) {
                 }
             });
-        }catch (Exception ex){
+        } catch (Exception ex) {
             Log.e("ActivityImageUpload", ex.getMessage());
         }
     }
-
 }

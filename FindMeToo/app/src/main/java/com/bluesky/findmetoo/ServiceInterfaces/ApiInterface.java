@@ -27,8 +27,8 @@ public interface ApiInterface {
     Call<Token> getToken(@Field("username") String username, @Field("password") String password, @Field("grant_type") String grantType);
     @GET("JoinServer/Activity/{activity}")
     Call<List<CurrentActivity>> getMatchingActivities(@Header("Authorization") String authorization, @Path("activity") String activity);
-    @GET("JoinServer/Images/{activity}")
-    Call<ResponseBody> getMatchingImages(@Header("Authorization") String authorization, @Path("activity") String activity);
+    @GET("JoinServer/Images/{deviceId}/{fileName}")
+    Call<ResponseBody> getMatchingImages(@Header("Authorization") String authorization, @Path("deviceId") String deviceId, @Path("fileName") String fileName);
     @POST("JoinServer/Location")
     Call<Void> postCurrentLocation(@Header("Authorization") String authorization, @Body CurrentActivity location);
     @POST("JoinServer/Activity")
