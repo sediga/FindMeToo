@@ -1,144 +1,145 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical" android:layout_width="match_parent"
+    android:id="@+id/ConstraintLayout0"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ProfileActivity">
+    android:gravity="center"
+    tools:context=".LoginActivity">
 
     <LinearLayout
+        android:id="@+id/linearLayout2"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.25"
-        android:orientation="horizontal">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toTopOf="@+id/ConstraintLayout0">
 
-        <LinearLayout
-            android:layout_width="0dp"
+        <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:id="@+id/ConstraintLayout1"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="0.4"
-            android:orientation="vertical">
+            android:gravity="center"
+            tools:context=".LoginActivity">
 
             <ImageView
                 android:id="@+id/imgPhoto"
-                android:layout_width="match_parent"
+                android:layout_width="150dp"
                 android:layout_height="match_parent"
+                android:layout_marginStart="0dp"
+                android:layout_marginLeft="0dp"
                 android:onClick="onClick"
+                app:layout_constraintBottom_toBottomOf="@id/ConstraintLayout1"
+                app:layout_constraintStart_toStartOf="@id/ConstraintLayout1"
+                app:layout_constraintTop_toTopOf="@id/ConstraintLayout1"
                 tools:srcCompat="@drawable/badge_sa" />
-        </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:layout_weight="0.6">
+            <EditText
+                android:id="@+id/txt_name"
+                android:layout_width="200dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="2dp"
+                android:layout_marginLeft="2dp"
+                android:hint="Name"
+                android:singleLine="false"
+                app:layout_constraintEnd_toEndOf="@id/ConstraintLayout1"
+                app:layout_constraintStart_toEndOf="@id/imgPhoto"
+                app:layout_constraintTop_toTopOf="@id/ConstraintLayout1" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="0.25">
-
-                <EditText
-                    android:id="@+id/txt_name"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:hint="Name"
-                    android:singleLine="false" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="0.75">
-
-                <EditText
-                    android:id="@+id/txt_hobies"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:hint="Hobies"
-                    android:singleLine="false" />
-            </LinearLayout>
-        </LinearLayout>
+            <EditText
+                android:id="@+id/txt_hobies"
+                android:layout_width="200dp"
+                android:layout_height="100dp"
+                android:hint="Hobies"
+                android:singleLine="false"
+                app:layout_constraintBottom_toBottomOf="@id/ConstraintLayout1"
+                app:layout_constraintEnd_toEndOf="@id/ConstraintLayout1"
+                app:layout_constraintStart_toEndOf="@id/imgPhoto"
+                app:layout_constraintTop_toBottomOf="@id/txt_name" />
+        </android.support.constraint.ConstraintLayout>
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.08"
-        android:orientation="horizontal">
+        android:layout_height="50dp"
+        android:orientation="horizontal"
+        android:id="@+id/linearLayout3"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout2"
+        tools:ignore="UnknownId">
 
-        <LinearLayout
-            android:layout_width="0dp"
+        <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:id="@+id/ConstraintLayout2"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="0.4">
+            android:gravity="center"
+            tools:context=".LoginActivity">
 
             <RatingBar
                 android:id="@+id/profile_rating"
                 style="@style/Widget.AppCompat.RatingBar.Indicator"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:isIndicator="true"
                 android:numStars="5"
+                android:orientation="horizontal"
                 android:rating="4"
-                android:stepSize="0.1"
-                android:visibility="visible" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="0.3">
+                android:stepSize="1"
+                android:visibility="visible"
+                app:layout_constraintBottom_toBottomOf="@id/ConstraintLayout2"
+                app:layout_constraintStart_toStartOf="@id/ConstraintLayout2"
+                app:layout_constraintTop_toTopOf="@id/ConstraintLayout2" />
 
             <TextView
                 android:id="@+id/txt_view_reviews"
-                android:layout_width="match_parent"
+                android:layout_width="100dp"
                 android:layout_height="match_parent"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:autoLink="web"
                 android:gravity="center"
                 android:text="reviews"
                 android:textAlignment="center"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                android:autoLink="web"/>
-        </LinearLayout>
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="0.3">
+                app:layout_constraintBottom_toBottomOf="@id/ConstraintLayout2"
+                app:layout_constraintEnd_toStartOf="@id/txt_view_views"
+                app:layout_constraintTop_toTopOf="@id/ConstraintLayout2" />
 
             <TextView
                 android:id="@+id/txt_view_views"
-                android:layout_width="match_parent"
+                android:layout_width="100dp"
                 android:layout_height="match_parent"
+                android:autoLink="web"
                 android:gravity="center"
                 android:text="views"
                 android:textAlignment="center"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                android:autoLink="web"/>
-        </LinearLayout>
+                app:layout_constraintBottom_toBottomOf="@id/ConstraintLayout2"
+                app:layout_constraintEnd_toEndOf="@id/ConstraintLayout2"
+                app:layout_constraintTop_toTopOf="@id/ConstraintLayout2" />
+
+        </android.support.constraint.ConstraintLayout>
     </LinearLayout>
-    <LinearLayout
+
+    <EditText
+        android:id="@+id/txt_about"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:orientation="vertical"
-        android:id="@+id/layout_bottom"
-        android:layout_weight="0.73">
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dimen_5"
+        android:hint="About Yourself"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/linearLayout3" />
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="0dp"
+            android:layout_height="40dp"
             android:orientation="horizontal"
-            android:layout_weight="0.9">
-
-            <EditText
-                android:id="@+id/txt_about"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:hint="About Yourself" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:orientation="horizontal"
-            android:layout_weight="0.1">
+            android:id="@+id/linearLayout4"
+            app:layout_constraintTop_toBottomOf="@+id/txt_about">
 
             <Button
                 android:id="@+id/btn_cancel"
@@ -149,11 +150,6 @@
                 android:background="@drawable/btn_bg"
                 android:text="CANCEL" />
 
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="0.01"></LinearLayout>
-
             <Button
                 android:id="@+id/btn_save"
                 style="@style/Widget.AppCompat.Button.Borderless"
@@ -163,5 +159,4 @@
                 android:background="@drawable/btn_bg"
                 android:text="SAVE" />
         </LinearLayout>
-    </LinearLayout>
-</LinearLayout>
+</android.support.constraint.ConstraintLayout>

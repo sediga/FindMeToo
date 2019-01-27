@@ -78,6 +78,8 @@ public class MapsActivity extends FragmentActivity implements
         FloatingSearchView.OnSearchListener,
         FloatingSearchView.OnHomeActionClickListener {
 
+    public static final int CAMERAY_ACTIVITY = 1;
+    public static final int GALLERY_ACTIVITY = 0;
     private GoogleMap mMap;
     private HashMap<Integer, Marker> markers;
     private HashMap<Circle, Integer> circles;
@@ -266,6 +268,7 @@ public class MapsActivity extends FragmentActivity implements
                 Bitmap bmp = BitmapFactory.decodeStream(body.byteStream());
 
                 int width, height;
+                bmp = ImageUtility.resizeAndCompressImageBeforeSend(this, bmp);
                 ImageButton image1 = ((ImageButton) mWindow.findViewById(R.id.info_badge));
                 image1.setImageBitmap(bmp);
             }
@@ -445,7 +448,7 @@ public class MapsActivity extends FragmentActivity implements
                 try {
                     Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
                     photoPickerIntent.setType("image/*");
-                    startActivityForResult(photoPickerIntent, 1);
+                    startActivityForResult(photoPickerIntent, CAMERAY_ACTIVITY);
                 }catch (Exception ex)
                 {
                     Log.e("cameraintenterror", ex.getMessage());
@@ -464,7 +467,7 @@ public class MapsActivity extends FragmentActivity implements
 //                Toast.makeText(MapsActivity.this, "image button clicked!", Toast.LENGTH_SHORT).show();
                 Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 String filePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)+"/tempImage.jpeg";
-                startActivityForResult(takePicture, 0);
+                startActivityForResult(takePicture, GALLERY_ACTIVITY);
             }
         };
         image.setOnTouchListener(imageListener);
@@ -532,7 +535,7 @@ public class MapsActivity extends FragmentActivity implements
             this.imageFilePath = null;
             this.imageFileName = null;
             switch (requestCode) {
-                case 1: {
+                case CAMERAY_ACTIVITY: {
                     if (resultCode == Activity.RESULT_OK) {
                         selectedImage = data.getData();
                         this.imageFilePath = getPath(selectedImage);
@@ -549,17 +552,18 @@ public class MapsActivity extends FragmentActivity implements
                         }                    }
                 }
                 break;
-                case 0: {
+                case GALLERY_ACTIVITY: {
                     if (resultCode == RESULT_OK) {
-                            if (data != null && data.getExtras() != null) {
+                        final Bundle extras = data.getExtras();
+                        if (data != null && extras != null) {
                                 this.imageFileName = "/tempImage.jpeg";
                                 this.imageFilePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)+this.imageFileName;
-                                File file = new File(this.imageFilePath);
-                                Bitmap imageBitmap = (Bitmap) data.getExtras().get("data");
-                                FileOutputStream out = new FileOutputStream(file);
-                                imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
-                                out.flush();
-                                out.close();
+//                                File file = new File(this.imageFilePath);
+//                                bitmap = (Bitmap) extras.get("data");
+//                                FileOutputStream out = new FileOutputStream(file);
+//                                imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+//                                out.flush();
+//                                out.close();
 //                                imageBitmap.s
 //                                mImageView.setImageBitmap(imageBitmap);
                         }
@@ -571,12 +575,10 @@ public class MapsActivity extends FragmentActivity implements
             }
 
             if (image != null && this.imageFileName != null && this.imageFilePath != null) {
-                this.imageFilePath = ImageUtility.resizeAndCompressImageBeforeSend(this, this.imageFilePath, this.imageFileName);
-                BitmapFactory.Options options = new BitmapFactory.Options();
-                options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-                bitmap = BitmapFactory.decodeFile(imageFilePath, options);
+                bitmap = ImageUtility.resizeAndCompressImageBeforeSend(this, imageFilePath);
                 image.setImageBitmap(bitmap);
             }
+
         }catch (Exception ex){
             Log.e("imageselector", ex.getMessage());
         }
