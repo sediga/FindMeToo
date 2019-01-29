@@ -14,8 +14,6 @@
      limitations under the License.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:background="@drawable/custom_info_bubble"
@@ -31,44 +29,45 @@
         <ImageButton
             android:id="@+id/info_badge"
             android:layout_width="0dp"
-            android:layout_weight="0.3"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_marginRight="5dp"
-            android:adjustViewBounds="true"/>
+            android:layout_weight="0.3"
+            android:adjustViewBounds="true"></ImageButton>
 
-        <android.support.constraint.ConstraintLayout
-            android:id="@+id/ConstraintLayout0"
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="0.7">
+            android:layout_weight="0.7"
+            android:orientation="vertical">
 
             <TextView
                 android:id="@+id/title"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="0.3"
+                android:layout_gravity="center_horizontal"
+                android:layout_weight="0.25"
                 android:ellipsize="end"
                 android:singleLine="false"
                 android:textColor="#ff000000"
                 android:textSize="14dp"
-                android:textStyle="bold"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="0.1" />
 
             <TextView
                 android:id="@+id/snippet"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="0.7"
+                android:layout_weight="0.65"
                 android:ellipsize="end"
                 android:singleLine="false"
                 android:textColor="#ff7f7f7f"
-                android:textSize="14dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/title" />
+                android:textSize="14dp" />
 
-        </android.support.constraint.ConstraintLayout>
+        </LinearLayout>
     </LinearLayout>
 
     <LinearLayout
@@ -77,36 +76,29 @@
         android:layout_weight="0.2"
         android:orientation="horizontal">
 
-        <android.support.constraint.ConstraintLayout
-            android:id="@+id/ConstraintLayout1"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
         <RatingBar
-            android:id="@+id/ratingView0"
             style="@style/Widget.AppCompat.RatingBar.Indicator"
-            android:layout_width="0dp"
-            android:layout_weight="0.6"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:fitsSystemWindows="true"
             android:numStars="5"
-            android:stepSize="1"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"/>
+            android:stepSize="0.1" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.1" />
 
         <Button
             android:id="@+id/iammin"
             style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="0dp"
-            android:layout_weight="0.4"
             android:layout_height="match_parent"
+            android:layout_weight="0.4"
             android:background="@drawable/btn_bg"
             android:text="I'm In"
-            android:textAppearance="@style/TextAppearance.AppCompat.Button"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/ratingView0"/>
+            android:textAppearance="@style/TextAppearance.AppCompat.Button" />
 
-        </android.support.constraint.ConstraintLayout>
     </LinearLayout>
     <!--<TextView-->
     <!--android:layout_width="match_parent"-->
