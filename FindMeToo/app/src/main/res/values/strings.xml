@@ -5,7 +5,7 @@
     <string name="password">Password</string>
     <string name="login">Login</string>
     <string name="do_you_have_account">Do you have account?</string>
-    <string name="if_don_t_have_account">If don\'t have account</string>
+    <string name="if_don_t_have_account">If you don\'t have account</string>
     <string name="click_here">Click Here!</string>
     <string name="confirm_password">Confirm Password</string>
     <string name="register">Register</string>

@@ -52,6 +52,8 @@
             android:label="@string/title_activity_maps"
             android:configChanges="orientation|screenSize|keyboardHidden"/>
         <activity android:name=".ProfileActivity"></activity>
+        <activity android:name=".ProfileViewActivity"></activity>
+        <activity android:name=".ViewImageActivity"></activity>
     </application>
 
 </manifest>

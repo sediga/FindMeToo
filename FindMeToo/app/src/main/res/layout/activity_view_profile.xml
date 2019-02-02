@@ -3,62 +3,62 @@
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/ConstraintLayout0"
+    android:id="@+id/ConstraintLayout0_View"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center"
     tools:context=".LoginActivity">
 
     <LinearLayout
-        android:id="@+id/linearLayout2"
+        android:id="@+id/linearLayout2_View"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintTop_toTopOf="@+id/ConstraintLayout0">
+        app:layout_constraintTop_toTopOf="@+id/ConstraintLayout0_View">
 
         <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
             xmlns:app="http://schemas.android.com/apk/res-auto"
             xmlns:tools="http://schemas.android.com/tools"
-            android:id="@+id/ConstraintLayout1"
+            android:id="@+id/ConstraintLayout1_View"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center"
             tools:context=".LoginActivity">
 
             <ImageView
-                android:id="@+id/imgPhoto"
+                android:id="@+id/imgViewPhoto"
                 android:layout_width="150dp"
                 android:layout_height="match_parent"
                 android:layout_marginStart="0dp"
                 android:layout_marginLeft="0dp"
                 android:onClick="onClick"
-                app:layout_constraintBottom_toBottomOf="@id/ConstraintLayout1"
-                app:layout_constraintStart_toStartOf="@id/ConstraintLayout1"
-                app:layout_constraintTop_toTopOf="@id/ConstraintLayout1"
+                app:layout_constraintBottom_toBottomOf="@id/ConstraintLayout1_View"
+                app:layout_constraintStart_toStartOf="@id/ConstraintLayout1_View"
+                app:layout_constraintTop_toTopOf="@id/ConstraintLayout1_View"
                 tools:srcCompat="@drawable/badge_sa" />
 
-            <EditText
-                android:id="@+id/txt_name"
+            <TextView
+                android:id="@+id/txt_view_name"
                 android:layout_width="200dp"
                 android:layout_height="50dp"
                 android:layout_marginStart="2dp"
                 android:layout_marginLeft="2dp"
                 android:hint="Name"
                 android:singleLine="false"
-                app:layout_constraintEnd_toEndOf="@id/ConstraintLayout1"
-                app:layout_constraintStart_toEndOf="@id/imgPhoto"
-                app:layout_constraintTop_toTopOf="@id/ConstraintLayout1" />
+                app:layout_constraintEnd_toEndOf="@id/ConstraintLayout1_View"
+                app:layout_constraintStart_toEndOf="@id/imgViewPhoto"
+                app:layout_constraintTop_toTopOf="@id/ConstraintLayout1_View" />
 
-            <EditText
-                android:id="@+id/txt_hobies"
+            <TextView
+                android:id="@+id/txt_view_hobies"
                 android:layout_width="200dp"
                 android:layout_height="100dp"
                 android:hint="Hobies"
                 android:singleLine="false"
-                app:layout_constraintBottom_toBottomOf="@id/ConstraintLayout1"
-                app:layout_constraintEnd_toEndOf="@id/ConstraintLayout1"
-                app:layout_constraintStart_toEndOf="@id/imgPhoto"
-                app:layout_constraintTop_toBottomOf="@id/txt_name" />
+                app:layout_constraintBottom_toBottomOf="@id/ConstraintLayout1_View"
+                app:layout_constraintEnd_toEndOf="@id/ConstraintLayout1_View"
+                app:layout_constraintStart_toEndOf="@id/imgViewPhoto"
+                app:layout_constraintTop_toBottomOf="@id/txt_view_name" />
         </android.support.constraint.ConstraintLayout>
     </LinearLayout>
 
@@ -66,33 +66,33 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:orientation="horizontal"
-        android:id="@+id/linearLayout3"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout2"
+        android:id="@+id/linearLayout3_View"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout2_View"
         tools:ignore="UnknownId">
 
         <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
             xmlns:app="http://schemas.android.com/apk/res-auto"
             xmlns:tools="http://schemas.android.com/tools"
-            android:id="@+id/ConstraintLayout2"
+            android:id="@+id/ConstraintLayout2_View"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center"
             tools:context=".LoginActivity">
 
             <RatingBar
-                android:id="@+id/profile_rating"
+                android:id="@+id/edit_profile_rating"
                 style="@style/Widget.AppCompat.RatingBar.Indicator"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:isIndicator="true"
+                android:isIndicator="false"
                 android:numStars="5"
                 android:orientation="horizontal"
-                android:rating="4"
+                android:rating="0"
                 android:stepSize="1"
                 android:visibility="visible"
-                app:layout_constraintBottom_toBottomOf="@id/ConstraintLayout2"
-                app:layout_constraintStart_toStartOf="@id/ConstraintLayout2"
-                app:layout_constraintTop_toTopOf="@id/ConstraintLayout2" />
+                app:layout_constraintBottom_toBottomOf="@id/ConstraintLayout2_View"
+                app:layout_constraintStart_toStartOf="@id/ConstraintLayout2_View"
+                app:layout_constraintTop_toTopOf="@id/ConstraintLayout2_View" />
 
             <TextView
                 android:id="@+id/txt_view_reviews"
@@ -105,9 +105,9 @@
                 android:text="reviews"
                 android:textAlignment="center"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                app:layout_constraintBottom_toBottomOf="@id/ConstraintLayout2"
+                app:layout_constraintBottom_toBottomOf="@id/ConstraintLayout2_View"
                 app:layout_constraintEnd_toStartOf="@id/txt_view_views"
-                app:layout_constraintTop_toTopOf="@id/ConstraintLayout2" />
+                app:layout_constraintTop_toTopOf="@id/ConstraintLayout2_View" />
 
             <TextView
                 android:id="@+id/txt_view_views"
@@ -118,43 +118,45 @@
                 android:text="views"
                 android:textAlignment="center"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                app:layout_constraintBottom_toBottomOf="@id/ConstraintLayout2"
-                app:layout_constraintEnd_toEndOf="@id/ConstraintLayout2"
-                app:layout_constraintTop_toTopOf="@id/ConstraintLayout2" />
+                app:layout_constraintBottom_toBottomOf="@id/ConstraintLayout2_View"
+                app:layout_constraintEnd_toEndOf="@id/ConstraintLayout2_View"
+                app:layout_constraintTop_toTopOf="@id/ConstraintLayout2_View" />
 
         </android.support.constraint.ConstraintLayout>
     </LinearLayout>
 
-    <EditText
-        android:id="@+id/txt_about"
+    <TextView
+        android:id="@+id/txt_view_about"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/dimen_5"
         android:hint="About Yourself"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/linearLayout3" />
+        app:layout_constraintTop_toBottomOf="@id/linearLayout3_View" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:orientation="horizontal"
-            android:id="@+id/linearLayout4"
-            app:layout_constraintTop_toBottomOf="@+id/txt_about">
+        <!--<LinearLayout-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="40dp"-->
+            <!--android:orientation="horizontal"-->
+            <!--android:id="@+id/linearLayout4_View"-->
+            <!--app:layout_constraintTop_toBottomOf="@+id/txt_about">-->
 
-            <Button
-                android:id="@+id/btn_cancel"
-                style="@style/Widget.AppCompat.Button.ButtonBar.AlertDialog"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="0.495"
-                android:text="CANCEL" />
+            <!--<Button-->
+                <!--android:id="@+id/btn_cancel"-->
+                <!--style="@style/Widget.AppCompat.Button.Borderless"-->
+                <!--android:layout_width="0dp"-->
+                <!--android:layout_height="match_parent"-->
+                <!--android:layout_weight="0.495"-->
+                <!--android:background="@drawable/btn_bg"-->
+                <!--android:text="CANCEL" />-->
 
-            <Button
-                android:id="@+id/btn_save"
-                style="@style/Widget.AppCompat.Button.ButtonBar.AlertDialog"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="0.495"
-                android:text="SAVE" />
-        </LinearLayout>
+            <!--<Button-->
+                <!--android:id="@+id/btn_save"-->
+                <!--style="@style/Widget.AppCompat.Button.Borderless"-->
+                <!--android:layout_width="0dp"-->
+                <!--android:layout_height="match_parent"-->
+                <!--android:layout_weight="0.495"-->
+                <!--android:background="@drawable/btn_bg"-->
+                <!--android:text="SAVE" />-->
+        <!--</LinearLayout>-->
 </android.support.constraint.ConstraintLayout>

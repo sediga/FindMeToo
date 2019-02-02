@@ -110,20 +110,20 @@
 
         <Button
             android:id="@+id/button_register"
+            style="@style/Widget.AppCompat.Button.ButtonBar.AlertDialog"
             android:layout_width="107dp"
             android:layout_height="@dimen/dimen_30"
             android:layout_marginTop="@dimen/dimen_20"
-            android:background="@drawable/ic_button_click"
             android:text="@string/register"
             android:textColor="@android:color/white"
             android:textSize="@dimen/font_13" />
 
         <Button
             android:id="@+id/button_profile"
+            style="@style/Widget.AppCompat.Button.ButtonBar.AlertDialog"
             android:layout_width="107dp"
             android:layout_height="@dimen/dimen_30"
             android:layout_marginTop="@dimen/dimen_20"
-            android:background="@drawable/ic_button_click"
             android:text="@string/profile"
             android:textColor="@android:color/white"
             android:textSize="@dimen/font_13" />
