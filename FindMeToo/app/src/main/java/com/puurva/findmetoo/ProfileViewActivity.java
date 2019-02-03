@@ -42,31 +42,8 @@ public class ProfileViewActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_profile);
 
-//        findViewById(R.id.btn_save).setOnClickListener(this);
-//        findViewById(R.id.btn_cancel).setOnClickListener(this);
-//        findViewById(R.id.imgPhoto).setOnClickListener(this);
-
         fillProfile();
     }
-
-//    @Override
-//    public void onClick(View v) {
-//
-//        int id = v.getId();
-//
-//        switch (id) {
-//            case R.id.btn_cancel:
-//                finish();
-//                break;
-//            case R.id.btn_save:
-//                addProfile();
-//                break;
-//            case R.id.imgPhoto:
-//                photoClicked();
-//                break;
-//        }
-//
-//    }
 
     private  void photoClicked()
     {
@@ -75,38 +52,6 @@ public class ProfileViewActivity extends AppCompatActivity {
         startActivityForResult(photoPickerIntent, 1);
     }
 
-//    @Override
-//    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        Log.e("Test", "OnActivityResult Called");
-////        Toast.makeText(ProfileActivity.this, "onActivityResult called", Toast.LENGTH_SHORT);
-//        super.onActivityResult(requestCode, resultCode, data);
-//        if (requestCode == 1)
-//            if (resultCode == Activity.RESULT_OK) {
-//                Uri selectedImage = data.getData();
-//
-//                this.imageFilePath = getPath(selectedImage);
-//                Log.e("FilePath", this.imageFilePath);
-//                String file_extn = this.imageFilePath.substring(this.imageFilePath.lastIndexOf(".") + 1);
-////                image_name_tv.setText(imageFilePath);
-//
-////                try {
-//                if (file_extn.equals("img") || file_extn.equals("jpg") || file_extn.equals("jpeg") || file_extn.equals("gif") || file_extn.equals("png")) {
-//                    Toast.makeText(ProfileViewActivity.this,"filename: " + this.imageFilePath, Toast.LENGTH_SHORT);
-//                    //FINE
-//                    BitmapFactory.Options options = new BitmapFactory.Options();
-//                    options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-//                    Bitmap bitmap = BitmapFactory.decodeFile(this.imageFilePath, options);
-//                    ((ImageView) findViewById(R.id.imgPhoto)).setImageBitmap(bitmap);
-//                } else {
-//                    Log.e("ImageError", "Unknown photo file format");
-//                    //NOT IN REQUIRED FORMAT
-//                }
-////                } catch (FileNotFoundException e) {
-////
-////                    e.printStackTrace();
-////                }
-//            }
-//    }
 
     public String getPath(Uri uri) {
         String[] projection = {MediaStore.MediaColumns.DATA};
@@ -146,55 +91,5 @@ public class ProfileViewActivity extends AppCompatActivity {
             public void onFailure(Call<ProfileModel> call, Throwable t) {
             }
         });
-
     }
-
-//    private void addProfile() {
-//        final String deviceId = String.valueOf(Global.current_user.getId());
-//        String profilName = ((EditText) findViewById(R.id.txt_name)).getText().toString();
-//        String hobies = ((EditText) findViewById(R.id.txt_hobies)).getText().toString();
-//        String about = ((EditText) findViewById(R.id.txt_about)).getText().toString();
-//        final String token = Global.preference.getValue(this, PrefConst.TOKEN, "");
-//
-//        ProfileModel profileModel = new ProfileModel(String.valueOf(Global.current_user.getId()), Global.preference.getValue(this,
-//                PrefConst.USERNAME, ""),
-//                null, profilName, hobies, about);
-//
-//        ApiInterface apiService =
-//                HttpClient.getClient().create(ApiInterface.class);
-//        Call<Void> call = apiService.putProfile("Bearer " + token, deviceId, profileModel);
-//        call.enqueue(new Callback<Void>() {
-//            @Override
-//            public void onResponse(Call<Void> call, Response<Void> response) {
-//                if(response.isSuccessful()) {
-////                    uploadImage(deviceId, token);
-//                    finish();
-//                }
-//            }
-//
-//            @Override
-//            public void onFailure(Call<Void> call, Throwable t) {
-//            }
-//        });
-//    }
-//    private void uploadImage(String deviceId, String token) {
-//        File file = new File(this.imageFilePath);
-//        RequestBody reqFile = RequestBody.create(MediaType.parse("image/*"), file);
-//        MultipartBody.Part body = MultipartBody.Part.createFormData("upload", file.getName(), reqFile);
-//        RequestBody name = RequestBody.create(MediaType.parse("text/plain"), "upload_test");
-//        ApiInterface apiService =
-//                HttpClient.getClient().create(ApiInterface.class);
-//        Call<Void> call = apiService.postImage("Bearer " + token, deviceId, body);
-//        call.enqueue(new Callback<Void>() {
-//            @Override
-//            public void onResponse(Call<Void> call, Response<Void> response) {
-//                if(response.isSuccessful()) {
-//                }
-//            }
-//
-//            @Override
-//            public void onFailure(Call<Void> call, Throwable t) {
-//            }
-//        });
-//    }
 }
