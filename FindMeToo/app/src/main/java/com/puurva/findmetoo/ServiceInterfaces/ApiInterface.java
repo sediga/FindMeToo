@@ -20,6 +20,8 @@ import retrofit2.http.Path;
 import java.util.*;
 
 public interface ApiInterface {
+    @POST("JoinServer/Notifications/NewToken/{deviceid}")
+    Call<Void> SendRegistrationToServer(@Path("deviceId") String deviceId, @Body() String tocken);
     @POST("JoinServer/api/Account/Register")
     Call<Void> registerExternal(@Body() RegisterBindingModel activity);
     @FormUrlEncoded

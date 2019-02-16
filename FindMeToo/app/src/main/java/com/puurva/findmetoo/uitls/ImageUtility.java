@@ -64,6 +64,46 @@ public class ImageUtility {
         return result;
     }
 
+    public static Bitmap scaleImageToResolution(Context context, Bitmap image, int dstWidth, int dstHeight, File fileToWrite) {
+
+        Bitmap result = null;
+        if (dstHeight > 0 && dstWidth > 0 && image != null) {
+            try {
+                //Get Image Properties
+                BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+                bmOptions.inJustDecodeBounds = true;
+                int photoH = bmOptions.outHeight;
+                int photoW = bmOptions.outWidth;
+
+                bmOptions.inJustDecodeBounds = false;
+                bmOptions.inPurgeable = true;
+                //Smaller Image Size in Memory with Config
+                bmOptions.inPreferredConfig = Bitmap.Config.RGB_565;
+
+                //Is resolution not the same like 16:9 == 4:3 then crop otherwise fit
+                ScalingLogic scalingLogic = getScalingLogic(photoW, photoH, dstWidth, dstHeight);
+                //Get Maximum automatic downscaling that it's still bigger then this requested resolution
+                bmOptions.inSampleSize = calculateScalingSampleSize(photoW, photoH, dstWidth, dstHeight, scalingLogic);
+
+                //Get unscaled Bitmap
+                result = image;
+
+                //Scale Bitmap to requested Resolution
+                result = scaleImageToResolution(context, result, scalingLogic, dstWidth, dstHeight);
+
+                if (result != null) {
+                    //Save Bitmap with quality
+                    saveImageWithQuality(context, result, fileToWrite);
+                }
+            } finally {
+                //Clear Memory
+//                if (result != null)
+//                    result.recycle();
+            }
+        }
+        return result;
+    }
+
     public static void saveImageWithQuality(Context context, Bitmap bitmap, String path) {
         saveImageWithQuality(bitmap, path, getCompressQuality());
     }

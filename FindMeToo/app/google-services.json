@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "1058601497589",
+    "firebase_url": "https://findmetoo-3aed1.firebaseio.com",
+    "project_id": "findmetoo-3aed1",
+    "storage_bucket": "findmetoo-3aed1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1058601497589:android:043a34d181ed6d63",
+        "android_client_info": {
+          "package_name": "com.puurva.findmetoo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1058601497589-8ujqllk25kq95al0d5h01edk3bihddsg.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.puurva.findmetoo",
+            "certificate_hash": "9da946a015b5af66632bacd69339f5f242e45c46"
+          }
+        },
+        {
+          "client_id": "1058601497589-lba8q36v1aagae1dgh9hen232o767tj8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCRxkGUWTONQ1vWBGb5-zwm4S2J7nQNaoA"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1058601497589-lba8q36v1aagae1dgh9hen232o767tj8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

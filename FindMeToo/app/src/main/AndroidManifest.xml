@@ -7,7 +7,6 @@
          Google Maps Android API v2, but you must specify either coarse or fine
          location permissions for the 'MyLocation' functionality. 
     -->
-
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -22,7 +21,11 @@
         android:roundIcon="@drawable/findmetoo_logo"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
+        <service android:name=".NotificationsService">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -37,8 +40,8 @@
 
         <activity
             android:name=".MapsActivity"
-            android:label="@string/title_activity_maps"
-            android:configChanges="orientation|screenSize|keyboardHidden"/>
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:label="@string/title_activity_maps" />
         <activity
             android:name=".LoginActivity"
             android:label="@string/title_activity_maps">
@@ -48,12 +51,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".RegisterActivity"
-            android:label="@string/title_activity_maps"
-            android:configChanges="orientation|screenSize|keyboardHidden"/>
-        <activity android:name=".ProfileActivity"></activity>
-        <activity android:name=".ProfileViewActivity"></activity>
-        <activity android:name=".ViewImageActivity"></activity>
+        <activity
+            android:name=".RegisterActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:label="@string/title_activity_maps" />
+        <activity android:name=".ProfileActivity" />
+        <activity android:name=".ProfileViewActivity" />
+        <activity android:name=".ViewImageActivity" />
     </application>
 
 </manifest>

@@ -23,6 +23,7 @@ import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -240,6 +241,7 @@ public class MapsActivity extends FragmentActivity implements
 
     @Override
     public void onSearchAction(String currentQuery) {
+        this.bitmap=null;
         showMarkerOfUsers(currentQuery);
     }
 
@@ -266,18 +268,19 @@ public class MapsActivity extends FragmentActivity implements
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         try {
-            this.imageFilePath = null;
-            this.imageFileName = null;
-            File file = null;
-            switch (requestCode) {
+            String filePath = GetImageFileFullPath();
+            File file = new File(filePath);
+            DisplayMetrics displayMetrics = new DisplayMetrics();
+            getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+            int height = displayMetrics.heightPixels;
+            int width = displayMetrics.widthPixels;            switch (requestCode) {
                 case CAMERA_ACTIVITY: {
                     if (resultCode == Activity.RESULT_OK) {
                         BitmapFactory.Options options = new BitmapFactory.Options();
                         options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-                        String filePath = GetImageFileFullPath();
                         float angle = ImageUtility.getExifAngle(this, filePath);
-//                        ImageUtility.scaleImageToResolution(this, new File(filePath), 1024, 1024);
                         bitmap = ImageUtility.rotateImage(filePath, angle);
+                        bitmap = ImageUtility.scaleImageToResolution(this, this.bitmap, 300, 200, file);
                     }
                 }
                 break;
@@ -285,13 +288,15 @@ public class MapsActivity extends FragmentActivity implements
                     if (resultCode == RESULT_OK) {
                         Uri imageUri = data.getData();
                         bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
+
+                        bitmap = ImageUtility.scaleImageToResolution(this, this.bitmap, 300, 300, file);
                     }
                 }
                 break;
             }
 
             if (image != null && bitmap != null) {
-                bitmap = ImageUtility.scaleImageToResolution(this, this.bitmap, 300, 300);
+//                bitmap = ImageUtility.scaleImageToResolution(this, this.bitmap, image.getWidth(), image.getWidth());
                 image.setImageBitmap(bitmap);
             }
 
@@ -409,7 +414,9 @@ public class MapsActivity extends FragmentActivity implements
 
                 int width, height;
                 ImageButton image1 = ((ImageButton) mWindow.findViewById(R.id.info_badge));
-                bmp = ImageUtility.scaleImageToResolution(this, bmp, image1.getWidth(), image1.getHeight());
+                bmp = ImageUtility.scaleImageToResolution(this, bmp, bmp.getHeight(), bmp.getWidth());
+                image1.setMaxWidth(bmp.getWidth());
+                image1.setMaxHeight(bmp.getHeight());
                 image1.setImageBitmap(bmp);
             }
             return true;
