@@ -31,7 +31,6 @@
                 android:layout_height="match_parent"
                 android:layout_marginStart="0dp"
                 android:layout_marginLeft="0dp"
-                android:onClick="onClick"
                 app:layout_constraintBottom_toBottomOf="@id/ConstraintLayout1_View"
                 app:layout_constraintStart_toStartOf="@id/ConstraintLayout1_View"
                 app:layout_constraintTop_toTopOf="@id/ConstraintLayout1_View"

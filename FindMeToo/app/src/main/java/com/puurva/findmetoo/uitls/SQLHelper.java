@@ -1,19 +1,11 @@
 package com.puurva.findmetoo.uitls;
 
 import android.content.ContentValues;
-import android.content.Context;
-import android.database.SQLException;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
-import android.os.Environment;
+import android.database.Cursor;
 
-import com.puurva.findmetoo.R;
+import com.puurva.findmetoo.ServiceInterfaces.DeviceModel;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.util.Calendar;
 
 /**
  * Created by puurva on 2018-08-24.
@@ -21,6 +13,36 @@ import java.io.OutputStream;
  */
 
 public class SQLHelper {
+
+    public static boolean AddDevice(DeviceModel deviceModel){
+        ContentValues values = new ContentValues();
+        values.put("DeviceId", deviceModel.DeviceID);
+        values.put("EmailId", deviceModel.EmailID);
+        values.put("SoftwareVersion", deviceModel.SoftwareVersion);
+        values.put("NotificationToken", deviceModel.NotificationToken);
+        values.put("CreatedOn", Calendar.getInstance().getTime().toString());
+        return Insert("DeviceInfo", values);
+    }
+
+    public static DeviceModel GetLatestDevice(){
+        Cursor c = Global.mdb.rawQuery(
+                "SELECT  * FROM DeviceInfo ORDER BY CreatedOn DESC LIMIT 1",
+                null);
+
+        if (c == null || c.getCount() == 0) {
+            return null;
+        }
+
+        c.moveToFirst();
+        Global.device_info = new DeviceModel(
+                c.getString(0),
+                c.getString(1),
+                c.getString(2),
+                c.getString(3)
+        );
+
+        return  Global.device_info;
+    }
 
     public static boolean Insert( String table, ContentValues values){
 

@@ -16,4 +16,7 @@
     <string name="gallery">Gallery</string>
     <string name="enter_brief_description">Enter brief description</string>
     <string name="enter_title">Enter Title</string>
+    <string name="default_notification_channel_id">findmetoo_defauld_channel</string>
+    <string name="default_notification_channel_name">findmetoo</string>
+    <string name="fcm_message">FindMeToo</string>
 </resources>

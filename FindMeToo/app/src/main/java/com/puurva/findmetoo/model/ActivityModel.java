@@ -10,17 +10,17 @@ public class ActivityModel {
     private String userId;
     @SerializedName("activity")
     private String activity;
-    @SerializedName("latitude")
-    private double latitude;
-    @SerializedName("longitude")
-    private double longitude;
+    @SerializedName("Lat")
+    private double Lat;
+    @SerializedName("Long")
+    private double Long;
 
-    public ActivityModel(int id, String userId, String activity, double latitude, double longitude) {
+    public ActivityModel(int id, String userId, String activity, double Lat, double Long) {
         this.id = id;
         this.userId = userId;
         this.activity = activity;
-        this.latitude = latitude;
-        this.longitude = longitude;
+        this.Lat = Lat;
+        this.Long = Long;
     }
 
     public int getId() {
@@ -47,19 +47,19 @@ public class ActivityModel {
         this.activity = activity;
     }
 
-    public double getLatitude() {
-        return latitude;
+    public double getLat() {
+        return Lat;
     }
 
-    public void setLatitude(double latitude) {
-        this.latitude = latitude;
+    public void setLat(double lat) {
+        this.Lat = lat;
     }
 
-    public double getLongitude() {
-        return longitude;
+    public double getLong() {
+        return Long;
     }
 
-    public void setLongitude(double longitude) {
-        this.longitude = longitude;
+    public void setLong(double aLong) {
+        this.Long = aLong;
     }
 }

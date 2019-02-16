@@ -3,6 +3,8 @@ package com.puurva.findmetoo;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -12,17 +14,17 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.os.StrictMode;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.text.SpannableString;
-import android.text.style.ForegroundColorSpan;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -38,6 +40,11 @@ import android.widget.Toast;
 
 import com.arlib.floatingsearchview.FloatingSearchView;
 import com.arlib.floatingsearchview.suggestions.model.SearchSuggestion;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.puurva.findmetoo.model.CurrentActivity;
 import com.puurva.findmetoo.preference.PrefConst;
 import com.puurva.findmetoo.uitls.GPSTracker;
@@ -83,6 +90,7 @@ public class MapsActivity extends FragmentActivity implements
     private GoogleMap mMap;
     private HashMap<Integer, Marker> markers;
     private HashMap<Circle, Integer> circles;
+    private HashMap<Integer, String> activityIds;
     private FloatingSearchView mSearchView;
     private View mWindow;
     View view = null;
@@ -114,6 +122,8 @@ public class MapsActivity extends FragmentActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
+            SetupFirebaseNotifications();
+
         StrictMode.VmPolicy.Builder newbuilder = new StrictMode.VmPolicy.Builder();
         StrictMode.setVmPolicy(newbuilder.build());
 
@@ -133,6 +143,50 @@ public class MapsActivity extends FragmentActivity implements
         {
             ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.CAMERA}, 100);
         }
+    }
+
+    private void SetupFirebaseNotifications() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            // Create channel to show notifications.
+            String channelId  = getString(R.string.default_notification_channel_id);
+            String channelName = getString(R.string.default_notification_channel_name);
+            NotificationManager notificationManager =
+                    getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(new NotificationChannel(channelId,
+                    channelName, NotificationManager.IMPORTANCE_LOW));
+        }
+
+//        FirebaseMessaging.getInstance().subscribeToTopic("weather")
+//                .addOnCompleteListener(new OnCompleteListener<Void>() {
+//                    @Override
+//                    public void onComplete(@NonNull Task<Void> task) {
+////                        String msg = getString(R.string.msg_subscribed);
+//                        if (!task.isSuccessful()) {
+////                            msg = getString(R.string.msg_subscribe_failed);
+//                        }
+////                        Log.d(TAG, msg);
+////                        Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show();
+//                    }
+//                });
+//
+//        FirebaseInstanceId.getInstance().getInstanceId()
+//                .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+//                    @Override
+//                    public void onComplete(@NonNull Task<InstanceIdResult> task) {
+//                        if (!task.isSuccessful()) {
+////                            Log.w(TAG, "getInstanceId failed", task.getException());
+//                            return;
+//                        }
+//
+//                        // Get new Instance ID token
+//                        String token = task.getResult().getToken();
+//
+//                        // Log and toast
+////                        String msg = getString(R.string.msg_token_fmt, token);
+////                        Log.d(TAG, msg);
+////                        Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show();
+//                    }
+//                });
     }
 
 
@@ -273,7 +327,8 @@ public class MapsActivity extends FragmentActivity implements
             DisplayMetrics displayMetrics = new DisplayMetrics();
             getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
             int height = displayMetrics.heightPixels;
-            int width = displayMetrics.widthPixels;            switch (requestCode) {
+            int width = displayMetrics.widthPixels;
+            switch (requestCode) {
                 case CAMERA_ACTIVITY: {
                     if (resultCode == Activity.RESULT_OK) {
                         BitmapFactory.Options options = new BitmapFactory.Options();
@@ -448,6 +503,12 @@ public class MapsActivity extends FragmentActivity implements
             circles = new HashMap<Circle, Integer>();
         }
 
+        if (activityIds != null) {
+            activityIds.clear();
+        } else {
+            activityIds = new HashMap<Integer, String>();
+        }
+
         search_text = search_text.toLowerCase();
 
         String token = Global.preference.getValue(this, PrefConst.TOKEN, "");
@@ -477,6 +538,7 @@ public class MapsActivity extends FragmentActivity implements
                                 .snippet(((CurrentActivity) locations[i]).description)
                                 .title(((CurrentActivity) locations[i]).activity));
                         markers.put(i, marker);
+                        activityIds.put(i, ((CurrentActivity) locations[i]).ActivityId);
                         marker.setTag(((CurrentActivity) locations[i]).ImagePath);
                         Circle circle = mMap.addCircle(new CircleOptions()
                                 .center(new LatLng(((CurrentActivity) locations[i]).latitude, ((CurrentActivity) locations[i]).longitude))
@@ -487,7 +549,6 @@ public class MapsActivity extends FragmentActivity implements
                         if (i == 0) {
                             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(circle.getCenter(), 11));
                         }
-
                         mMap.setOnCircleClickListener(new GoogleMap.OnCircleClickListener() {
 
                             @Override
@@ -575,7 +636,7 @@ public class MapsActivity extends FragmentActivity implements
     }
 
     private void CreateActivity(EditText edit_description, EditText edit_title, final String token) {
-        final String deviceId = String.valueOf(Global.current_user.getId());
+        final String deviceId = Global.preference.getValue(this, PrefConst.ANDROIDID, "");
         String description = edit_description.getText().toString().trim();
         String title = edit_title.getText().toString().trim();
         if (title.isEmpty()) {
@@ -588,7 +649,7 @@ public class MapsActivity extends FragmentActivity implements
         gpsTracker.getLocation();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String currentDateandTime = sdf.format(new Date());
-        final ActivityModel activity = new ActivityModel(String.valueOf(Global.current_user.getId()), title, description, currentDateandTime, gpsTracker.latitude, gpsTracker.longitude);
+        final ActivityModel activity = new ActivityModel(deviceId, title, description, currentDateandTime, gpsTracker.latitude, gpsTracker.longitude);
 
         PostNewActivity(token, deviceId, activity);
     }
@@ -597,7 +658,6 @@ public class MapsActivity extends FragmentActivity implements
         ApiInterface apiService =
                 HttpClient.getClient().create(ApiInterface.class);
         Call<Void> call = apiService.postActivity("Bearer " + token, activity);
-        Log.e("PostActivity", "Post Activity called");
         call.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {

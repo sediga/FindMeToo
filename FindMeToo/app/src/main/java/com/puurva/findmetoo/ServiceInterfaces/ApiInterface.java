@@ -22,6 +22,8 @@ import java.util.*;
 public interface ApiInterface {
     @POST("JoinServer/Notifications/NewToken/{deviceid}")
     Call<Void> SendRegistrationToServer(@Path("deviceId") String deviceId, @Body() String tocken);
+    @POST("JoinServer/Device")
+    Call<Void> postDevice(@Body() DeviceModel device);
     @POST("JoinServer/api/Account/Register")
     Call<Void> registerExternal(@Body() RegisterBindingModel activity);
     @FormUrlEncoded
