@@ -6,7 +6,7 @@ public class CurrentActivity {
 
     public CurrentActivity(String deviceId, String activity, double latitude, double longitude, String description, String activityId){
         this.DeviceId = deviceId;
-        this.activity = activity;
+        this.Activity = activity;
         this.latitude = latitude;
         this.longitude = longitude;
         this.description = description;
@@ -15,8 +15,8 @@ public class CurrentActivity {
 
     @SerializedName("DeviceID")
     public String DeviceId;
-    @SerializedName("CurrentActivity")
-    public String activity;
+    @SerializedName("Activity")
+    public String Activity;
     @SerializedName("Lat")
     public double latitude;
     @SerializedName("Long")

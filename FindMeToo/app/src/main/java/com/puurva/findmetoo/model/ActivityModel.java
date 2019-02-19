@@ -62,4 +62,6 @@ public class ActivityModel {
     public void setLong(double aLong) {
         this.Long = aLong;
     }
+
 }
+

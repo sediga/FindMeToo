@@ -19,7 +19,6 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.StrictMode;
 import android.provider.MediaStore;
-import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
@@ -40,12 +39,8 @@ import android.widget.Toast;
 
 import com.arlib.floatingsearchview.FloatingSearchView;
 import com.arlib.floatingsearchview.suggestions.model.SearchSuggestion;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.iid.FirebaseInstanceId;
-import com.google.firebase.iid.InstanceIdResult;
-import com.google.firebase.messaging.FirebaseMessaging;
 import com.puurva.findmetoo.model.CurrentActivity;
+import com.puurva.findmetoo.model.NotificationTocken;
 import com.puurva.findmetoo.preference.PrefConst;
 import com.puurva.findmetoo.uitls.GPSTracker;
 import com.puurva.findmetoo.uitls.Global;
@@ -90,7 +85,7 @@ public class MapsActivity extends FragmentActivity implements
     private GoogleMap mMap;
     private HashMap<Integer, Marker> markers;
     private HashMap<Circle, Integer> circles;
-    private HashMap<Integer, String> activityIds;
+    private HashMap<Marker, String> activityIds;
     private FloatingSearchView mSearchView;
     private View mWindow;
     View view = null;
@@ -216,8 +211,33 @@ public class MapsActivity extends FragmentActivity implements
         {
             @Override
             protected void onClickConfirmed(View v, Marker marker) {
+                String activityId = activityIds.get(marker);
+                String token = getToken();
+                final String deviceId = Global.preference.getValue(MapsActivity.this, PrefConst.ANDROIDID, "");
+                ApiInterface apiService =
+                        HttpClient.getClient().create(ApiInterface.class);
+                try {
+                    NotificationRequestModel notificationRequestModel = new NotificationRequestModel(deviceId, NotificationTocken.NotificationType.AmIn, activityId);
+                    Call<Void> call = apiService.sendNotification("Bearer " + token, notificationRequestModel);
+
+                    call.enqueue(new Callback<Void>() {
+                        @Override
+                        public void onResponse(Call<Void> call, Response<Void> response) {
+                            if (response.isSuccessful()) {
+                                Toast.makeText(MapsActivity.this, "Your request has been submitted. We will let you know when accepted.", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<Void> call, Throwable t) {
+                            Log.d("onFailure", t.toString());
+                        }
+                    });
+                } catch (Exception ex)
+                {
+                    Log.e("postActivity", ex.getMessage());
+                }
                 // Here we can perform some action triggered after clicking the button
-                Toast.makeText(MapsActivity.this, marker.getTitle() + "'s button clicked!", Toast.LENGTH_SHORT).show();
             }
         };
         this.imIn.setOnTouchListener(infoButtonListener);
@@ -412,15 +432,20 @@ public class MapsActivity extends FragmentActivity implements
             snippetUi.setText("");
         }
 
+        String token = getToken();
+//        final Marker tempMarker = marker;
+        if(marker.getTag() != "downloaded" && marker.getTag() != "") {
+            GetActivityImage(marker, token);
+        }
+    }
+
+    private String getToken() {
         String username = Global.preference.getValue(this, PrefConst.USERNAME, "");
         String token = Global.preference.getValue(this, PrefConst.TOKEN, "");
         if (token == null || token == "") {
             token = getToken(username);
         }
-//        final Marker tempMarker = marker;
-        if(marker.getTag() != "downloaded" && marker.getTag() != "") {
-            GetActivityImage(marker, token);
-        }
+        return token;
     }
 
     private void GetActivityImage(final Marker marker, String token) {
@@ -506,15 +531,12 @@ public class MapsActivity extends FragmentActivity implements
         if (activityIds != null) {
             activityIds.clear();
         } else {
-            activityIds = new HashMap<Integer, String>();
+            activityIds = new HashMap<Marker, String>();
         }
 
         search_text = search_text.toLowerCase();
 
-        String token = Global.preference.getValue(this, PrefConst.TOKEN, "");
-        if (token == null || token == "") {
-            token = getToken(username);
-        }
+        String token = getToken();
 
         GetMatchingActivitiesByKeyword(search_text, token);
 
@@ -536,9 +558,9 @@ public class MapsActivity extends FragmentActivity implements
                                 .position(pos).icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("custom_info_bubble", 1, 1)))
                                 .visible(false)
                                 .snippet(((CurrentActivity) locations[i]).description)
-                                .title(((CurrentActivity) locations[i]).activity));
+                                .title(((CurrentActivity) locations[i]).Activity));
                         markers.put(i, marker);
-                        activityIds.put(i, ((CurrentActivity) locations[i]).ActivityId);
+                        activityIds.put(marker, ((CurrentActivity) locations[i]).ActivityId);
                         marker.setTag(((CurrentActivity) locations[i]).ImagePath);
                         Circle circle = mMap.addCircle(new CircleOptions()
                                 .center(new LatLng(((CurrentActivity) locations[i]).latitude, ((CurrentActivity) locations[i]).longitude))

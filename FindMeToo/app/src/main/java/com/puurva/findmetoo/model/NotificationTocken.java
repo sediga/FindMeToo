@@ -10,4 +10,10 @@ public class NotificationTocken {
     public String device_id;
     @SerializedName("token")
     public String token;
+
+    public enum NotificationType
+    {
+        None,
+        AmIn
+    }
 }

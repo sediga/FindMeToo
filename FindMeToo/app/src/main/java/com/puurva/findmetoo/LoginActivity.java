@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.os.Build;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -36,7 +37,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
+public class LoginActivity extends AppCompatActivity implements View.OnClickListener, ActivityCompat.OnRequestPermissionsResultCallback {
 
     private SQLiteManager dbHelper;
     private String androidId;
@@ -49,16 +50,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         findViewById(R.id.button_login).setOnClickListener(this);
         findViewById(R.id.button_register).setOnClickListener(this);
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                            Manifest.permission.READ_EXTERNAL_STORAGE},
-                    Global.PERMISSION_REQUEST_CODE);
+        if (confirmationPermission()) {
             // sqlite db_user setting
-        }
-
-        if(Global.mdb == null){
             dbHelper = new SQLiteManager(this);
             Global.mdb = dbHelper.openDataBase();
         }
@@ -90,7 +83,36 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         });
 
         if (!username.isEmpty() && !password.isEmpty()) {
+//            EditText edit_username = findViewById(R.id.edit_username);
+//            EditText edit_password = findViewById(R.id.edit_password);
+//            edit_username.setText(username);
+//            edit_password.setText(password);
             doLogin(username, password);
+        }
+    }
+
+    /**
+     *  confirm permission
+     */
+    private boolean confirmationPermission() {
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                            Manifest.permission.READ_EXTERNAL_STORAGE,
+                            Manifest.permission.CAMERA,
+                            Manifest.permission.INTERNET,
+                            Manifest.permission.ACCESS_COARSE_LOCATION,
+                            Manifest.permission.ACCESS_FINE_LOCATION},
+                    Global.PERMISSION_REQUEST_CODE);
+            return false;
+        } else {
+            return true;
         }
     }
 

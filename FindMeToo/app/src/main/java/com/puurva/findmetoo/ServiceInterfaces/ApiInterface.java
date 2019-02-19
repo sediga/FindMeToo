@@ -20,8 +20,8 @@ import retrofit2.http.Path;
 import java.util.*;
 
 public interface ApiInterface {
-    @POST("JoinServer/Notifications/NewToken/{deviceid}")
-    Call<Void> SendRegistrationToServer(@Path("deviceId") String deviceId, @Body() String tocken);
+    @POST("JoinServer/Notification")
+    Call<Void> sendNotification(@Header("Authorization") String authorization, @Body NotificationRequestModel notificationRequestModel);
     @POST("JoinServer/Device")
     Call<Void> postDevice(@Body() DeviceModel device);
     @POST("JoinServer/api/Account/Register")
