@@ -10,4 +10,5 @@ public class PrefConst {
     public static final String PASSWORD = "password";
     public static final String TOKEN = "token";
     public static final String ANDROIDID = "androidid";
+    public static final String HASREQUIREDPERMISSIONS = "hasrequiredpermissions";
 }

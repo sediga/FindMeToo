@@ -50,10 +50,12 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         findViewById(R.id.button_login).setOnClickListener(this);
         findViewById(R.id.button_register).setOnClickListener(this);
 
-        if (confirmationPermission()) {
-            // sqlite db_user setting
-            dbHelper = new SQLiteManager(this);
-            Global.mdb = dbHelper.openDataBase();
+        if(!Global.preference.getValue(this, PrefConst.HASREQUIREDPERMISSIONS, false)) {
+            if (confirmationPermission()) {
+                // sqlite db_user setting
+                dbHelper = new SQLiteManager(this);
+                Global.mdb = dbHelper.openDataBase();
+            }
         }
 
         Global.preference = Preference.getInstance();
@@ -70,6 +72,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             @Override
             public void onSuccess(InstanceIdResult instanceIdResult) {
                 if(!Global.has_device_registered) {
+                    while(Global.mdb == null);
                     String newToken = instanceIdResult.getToken();
                     String softwareVersion = Build.VERSION.RELEASE;
                     DeviceModel latestStoredDevice = SQLHelper.GetLatestDevice();
@@ -123,10 +126,11 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 // check permission result
                 if (grantResult != PackageManager.PERMISSION_GRANTED) {
                     Toast.makeText(this, "Permission error", Toast.LENGTH_SHORT).show();
+                    finish();
                     return;
                 }
             }
-
+            Global.preference.put(this, PrefConst.HASREQUIREDPERMISSIONS, true);
             // sqlite db_user setting
             dbHelper = new SQLiteManager(this);
             Global.mdb = dbHelper.openDataBase();
