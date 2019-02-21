@@ -37,7 +37,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class LoginActivity extends AppCompatActivity implements View.OnClickListener, ActivityCompat.OnRequestPermissionsResultCallback {
+public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
 
     private SQLiteManager dbHelper;
     private String androidId;
@@ -50,22 +50,21 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         findViewById(R.id.button_login).setOnClickListener(this);
         findViewById(R.id.button_register).setOnClickListener(this);
 
-        if(!Global.preference.getValue(this, PrefConst.HASREQUIREDPERMISSIONS, false)) {
-            if (confirmationPermission()) {
-                // sqlite db_user setting
-                dbHelper = new SQLiteManager(this);
-                Global.mdb = dbHelper.openDataBase();
-            }
+        if (confirmationPermission()) {
+            // sqlite db_user setting
+            dbHelper = new SQLiteManager(this);
+            Global.mdb = dbHelper.openDataBase();
         }
 
         Global.preference = Preference.getInstance();
         String username = Global.preference.getValue(this, PrefConst.USERNAME, "");
         String password = Global.preference.getValue(this, PrefConst.PASSWORD, "");
 
-        androidId = Global.preference.getValue(this, PrefConst.ANDROIDID, "");
-        if (androidId == "") {
+        androidId = Global.AndroidID;
+        if (androidId == null) {
             androidId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
-            Global.preference.put(this, PrefConst.ANDROIDID, androidId);
+
+            Global.AndroidID = androidId;
         }
 
         FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, new OnSuccessListener<InstanceIdResult>() {
@@ -80,16 +79,17 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                         DeviceModel deviceModel = new DeviceModel(androidId, "", softwareVersion, newToken);
                         CommonUtility.RegisterDevice(deviceModel);
                         SQLHelper.AddDevice(deviceModel);
+                        Global.has_device_registered = true;
                     }
                 }
             }
         });
 
         if (!username.isEmpty() && !password.isEmpty()) {
-//            EditText edit_username = findViewById(R.id.edit_username);
-//            EditText edit_password = findViewById(R.id.edit_password);
-//            edit_username.setText(username);
-//            edit_password.setText(password);
+            EditText edit_username = findViewById(R.id.edit_username);
+            EditText edit_password = findViewById(R.id.edit_password);
+            edit_username.setText(username);
+            edit_password.setText(password);
             doLogin(username, password);
         }
     }
@@ -106,10 +106,11 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
             ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    new String[]{
+                            Manifest.permission.INTERNET,
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE,
                             Manifest.permission.READ_EXTERNAL_STORAGE,
                             Manifest.permission.CAMERA,
-                            Manifest.permission.INTERNET,
                             Manifest.permission.ACCESS_COARSE_LOCATION,
                             Manifest.permission.ACCESS_FINE_LOCATION},
                     Global.PERMISSION_REQUEST_CODE);
@@ -130,7 +131,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     return;
                 }
             }
-            Global.preference.put(this, PrefConst.HASREQUIREDPERMISSIONS, true);
             // sqlite db_user setting
             dbHelper = new SQLiteManager(this);
             Global.mdb = dbHelper.openDataBase();

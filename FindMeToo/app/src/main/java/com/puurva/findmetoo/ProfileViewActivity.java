@@ -37,12 +37,17 @@ public class ProfileViewActivity extends AppCompatActivity {
         //implements View.OnClickListener {
 
     private String imageFilePath;
+    private String deviceID;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_profile);
 
-        fillProfile();
+        deviceID = getIntent().getStringExtra("DeviceID");
+        if(deviceID != null) {
+            fillProfile();
+        }
     }
 
     private  void photoClicked()
@@ -66,14 +71,13 @@ public class ProfileViewActivity extends AppCompatActivity {
 
     private void fillProfile()
     {
-        String deviceId = String.valueOf(Global.current_user.getId());
         final String token = Global.preference.getValue(this, PrefConst.TOKEN, "");
         final TextView txtProfileName = ((TextView) findViewById(R.id.txt_view_name));
         final TextView txtHobies = ((TextView) findViewById(R.id.txt_view_hobies));
         final TextView txtAbout = ((TextView) findViewById(R.id.txt_view_about));
         ApiInterface apiService =
                 HttpClient.getClient().create(ApiInterface.class);
-        Call<ProfileModel> call = apiService.getProfile("Bearer " + token, deviceId);
+        Call<ProfileModel> call = apiService.getProfile("Bearer " + token, deviceID);
         call.enqueue(new Callback<ProfileModel>() {
             @Override
             public void onResponse(Call<ProfileModel> call, Response<ProfileModel> response) {

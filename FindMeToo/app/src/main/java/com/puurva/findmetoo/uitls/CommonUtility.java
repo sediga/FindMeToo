@@ -10,6 +10,7 @@ import android.graphics.Rect;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
+import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.Toast;
@@ -17,6 +18,7 @@ import android.widget.Toast;
 import com.puurva.findmetoo.LoginActivity;
 import com.puurva.findmetoo.ServiceInterfaces.ApiInterface;
 import com.puurva.findmetoo.ServiceInterfaces.DeviceModel;
+import com.puurva.findmetoo.preference.PrefConst;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -49,6 +51,19 @@ public class CommonUtility {
                 Log.e("login", "Login Failed : " + t.getMessage());
             }
         }));
+    }
+
+    public  static String GetDeviceId()
+    {
+        String deviceId = Global.AndroidID;
+        if(deviceId == null)
+        {
+            DeviceModel latestStoredDevice = SQLHelper.GetLatestDevice();
+            if(latestStoredDevice != null) {
+                deviceId = latestStoredDevice.DeviceID;
+            }
+        }
+        return deviceId;
     }
 }
 

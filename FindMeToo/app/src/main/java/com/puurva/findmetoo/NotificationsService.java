@@ -19,14 +19,19 @@ import android.widget.Toast;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import com.google.gson.JsonObject;
 import com.puurva.findmetoo.ServiceInterfaces.ApiInterface;
 import com.puurva.findmetoo.ServiceInterfaces.DeviceModel;
+import com.puurva.findmetoo.model.CurrentActivity;
 import com.puurva.findmetoo.model.Token;
 import com.puurva.findmetoo.preference.PrefConst;
 import com.puurva.findmetoo.uitls.CommonUtility;
 import com.puurva.findmetoo.uitls.Global;
 import com.puurva.findmetoo.uitls.HttpClient;
 import com.puurva.findmetoo.uitls.SQLHelper;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -60,7 +65,7 @@ public class NotificationsService extends FirebaseMessagingService {
         // sends notification
         // messages. For more see: https://firebase.google.com/docs/cloud-messaging/concept-options
         // [END_EXCLUDE]
-
+        CurrentActivity activity = null;
         // TODO(developer): Handle FCM messages here.
         // Not getting messages here? See why this may be: https://goo.gl/39bRNJ
         Log.d(TAG, "From: " + remoteMessage.getFrom());
@@ -69,20 +74,31 @@ public class NotificationsService extends FirebaseMessagingService {
         if (remoteMessage.getData().size() > 0) {
             Log.d(TAG, "Message data payload: " + remoteMessage.getData());
 
-            if (/* Check if data needs to be processed by long running job */ true) {
-                // For long-running tasks (10 seconds or more) use Firebase Job Dispatcher.
-//                scheduleJob();
-            } else {
-                // Handle message within 10 seconds
-                handleNow();
+            try {
+                JSONObject jObject = new JSONObject(remoteMessage.getData()) ;
+                activity = new CurrentActivity(jObject.getString("DeviceID"),
+                        jObject.getString("What"),
+                        jObject.getDouble("Lat"),
+                        jObject.getDouble("Long"),
+                        jObject.getString("description"), null);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
+
+//            if (/* Check if data needs to be processed by long running job */ true) {
+//                // For long-running tasks (10 seconds or more) use Firebase Job Dispatcher.
+////                scheduleJob();
+//            } else {
+//                // Handle message within 10 seconds
+//                handleNow();
+//            }
 
         }
 
         // Check if message contains a notification payload.
         if (remoteMessage.getNotification() != null) {
             Log.d(TAG, "Message Notification Body: " + remoteMessage.getNotification().getBody());
-            sendNotification(remoteMessage.getNotification().getBody());
+            sendNotification(remoteMessage.getNotification().getBody(), activity.DeviceId);
 //            Toast.makeText(this, remoteMessage.getNotification().getBody(), Toast.LENGTH_SHORT).show();
         }
 
@@ -108,7 +124,6 @@ public class NotificationsService extends FirebaseMessagingService {
         // Instance ID token to your app server.
         if(!Global.has_device_registered) {
             sendRegistrationToServer(token);
-            Global.has_device_registered = true;
         }
     }
     // [END on_new_token]
@@ -143,14 +158,15 @@ public class NotificationsService extends FirebaseMessagingService {
      * @param token The new token.
      */
     private void sendRegistrationToServer(String token) {
-        String androidId = Global.preference.getValue(this, PrefConst.ANDROIDID, "");
+        String androidId = CommonUtility.GetDeviceId();
         if (androidId == "") {
-            Global.preference.put(this, PrefConst.ANDROIDID, Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID));
+            Global.AndroidID = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
         }
 
         DeviceModel deviceModel = new DeviceModel(androidId, "", android.os.Build.VERSION.RELEASE, token);
         CommonUtility.RegisterDevice(deviceModel);
         SQLHelper.AddDevice(deviceModel);
+        Global.has_device_registered = true;
     }
 
 
@@ -159,9 +175,10 @@ public class NotificationsService extends FirebaseMessagingService {
      *
      * @param messageBody FCM message body received.
      */
-    private void sendNotification(String messageBody) {
-        Intent intent = new Intent(getApplicationContext(), MapsActivity.class);
+    private void sendNotification(String messageBody, String deviceID) {
+        Intent intent = new Intent(getApplicationContext(), ProfileViewActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.putExtra("DeviceID", deviceID);
         PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0 /* Request code */, intent,
                 PendingIntent.FLAG_ONE_SHOT);
 

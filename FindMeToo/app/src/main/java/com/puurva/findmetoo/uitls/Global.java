@@ -11,6 +11,7 @@ import com.puurva.findmetoo.preference.Preference;
 
 public class Global {
 
+    public static String AndroidID = null;
     public static UserModel current_user;
     public static SQLiteDatabase mdb;
     public static Preference preference;

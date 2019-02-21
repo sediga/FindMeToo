@@ -85,7 +85,7 @@ public class MapsActivity extends FragmentActivity implements
     private GoogleMap mMap;
     private HashMap<Integer, Marker> markers;
     private HashMap<Circle, Integer> circles;
-    private HashMap<Marker, String> activityIds;
+    private HashMap<Marker, CurrentActivity> activities;
     private FloatingSearchView mSearchView;
     private View mWindow;
     View view = null;
@@ -211,7 +211,8 @@ public class MapsActivity extends FragmentActivity implements
         {
             @Override
             protected void onClickConfirmed(View v, Marker marker) {
-                String activityId = activityIds.get(marker);
+                CurrentActivity activity = activities.get(marker);
+                String activityId = activity.ActivityId;
                 String token = getToken();
                 final String deviceId = Global.preference.getValue(MapsActivity.this, PrefConst.ANDROIDID, "");
                 ApiInterface apiService =
@@ -255,15 +256,16 @@ public class MapsActivity extends FragmentActivity implements
         };
         this.infoImage.setOnTouchListener(infoImageButtonListener);
 
-        this.viewProfileClickistener = new OnInfoWindowElemTouchListener(this.viewProfile, null, null)
-//                getResources().getDrawable(R.drawable.badge_sa), //btn_default_normal_holo_light
-//                getResources().getDrawable(R.drawable.badge_sa)) //btn_default_pressed_holo_light
+        this.viewProfileClickistener = new OnInfoWindowElemTouchListener(this.viewProfile,
+//                null, null)
+                getResources().getDrawable(R.drawable.badge_sa), //btn_default_normal_holo_light
+                getResources().getDrawable(R.drawable.badge_sa)) //btn_default_pressed_holo_light
         {
             @Override
             protected void onClickConfirmed(View v, Marker marker) {
                 // Here we can perform some action triggered after clicking the button
 //                Toast.makeText(MapsActivity.this, marker.getTitle() + "'s image button clicked!", Toast.LENGTH_SHORT).show();
-                LaunchViewProfile(v);
+                LaunchViewProfile(v, activities.get(marker).DeviceId);
             }
         };
         this.viewProfile.setOnTouchListener(viewProfileClickistener);
@@ -286,6 +288,7 @@ public class MapsActivity extends FragmentActivity implements
                 }
                 infoButtonListener.setMarker(marker);
                 infoImageButtonListener.setMarker(marker);
+                viewProfileClickistener.setMarker(marker);
                 mapWrapperLayout.setMarkerWithInfoWindow(marker, mWindow);
                 if (image.getTag(R.id.info_badge) == "loaded") {
                     image.setTag(R.id.info_badge, "DontReload");
@@ -304,7 +307,9 @@ public class MapsActivity extends FragmentActivity implements
         } else if (id == R.id.action_add) {
             addKeyword();
         } else if (id == R.id.menu_profile) {
-            startActivity(new Intent(this, ProfileActivity.class));
+            Intent profileIntent = new Intent(this, ProfileActivity.class);
+            profileIntent.putExtra("DeviceID", CommonUtility.GetDeviceId());
+            startActivity(profileIntent);
         }
 
     }
@@ -399,8 +404,10 @@ public class MapsActivity extends FragmentActivity implements
         return token;
     }
 
-    private void LaunchViewProfile(View v) {
-        startActivity(new Intent(this, ProfileViewActivity.class));
+    private void LaunchViewProfile(View v, String deviceID) {
+        Intent profileIntent = new Intent(this, ProfileViewActivity.class);
+        profileIntent.putExtra("DeviceID", deviceID);
+        startActivity(profileIntent);
     }
 
     private void LaunchImageViewer(View v) {
@@ -528,10 +535,10 @@ public class MapsActivity extends FragmentActivity implements
             circles = new HashMap<Circle, Integer>();
         }
 
-        if (activityIds != null) {
-            activityIds.clear();
+        if (activities != null) {
+            activities.clear();
         } else {
-            activityIds = new HashMap<Marker, String>();
+            activities = new HashMap<Marker, CurrentActivity>();
         }
 
         search_text = search_text.toLowerCase();
@@ -560,7 +567,8 @@ public class MapsActivity extends FragmentActivity implements
                                 .snippet(((CurrentActivity) locations[i]).description)
                                 .title(((CurrentActivity) locations[i]).Activity));
                         markers.put(i, marker);
-                        activityIds.put(marker, ((CurrentActivity) locations[i]).ActivityId);
+
+                        activities.put(marker, ((CurrentActivity) locations[i]));
                         marker.setTag(((CurrentActivity) locations[i]).ImagePath);
                         Circle circle = mMap.addCircle(new CircleOptions()
                                 .center(new LatLng(((CurrentActivity) locations[i]).latitude, ((CurrentActivity) locations[i]).longitude))

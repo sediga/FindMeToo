@@ -25,6 +25,7 @@ import com.puurva.findmetoo.model.CurrentActivity;
 import com.puurva.findmetoo.model.ProfileModel;
 import com.puurva.findmetoo.model.Token;
 import com.puurva.findmetoo.preference.PrefConst;
+import com.puurva.findmetoo.uitls.CommonUtility;
 import com.puurva.findmetoo.uitls.GPSTracker;
 import com.puurva.findmetoo.uitls.Global;
 import com.puurva.findmetoo.uitls.HttpClient;
@@ -51,6 +52,7 @@ import retrofit2.Response;
 public class ProfileActivity extends AppCompatActivity implements View.OnClickListener {
 
     private String imageFilePath;
+    private String deviceID;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,8 +61,10 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         findViewById(R.id.btn_save).setOnClickListener(this);
         findViewById(R.id.btn_cancel).setOnClickListener(this);
         findViewById(R.id.imgPhoto).setOnClickListener(this);
-
-        fillProfile();
+        deviceID = getIntent().getStringExtra("DeviceID");
+        if(deviceID != null) {
+            fillProfile();
+        }
     }
 
     @Override
@@ -135,14 +139,13 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
 
     private void fillProfile()
     {
-        String deviceId = String.valueOf(Global.current_user.getId());
         final String token = Global.preference.getValue(this, PrefConst.TOKEN, "");
         final EditText txtProfileName = ((EditText) findViewById(R.id.txt_name));
         final EditText txtHobies = ((EditText) findViewById(R.id.txt_hobies));
         final EditText txtAbout = ((EditText) findViewById(R.id.txt_about));
         ApiInterface apiService =
                 HttpClient.getClient().create(ApiInterface.class);
-        Call<ProfileModel> call = apiService.getProfile("Bearer " + token, deviceId);
+        Call<ProfileModel> call = apiService.getProfile("Bearer " + token, deviceID);
         call.enqueue(new Callback<ProfileModel>() {
             @Override
             public void onResponse(Call<ProfileModel> call, Response<ProfileModel> response) {
@@ -164,19 +167,18 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
     }
 
     private void addProfile() {
-        final String deviceId = String.valueOf(Global.current_user.getId());
         String profilName = ((EditText) findViewById(R.id.txt_name)).getText().toString();
         String hobies = ((EditText) findViewById(R.id.txt_hobies)).getText().toString();
         String about = ((EditText) findViewById(R.id.txt_about)).getText().toString();
         final String token = Global.preference.getValue(this, PrefConst.TOKEN, "");
 
-        ProfileModel profileModel = new ProfileModel(String.valueOf(Global.current_user.getId()), Global.preference.getValue(this,
+        ProfileModel profileModel = new ProfileModel(deviceID, Global.preference.getValue(this,
                 PrefConst.USERNAME, ""),
                 null, profilName, hobies, about);
 
         ApiInterface apiService =
                 HttpClient.getClient().create(ApiInterface.class);
-        Call<Void> call = apiService.putProfile("Bearer " + token, deviceId, profileModel);
+        Call<Void> call = apiService.putProfile("Bearer " + token, deviceID, profileModel);
         call.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
