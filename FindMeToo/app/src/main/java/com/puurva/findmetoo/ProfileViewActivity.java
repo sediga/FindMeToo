@@ -11,16 +11,20 @@ import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.puurva.findmetoo.Enums.NotificationType;
 import com.puurva.findmetoo.ServiceInterfaces.ApiInterface;
 import com.puurva.findmetoo.model.ProfileModel;
 import com.puurva.findmetoo.preference.PrefConst;
 import com.puurva.findmetoo.uitls.Global;
 import com.puurva.findmetoo.uitls.HttpClient;
+import com.puurva.findmetoo.uitls.ImageUtility;
 
 import org.w3c.dom.Text;
 
@@ -29,11 +33,12 @@ import java.io.File;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class ProfileViewActivity extends AppCompatActivity {
+public class ProfileViewActivity extends AppCompatActivity implements View.OnClickListener {
         //implements View.OnClickListener {
 
     private String imageFilePath;
@@ -45,9 +50,38 @@ public class ProfileViewActivity extends AppCompatActivity {
         setContentView(R.layout.activity_view_profile);
 
         deviceID = getIntent().getStringExtra("DeviceID");
+        NotificationType notificationType = (NotificationType) getIntent().getSerializableExtra("source");
+        if(notificationType == NotificationType.AMIN) {
+            Button acceptButton = this.findViewById(R.id.btn_profile_accept);
+            Button rejectButton = this.findViewById(R.id.btn_profile_reject);
+            acceptButton.setVisibility(View.VISIBLE);
+            rejectButton.setVisibility(View.VISIBLE);
+        }
         if(deviceID != null) {
             fillProfile();
         }
+    }
+
+    @Override
+    public void onClick(View v) {
+
+        int id = v.getId();
+
+        switch (id) {
+            case R.id.btn_profile_reject:
+                finish();
+                break;
+            case R.id.btn_profile_accept:
+                acceptRequest();
+                break;
+//            case R.id.imgPhoto:
+//                photoClicked();
+//                break;
+        }
+
+    }
+
+    private void acceptRequest() {
     }
 
     private  void photoClicked()
@@ -87,6 +121,7 @@ public class ProfileViewActivity extends AppCompatActivity {
                         txtProfileName.setText(profileModel.getProfileName());
                         txtHobies.setText(profileModel.getHobies());
                         txtAbout.setText(profileModel.getAbout());
+                        downloadProfileImage(token, deviceID);
                     }
                 }
             }
@@ -96,4 +131,61 @@ public class ProfileViewActivity extends AppCompatActivity {
             }
         });
     }
+
+    private void downloadProfileImage(String token, String deviceID) {
+        ApiInterface apiService =
+                HttpClient.getClient().create(ApiInterface.class);
+        Call<ResponseBody> call = apiService.getProfileImage("Bearer " + token, deviceID);
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+
+                try {
+                    if(response.isSuccessful()) {
+                        Log.d("onResponse", "Response came from server");
+
+                        boolean FileDownloaded = false;
+                        if (response.body() != null) {
+                            FileDownloaded = DownloadImage(response.body());
+                        }
+                        Log.d("onResponse", "Image is downloaded and saved ? " + FileDownloaded);
+                    }
+
+                } catch (Exception e) {
+                    Log.d("onResponse", "There is an error");
+                    e.printStackTrace();
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Log.d("onFailure", t.toString());
+            }
+        });
+    }
+
+    private boolean DownloadImage(ResponseBody body) {
+
+        try {
+            Log.d("DownloadImage", "Reading and writing file");
+            if (body != null) {
+                // display the image data in a ImageView or save it
+                Bitmap bmp = BitmapFactory.decodeStream(body.byteStream());
+
+                int width, height;
+                ImageView image1 = ((ImageView) findViewById(R.id.imgViewPhoto));
+                bmp = ImageUtility.scaleImageToResolution(this, bmp, bmp.getHeight(), bmp.getWidth());
+                image1.setMaxWidth(bmp.getWidth());
+                image1.setMaxHeight(bmp.getHeight());
+                image1.setImageBitmap(bmp);
+            }
+            return true;
+
+        } catch (Exception e) {
+            Log.d("DownloadImage", e.toString());
+            return false;
+        }
+    }
+
 }

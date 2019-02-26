@@ -33,6 +33,8 @@ public interface ApiInterface {
     Call<List<CurrentActivity>> getMatchingActivities(@Header("Authorization") String authorization, @Path("activity") String activity);
     @GET("JoinServer/Images/{deviceId}/{fileName}")
     Call<ResponseBody> getMatchingImages(@Header("Authorization") String authorization, @Path("deviceId") String deviceId, @Path("fileName") String fileName);
+    @GET("JoinServer/ProfileImage/{deviceId}")
+    Call<ResponseBody> getProfileImage(@Header("Authorization") String authorization, @Path("deviceId") String deviceId);
     @POST("JoinServer/Location")
     Call<Void> postCurrentLocation(@Header("Authorization") String authorization, @Body CurrentActivity location);
     @POST("JoinServer/Activity")
@@ -40,8 +42,8 @@ public interface ApiInterface {
     @POST("JoinServer/Profile")
     Call<Void> postProfile(@Header("Authorization") String authorization, @Body ProfileModel profile);
     @Multipart
-    @POST("JoinServer/Profile/{deviceId}")
-    Call<Void> postImage(@Header("Authorization") String authorization, @Path("deviceId") String deviceId, @Part MultipartBody.Part image);
+    @POST("JoinServer/ProfileImage/{deviceId}")
+    Call<Void> postProfileImage(@Header("Authorization") String authorization, @Path("deviceId") String deviceId, @Part MultipartBody.Part image);
     @Multipart
     @POST("JoinServer/images/{deviceId}/{activity}")
     Call<Void> postActivityImage(@Header("Authorization") String authorization, @Path("deviceId") String deviceId, @Path("activity") String activity, @Part MultipartBody.Part image);

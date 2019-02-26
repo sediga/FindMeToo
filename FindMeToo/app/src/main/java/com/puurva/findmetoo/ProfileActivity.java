@@ -1,58 +1,49 @@
 package com.puurva.findmetoo;
 
 import android.app.Activity;
-import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.puurva.findmetoo.ServiceInterfaces.ApiInterface;
-import com.puurva.findmetoo.ServiceInterfaces.RegisterBindingModel;
-import com.puurva.findmetoo.ServiceInterfaces.TokenBindingModel;
-import com.puurva.findmetoo.model.CurrentActivity;
 import com.puurva.findmetoo.model.ProfileModel;
-import com.puurva.findmetoo.model.Token;
 import com.puurva.findmetoo.preference.PrefConst;
-import com.puurva.findmetoo.uitls.CommonUtility;
-import com.puurva.findmetoo.uitls.GPSTracker;
 import com.puurva.findmetoo.uitls.Global;
 import com.puurva.findmetoo.uitls.HttpClient;
-import com.puurva.findmetoo.uitls.SQLHelper;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.Circle;
-import com.google.android.gms.maps.model.CircleOptions;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
+import com.puurva.findmetoo.uitls.ImageUtility;
 
 import java.io.File;
-import java.util.List;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class ProfileActivity extends AppCompatActivity implements View.OnClickListener {
 
+    public static final int CAMERA_ACTIVITY = 1;
+    public static final int GALLERY_ACTIVITY = 0;
     private String imageFilePath;
     private String deviceID;
+    private Bitmap bitmap = null;
+    private final String infoWindowImagePath = Environment.getExternalStorageDirectory().getAbsolutePath() + Global.FILE_PATH_SUFFIX;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -90,41 +81,84 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
     {
         Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
         photoPickerIntent.setType("image/*");
-        startActivityForResult(photoPickerIntent, 1);
+        startActivityForResult(photoPickerIntent, GALLERY_ACTIVITY);
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.e("Test", "OnActivityResult Called");
-//        Toast.makeText(ProfileActivity.this, "onActivityResult called", Toast.LENGTH_SHORT);
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 1)
-            if (resultCode == Activity.RESULT_OK) {
-                Uri selectedImage = data.getData();
-
-                this.imageFilePath = getPath(selectedImage);
-                Log.e("FilePath", this.imageFilePath);
-                String file_extn = this.imageFilePath.substring(this.imageFilePath.lastIndexOf(".") + 1);
-//                image_name_tv.setText(imageFilePath);
-
-//                try {
-                if (file_extn.equals("img") || file_extn.equals("jpg") || file_extn.equals("jpeg") || file_extn.equals("gif") || file_extn.equals("png")) {
-                    Toast.makeText(ProfileActivity.this,"filename: " + this.imageFilePath, Toast.LENGTH_SHORT);
-                    //FINE
-                    BitmapFactory.Options options = new BitmapFactory.Options();
-                    options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-                    Bitmap bitmap = BitmapFactory.decodeFile(this.imageFilePath, options);
-                    ((ImageView) findViewById(R.id.imgPhoto)).setImageBitmap(bitmap);
-                } else {
-                    Log.e("ImageError", "Unknown photo file format");
-                    //NOT IN REQUIRED FORMAT
+        try {
+            String filePath = GetImageFileFullPath();
+            File file = new File(filePath);
+            DisplayMetrics displayMetrics = new DisplayMetrics();
+            getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+            int height = displayMetrics.heightPixels;
+            int width = displayMetrics.widthPixels;
+            switch (requestCode) {
+                case CAMERA_ACTIVITY: {
+                    if (resultCode == Activity.RESULT_OK) {
+                        BitmapFactory.Options options = new BitmapFactory.Options();
+                        options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+                        float angle = ImageUtility.getExifAngle(this, filePath);
+                        bitmap = ImageUtility.rotateImage(filePath, angle);
+                        bitmap = ImageUtility.scaleImageToResolution(this, this.bitmap, 300, 200, file);
+                    }
                 }
-//                } catch (FileNotFoundException e) {
-//                    // TODO Auto-generated catch block
-//                    e.printStackTrace();
-//                }
+                break;
+                case GALLERY_ACTIVITY: {
+                    if (resultCode == RESULT_OK) {
+                        Uri imageUri = data.getData();
+                        bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
+
+                        bitmap = ImageUtility.scaleImageToResolution(this, this.bitmap, 300, 300, file);
+                    }
+                }
+                break;
             }
+
+            ImageView image = ((ImageView) findViewById(R.id.imgPhoto));
+
+            if (image != null && bitmap != null) {
+//                bitmap = ImageUtility.scaleImageToResolution(this, this.bitmap, image.getWidth(), image.getWidth());
+                image.setImageBitmap(bitmap);
+            }
+
+        }catch (Exception ex){
+            Log.e("imageselector", ex.getMessage());
+        }
     }
+
+//    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+//        Log.e("Test", "OnActivityResult Called");
+////        Toast.makeText(ProfileActivity.this, "onActivityResult called", Toast.LENGTH_SHORT);
+//        super.onActivityResult(requestCode, resultCode, data);
+//        if (requestCode == 1)
+//            if (resultCode == Activity.RESULT_OK) {
+//                Uri selectedImage = data.getData();
+//
+//                this.imageFilePath = getPath(selectedImage);
+//                Log.e("FilePath", this.imageFilePath);
+//                String file_extn = this.imageFilePath.substring(this.imageFilePath.lastIndexOf(".") + 1);
+////                image_name_tv.setText(imageFilePath);
+//
+////                try {
+//                if (file_extn.equals("img") || file_extn.equals("jpg") || file_extn.equals("jpeg") || file_extn.equals("gif") || file_extn.equals("png")) {
+//                    Toast.makeText(ProfileActivity.this,"filename: " + this.imageFilePath, Toast.LENGTH_SHORT);
+//                    //FINE
+//                    BitmapFactory.Options options = new BitmapFactory.Options();
+//                    options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+//                    Bitmap bitmap = BitmapFactory.decodeFile(this.imageFilePath, options);
+//                    ((ImageView) findViewById(R.id.imgPhoto)).setImageBitmap(bitmap);
+//                } else {
+//                    Log.e("ImageError", "Unknown photo file format");
+//                    //NOT IN REQUIRED FORMAT
+//                }
+////                } catch (FileNotFoundException e) {
+////                    // TODO Auto-generated catch block
+////                    e.printStackTrace();
+////                }
+//            }
+//    }
 
     public String getPath(Uri uri) {
         String[] projection = {MediaStore.MediaColumns.DATA};
@@ -155,6 +189,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
                         txtProfileName.setText(profileModel.getProfileName());
                         txtHobies.setText(profileModel.getHobies());
                         txtAbout.setText(profileModel.getAbout());
+                        downloadProfileImage(token, deviceID);
                     }
                 }
             }
@@ -164,6 +199,61 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
             }
         });
 
+    }
+
+    private void downloadProfileImage(String token, String deviceID) {
+        ApiInterface apiService =
+                HttpClient.getClient().create(ApiInterface.class);
+        Call<ResponseBody> call = apiService.getProfileImage("Bearer " + token, deviceID);
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+
+                try {
+
+                    Log.d("onResponse", "Response came from server");
+
+                    boolean FileDownloaded = false;
+                    if (response.body() != null) {
+                        FileDownloaded = DownloadImage(response.body());
+                    }
+                    Log.d("onResponse", "Image is downloaded and saved ? " + FileDownloaded);
+
+                } catch (Exception e) {
+                    Log.d("onResponse", "There is an error");
+                    e.printStackTrace();
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Log.d("onFailure", t.toString());
+            }
+        });
+    }
+
+    private boolean DownloadImage(ResponseBody body) {
+
+        try {
+            Log.d("DownloadImage", "Reading and writing file");
+            if (body != null) {
+                // display the image data in a ImageView or save it
+                Bitmap bmp = BitmapFactory.decodeStream(body.byteStream());
+
+                int width, height;
+                ImageView image1 = ((ImageView) findViewById(R.id.imgPhoto));
+                bmp = ImageUtility.scaleImageToResolution(this, bmp, bmp.getHeight(), bmp.getWidth());
+                image1.setMaxWidth(bmp.getWidth());
+                image1.setMaxHeight(bmp.getHeight());
+                image1.setImageBitmap(bmp);
+            }
+            return true;
+
+        } catch (Exception e) {
+            Log.d("DownloadImage", e.toString());
+            return false;
+        }
     }
 
     private void addProfile() {
@@ -183,7 +273,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if(response.isSuccessful()) {
-//                    uploadImage(deviceId, token);
+                    uploadImage(deviceID, token);
                     finish();
                 }
             }
@@ -194,23 +284,50 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         });
     }
     private void uploadImage(String deviceId, String token) {
-        File file = new File(this.imageFilePath);
-        RequestBody reqFile = RequestBody.create(MediaType.parse("image/*"), file);
-        MultipartBody.Part body = MultipartBody.Part.createFormData("upload", file.getName(), reqFile);
-        RequestBody name = RequestBody.create(MediaType.parse("text/plain"), "upload_test");
-        ApiInterface apiService =
-                HttpClient.getClient().create(ApiInterface.class);
-        Call<Void> call = apiService.postImage("Bearer " + token, deviceId, body);
-        call.enqueue(new Callback<Void>() {
-            @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
-                if(response.isSuccessful()) {
-                }
+        String tempFileName = GetImageFileFullPath();
+        if (this.bitmap != null) {
+            FileOutputStream out = null;
+            try {
+                out = new FileOutputStream(tempFileName);
+                this.bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out); // bmp is your Bitmap instance
+                // PNG is a lossless format, the compression factor (100) is ignored
+                File file = new File(tempFileName);
+//            RequestBody reqFile = RequestBody.create(MediaType.parse("image/*"), file);
+                RequestBody requestBody = RequestBody.create(MediaType.parse("multipart/form-data"), file);
+
+                MultipartBody.Part body = MultipartBody.Part.createFormData("upload", file.getName(), requestBody);
+
+                RequestBody name = RequestBody.create(MediaType.parse("text/plain"), "upload_test");
+                ApiInterface apiService =
+                        HttpClient.getClient().create(ApiInterface.class);
+                Call<Void> call = apiService.postProfileImage("Bearer " + token, deviceId, body);
+                call.enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(Call<Void> call, Response<Void> response) {
+                        if (response.isSuccessful()) {
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<Void> call, Throwable t) {
+                    }
+                });
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
             }
 
-            @Override
-            public void onFailure(Call<Void> call, Throwable t) {
+        }
+    }
+
+    private String GetImageFileFullPath() {
+        try {
+            File fileDir = new File(infoWindowImagePath);
+            if (!fileDir.exists()) {
+                fileDir.mkdir();
             }
-        });
+        }catch (Exception ex){
+            Log.e("CreateDir", ex.getMessage(), ex);
+        }
+        return infoWindowImagePath + "/tempImagefile.jpeg";
     }
 }

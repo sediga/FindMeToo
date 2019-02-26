@@ -205,16 +205,16 @@ public class MapsActivity extends FragmentActivity implements
         this.imIn = mWindow.findViewById(R.id.iammin);
         this.infoImage = mWindow.findViewById(R.id.info_badge);
         this.viewProfile = mWindow.findViewById(R.id.view_profile_link);
-        this.infoButtonListener = new OnInfoWindowElemTouchListener(this.imIn,
-                getResources().getDrawable(R.drawable.btn_bg), //btn_default_normal_holo_light
-                getResources().getDrawable(R.drawable.btn_bg)) //btn_default_pressed_holo_light
+        this.infoButtonListener = new OnInfoWindowElemTouchListener(this.imIn, null, null)
+//                getResources().getDrawable(R.drawable.btn_bg), //btn_default_normal_holo_light
+//                getResources().getDrawable(R.drawable.btn_bg)) //btn_default_pressed_holo_light
         {
             @Override
             protected void onClickConfirmed(View v, Marker marker) {
                 CurrentActivity activity = activities.get(marker);
                 String activityId = activity.ActivityId;
                 String token = getToken();
-                final String deviceId = Global.preference.getValue(MapsActivity.this, PrefConst.ANDROIDID, "");
+                final String deviceId = Global.AndroidID;
                 ApiInterface apiService =
                         HttpClient.getClient().create(ApiInterface.class);
                 try {
@@ -256,10 +256,9 @@ public class MapsActivity extends FragmentActivity implements
         };
         this.infoImage.setOnTouchListener(infoImageButtonListener);
 
-        this.viewProfileClickistener = new OnInfoWindowElemTouchListener(this.viewProfile,
-//                null, null)
-                getResources().getDrawable(R.drawable.badge_sa), //btn_default_normal_holo_light
-                getResources().getDrawable(R.drawable.badge_sa)) //btn_default_pressed_holo_light
+        this.viewProfileClickistener = new OnInfoWindowElemTouchListener(this.viewProfile, null, null)
+//                getResources().getDrawable(R.drawable.badge_sa), //btn_default_normal_holo_light
+//                getResources().getDrawable(R.drawable.badge_sa)) //btn_default_pressed_holo_light
         {
             @Override
             protected void onClickConfirmed(View v, Marker marker) {
@@ -274,6 +273,10 @@ public class MapsActivity extends FragmentActivity implements
 
             @Override
             public View getInfoWindow(Marker marker) {
+//                double angle = 0.0;
+//                double x = Math.sin(-angle * Math.PI / 180) * 0.5 + 0.5;
+//                double y = -(Math.cos(-angle * Math.PI / 180) * 0.5 - 100.5);
+//                marker.setInfoWindowAnchor((float)x, (float)y);
                 return null;
             }
 
@@ -456,8 +459,8 @@ public class MapsActivity extends FragmentActivity implements
     }
 
     private void GetActivityImage(final Marker marker, String token) {
-        String deviceId = marker.getTag().toString().split("/")[0];
-        String fileName = marker.getTag().toString().split("/")[1];
+        String deviceId = marker.getTag().toString().split("\\\\")[0];
+        String fileName = marker.getTag().toString().split("\\\\")[1];
         ApiInterface apiService =
                 HttpClient.getClient().create(ApiInterface.class);
         Call<ResponseBody> call = apiService.getMatchingImages("Bearer " + token, deviceId, fileName);
@@ -567,15 +570,18 @@ public class MapsActivity extends FragmentActivity implements
                                 .snippet(((CurrentActivity) locations[i]).description)
                                 .title(((CurrentActivity) locations[i]).Activity));
                         markers.put(i, marker);
-
                         activities.put(marker, ((CurrentActivity) locations[i]));
                         marker.setTag(((CurrentActivity) locations[i]).ImagePath);
                         Circle circle = mMap.addCircle(new CircleOptions()
-                                .center(new LatLng(((CurrentActivity) locations[i]).latitude, ((CurrentActivity) locations[i]).longitude))
+                                .center(pos)
                                 .radius(500)
                                 .clickable(true)
                                 .strokeColor(Color.MAGENTA)
                                 .fillColor(0x220000FF));
+                double angle = 0.0;
+                double x = Math.sin(-angle * Math.PI / 180) * 0.5 + 0.5;
+                double y = -(Math.cos(-angle * Math.PI / 180) * 0.5 - 0.5);
+//                marker.setInfoWindowAnchor((float)x, (float)(y+circle.getRadius()));
                         if (i == 0) {
                             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(circle.getCenter(), 11));
                         }
@@ -666,7 +672,7 @@ public class MapsActivity extends FragmentActivity implements
     }
 
     private void CreateActivity(EditText edit_description, EditText edit_title, final String token) {
-        final String deviceId = Global.preference.getValue(this, PrefConst.ANDROIDID, "");
+        final String deviceId = Global.AndroidID;
         String description = edit_description.getText().toString().trim();
         String title = edit_title.getText().toString().trim();
         if (title.isEmpty()) {
@@ -766,6 +772,7 @@ public class MapsActivity extends FragmentActivity implements
 
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
+                Log.e("ActivityImageUploader", t.getMessage());
             }
         });
     }

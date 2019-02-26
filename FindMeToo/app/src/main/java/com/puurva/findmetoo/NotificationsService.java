@@ -13,6 +13,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.IBinder;
 import android.provider.Settings;
+import android.renderscript.RenderScript;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
@@ -20,6 +21,7 @@ import android.widget.Toast;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.google.gson.JsonObject;
+import com.puurva.findmetoo.Enums.NotificationType;
 import com.puurva.findmetoo.ServiceInterfaces.ApiInterface;
 import com.puurva.findmetoo.ServiceInterfaces.DeviceModel;
 import com.puurva.findmetoo.model.CurrentActivity;
@@ -65,22 +67,17 @@ public class NotificationsService extends FirebaseMessagingService {
         // sends notification
         // messages. For more see: https://firebase.google.com/docs/cloud-messaging/concept-options
         // [END_EXCLUDE]
-        CurrentActivity activity = null;
         // TODO(developer): Handle FCM messages here.
         // Not getting messages here? See why this may be: https://goo.gl/39bRNJ
         Log.d(TAG, "From: " + remoteMessage.getFrom());
-
+        String deviceID = null;
         // Check if message contains a data payload.
         if (remoteMessage.getData().size() > 0) {
             Log.d(TAG, "Message data payload: " + remoteMessage.getData());
 
             try {
                 JSONObject jObject = new JSONObject(remoteMessage.getData()) ;
-                activity = new CurrentActivity(jObject.getString("DeviceID"),
-                        jObject.getString("What"),
-                        jObject.getDouble("Lat"),
-                        jObject.getDouble("Long"),
-                        jObject.getString("description"), null);
+                deviceID = jObject.get("DeviceId").toString();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -92,13 +89,14 @@ public class NotificationsService extends FirebaseMessagingService {
 //                // Handle message within 10 seconds
 //                handleNow();
 //            }
-
         }
 
         // Check if message contains a notification payload.
         if (remoteMessage.getNotification() != null) {
             Log.d(TAG, "Message Notification Body: " + remoteMessage.getNotification().getBody());
-            sendNotification(remoteMessage.getNotification().getBody(), activity.DeviceId);
+            if(deviceID != null) {
+                sendNotification(remoteMessage.getNotification().getBody(), deviceID);
+        }
 //            Toast.makeText(this, remoteMessage.getNotification().getBody(), Toast.LENGTH_SHORT).show();
         }
 
@@ -179,6 +177,7 @@ public class NotificationsService extends FirebaseMessagingService {
         Intent intent = new Intent(getApplicationContext(), ProfileViewActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.putExtra("DeviceID", deviceID);
+        intent.putExtra("source", NotificationType.AMIN);
         PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0 /* Request code */, intent,
                 PendingIntent.FLAG_ONE_SHOT);
 
@@ -206,7 +205,8 @@ public class NotificationsService extends FirebaseMessagingService {
                         .setContentText(messageBody)
                         .setAutoCancel(true)
                         .setSound(defaultSoundUri)
-                        .setContentIntent(pendingIntent);
+                        .setContentIntent(pendingIntent)
+                        .setPriority(NotificationManager.IMPORTANCE_HIGH);
 
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);

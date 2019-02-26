@@ -105,17 +105,6 @@
             android:transformPivotY="0dp"
             android:stepSize="0.1" />
 
-        <Button
-            android:id="@+id/contact"
-            style="@style/Widget.AppCompat.Button.Borderless"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="0.29"
-            android:background="@color/transparent"
-            android:text="contact"
-            android:textAppearance="@style/TextAppearance.AppCompat.Button"
-            android:textColor="@color/colorAccent" />
-
         <TextView
             android:layout_width="0dp"
             android:layout_height="match_parent"

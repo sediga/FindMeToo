@@ -50,12 +50,13 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         findViewById(R.id.button_login).setOnClickListener(this);
         findViewById(R.id.button_register).setOnClickListener(this);
 
-        if (confirmationPermission()) {
-            // sqlite db_user setting
-            dbHelper = new SQLiteManager(this);
-            Global.mdb = dbHelper.openDataBase();
-        }
+        while(!confirmationPermission());
+        // sqlite db_user setting
 
+    }
+
+
+    private void DoPostPermissionOperations() {
         Global.preference = Preference.getInstance();
         String username = Global.preference.getValue(this, PrefConst.USERNAME, "");
         String password = Global.preference.getValue(this, PrefConst.PASSWORD, "");
@@ -70,8 +71,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, new OnSuccessListener<InstanceIdResult>() {
             @Override
             public void onSuccess(InstanceIdResult instanceIdResult) {
-                if(!Global.has_device_registered) {
-                    while(Global.mdb == null);
+                if (!Global.has_device_registered) {
+                    while (Global.mdb == null) ;
                     String newToken = instanceIdResult.getToken();
                     String softwareVersion = Build.VERSION.RELEASE;
                     DeviceModel latestStoredDevice = SQLHelper.GetLatestDevice();
@@ -116,6 +117,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     Global.PERMISSION_REQUEST_CODE);
             return false;
         } else {
+            dbHelper = new SQLiteManager(this);
+            Global.mdb = dbHelper.openDataBase();
+
+            DoPostPermissionOperations();
             return true;
         }
     }
@@ -132,8 +137,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 }
             }
             // sqlite db_user setting
-            dbHelper = new SQLiteManager(this);
-            Global.mdb = dbHelper.openDataBase();
         }
     }
 
