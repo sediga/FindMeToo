@@ -1,22 +1,28 @@
 package com.puurva.findmetoo.ServiceInterfaces;
 
 import com.google.gson.annotations.SerializedName;
-import com.puurva.findmetoo.model.NotificationTocken;
-import com.puurva.findmetoo.model.NotificationTocken.NotificationType;
+import com.puurva.findmetoo.Enums.NotificationType;
+import com.puurva.findmetoo.Enums.RequestStatus;
 
 public class NotificationRequestModel {
 
-    public NotificationRequestModel(String deviceID, NotificationType notificationType, String activityId)
+    public NotificationRequestModel(String fromDeviceID, String toDeviceId, NotificationType notificationType, String activityId, RequestStatus requestStatus)
     {
-        this.DeviceID = deviceID;
+        this.FromDeviceId = fromDeviceID;
+        this.ToDeviceId = toDeviceId;
         this.RequestNotificationType = notificationType;
         this.ActivityId = activityId;
+        this.RequestNotificationStatus = requestStatus;
     }
 
-    @SerializedName("DeviceId")
-    public String DeviceID;
+    @SerializedName("FromDeviceId")
+    public String FromDeviceId;
+    @SerializedName("ToDeviceId")
+    public String ToDeviceId;
     @SerializedName("RequestNotificationType")
     public NotificationType RequestNotificationType;
     @SerializedName("ActivityId")
     public String ActivityId;
+    @SerializedName("NotificationRequestStatus")
+    public RequestStatus RequestNotificationStatus;
 }

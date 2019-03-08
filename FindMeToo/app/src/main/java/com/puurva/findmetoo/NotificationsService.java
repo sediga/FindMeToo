@@ -5,6 +5,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -22,8 +23,10 @@ import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.google.gson.JsonObject;
 import com.puurva.findmetoo.Enums.NotificationType;
+import com.puurva.findmetoo.Enums.RequestStatus;
 import com.puurva.findmetoo.ServiceInterfaces.ApiInterface;
 import com.puurva.findmetoo.ServiceInterfaces.DeviceModel;
+import com.puurva.findmetoo.model.ActivityNotification;
 import com.puurva.findmetoo.model.CurrentActivity;
 import com.puurva.findmetoo.model.Token;
 import com.puurva.findmetoo.preference.PrefConst;
@@ -35,6 +38,9 @@ import com.puurva.findmetoo.uitls.SQLHelper;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Map;
+
+import okhttp3.Request;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -43,6 +49,12 @@ import retrofit2.Response;
 public class NotificationsService extends FirebaseMessagingService {
 
     final String TAG = "NotificationsService";
+//    String deviceID = null;
+//    String activityID = null;
+//    RequestStatus requestStatus = null;
+//    NotificationType notificationType = null;
+
+    private ActivityNotification activityNotification = null;
 
     /**
      * Called when message is received.
@@ -70,14 +82,20 @@ public class NotificationsService extends FirebaseMessagingService {
         // TODO(developer): Handle FCM messages here.
         // Not getting messages here? See why this may be: https://goo.gl/39bRNJ
         Log.d(TAG, "From: " + remoteMessage.getFrom());
-        String deviceID = null;
         // Check if message contains a data payload.
         if (remoteMessage.getData().size() > 0) {
             Log.d(TAG, "Message data payload: " + remoteMessage.getData());
 
             try {
                 JSONObject jObject = new JSONObject(remoteMessage.getData()) ;
-                deviceID = jObject.get("DeviceId").toString();
+                activityNotification = new ActivityNotification(jObject.get("FromDeviceId").toString(),
+                        jObject.get("ActivityId").toString(),
+                        RequestStatus.valueOf(jObject.get("NotificationRequestStatus").toString()),
+                        NotificationType.valueOf(jObject.get("RequestNotificationType").toString()));
+//                deviceID = jObject.get("FromDeviceId").toString();
+//                activityID = jObject.get("ActivityId").toString();
+//                requestStatus = RequestStatus.valueOf(jObject.get("NotificationRequestStatus").toString());
+//                notificationType = NotificationType.valueOf(jObject.get("RequestNotificationType").toString());
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -94,8 +112,8 @@ public class NotificationsService extends FirebaseMessagingService {
         // Check if message contains a notification payload.
         if (remoteMessage.getNotification() != null) {
             Log.d(TAG, "Message Notification Body: " + remoteMessage.getNotification().getBody());
-            if(deviceID != null) {
-                sendNotification(remoteMessage.getNotification().getBody(), deviceID);
+            if(activityNotification != null) {
+                sendNotification(remoteMessage.getNotification().getBody());
         }
 //            Toast.makeText(this, remoteMessage.getNotification().getBody(), Toast.LENGTH_SHORT).show();
         }
@@ -173,13 +191,33 @@ public class NotificationsService extends FirebaseMessagingService {
      *
      * @param messageBody FCM message body received.
      */
-    private void sendNotification(String messageBody, String deviceID) {
-        Intent intent = new Intent(getApplicationContext(), ProfileViewActivity.class);
+    private void sendNotification(String messageBody) {
+//        Class<?> intentClass = null;
+//        switch (activityNotification.ActivityRequestStatus) {
+//            case NEW:
+//                intentClass = ProfileViewActivity.class;
+//                break;
+//            case ACCEPTED:
+//            case REJECTED:
+//                intentClass = MapsActivity.class;
+//                break;
+//            default:
+//                intentClass = MapsActivity.class;
+//                break;
+//        }
+        Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        intent.putExtra("DeviceID", deviceID);
-        intent.putExtra("source", NotificationType.AMIN);
-        PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0 /* Request code */, intent,
-                PendingIntent.FLAG_ONE_SHOT);
+        intent.putExtra("ActivityNotification", activityNotification);
+//        intent.putExtra("source", notificationType);
+//        intent.putExtra("ActivityID", activityID);
+//        intent.putExtra("RequestStatus", requestStatus);
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+        stackBuilder.addNextIntentWithParentStack(intent);
+        PendingIntent pendingIntent =
+                stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+
+//        PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0 /* Request code */, intent,
+//                PendingIntent.FLAG_ONE_SHOT);
 
 //        AlertDialog.Builder builder = new AlertDialog.Builder(this);
 //        builder.setTitle("Alert")

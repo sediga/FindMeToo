@@ -1,6 +1,7 @@
 package com.puurva.findmetoo;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -22,6 +23,7 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 import com.puurva.findmetoo.ServiceInterfaces.ApiInterface;
 import com.puurva.findmetoo.ServiceInterfaces.DeviceModel;
+import com.puurva.findmetoo.model.ActivityNotification;
 import com.puurva.findmetoo.model.Token;
 import com.puurva.findmetoo.preference.PrefConst;
 import com.puurva.findmetoo.preference.Preference;
@@ -41,16 +43,21 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     private SQLiteManager dbHelper;
     private String androidId;
-
+    private ActivityNotification activityNotification = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        findViewById(R.id.button_login).setOnClickListener(this);
-        findViewById(R.id.button_register).setOnClickListener(this);
+        activityNotification = getIntent().getParcelableExtra("ActivityNotification");
+        if(!Global.is_loggedin) {
+            findViewById(R.id.button_login).setOnClickListener(this);
+            findViewById(R.id.button_register).setOnClickListener(this);
 
-        while(!confirmationPermission());
+            while (!confirmationPermission()) ;
+        }else{
+            LoadActivity();
+        }
         // sqlite db_user setting
 
     }
@@ -58,7 +65,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     private void DoPostPermissionOperations() {
         Global.preference = Preference.getInstance();
-        String username = Global.preference.getValue(this, PrefConst.USERNAME, "");
+        final String username = Global.preference.getValue(this, PrefConst.USERNAME, "");
         String password = Global.preference.getValue(this, PrefConst.PASSWORD, "");
 
         androidId = Global.AndroidID;
@@ -77,7 +84,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     String softwareVersion = Build.VERSION.RELEASE;
                     DeviceModel latestStoredDevice = SQLHelper.GetLatestDevice();
                     if (latestStoredDevice == null || latestStoredDevice.NotificationToken.compareTo(newToken) != 0) {
-                        DeviceModel deviceModel = new DeviceModel(androidId, "", softwareVersion, newToken);
+                        DeviceModel deviceModel = new DeviceModel(androidId, username, softwareVersion, newToken);
                         CommonUtility.RegisterDevice(deviceModel);
                         SQLHelper.AddDevice(deviceModel);
                         Global.has_device_registered = true;
@@ -190,7 +197,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     if (!getUser(username, password)) {
                         return;
                     }
-                    startActivity(new Intent(LoginActivity.this, MapsActivity.class));
+                    Global.is_loggedin = true;
+                    LoadActivity();
 //                    finish();
                 }
             }
@@ -202,6 +210,27 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 Log.e("login", "Login Failed : " + t.getMessage());
             }
         }));
+    }
+
+    private void LoadActivity() {
+        Intent intentClass = new Intent(LoginActivity.this, MapsActivity.class);
+//        Log.e("LoginActivity", "checking activityNotificaiton");
+        if(activityNotification != null) {
+//            Log.e("LoginActivity", "activityNotificaiton not null");
+//            switch (activityNotification.ActivityRequestStatus) {
+//                case NEW:
+////                    intentClass = new Intent(LoginActivity.this, ProfileViewActivity.class);
+////                    break;
+//                case REJECTED:
+//                case ACCEPTED:
+//                    intentClass = new Intent(LoginActivity.this, MapsActivity.class);
+//                    break;
+//            }
+            intentClass.putExtra("ActivityNotification", activityNotification);
+        }else{
+            Log.e("LoginActivity", "activityNotificaiton is null");
+        }
+        startActivity(intentClass);
     }
 
     private void doLogin(final String username, String password) {

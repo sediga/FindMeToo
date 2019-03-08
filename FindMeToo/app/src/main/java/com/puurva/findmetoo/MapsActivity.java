@@ -17,6 +17,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.os.Parcelable;
 import android.os.StrictMode;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
@@ -39,8 +40,10 @@ import android.widget.Toast;
 
 import com.arlib.floatingsearchview.FloatingSearchView;
 import com.arlib.floatingsearchview.suggestions.model.SearchSuggestion;
+import com.puurva.findmetoo.Enums.NotificationType;
+import com.puurva.findmetoo.Enums.RequestStatus;
+import com.puurva.findmetoo.model.ActivityNotification;
 import com.puurva.findmetoo.model.CurrentActivity;
-import com.puurva.findmetoo.model.NotificationTocken;
 import com.puurva.findmetoo.preference.PrefConst;
 import com.puurva.findmetoo.uitls.GPSTracker;
 import com.puurva.findmetoo.uitls.Global;
@@ -111,13 +114,20 @@ public class MapsActivity extends FragmentActivity implements
 
     private String imageFilePath;
     private String imageFileName;
+    private ActivityNotification activityNotification = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
-            SetupFirebaseNotifications();
+//       if(Global.preference == null || Global.preference.getValue(this, PrefConst.USERNAME, null) == null){
+//           Intent loginIntent = new Intent(this, LoginActivity.class);
+//           loginIntent.putExtra("activity", (Parcelable) getIntent());
+//           loginIntent.putExtras(getIntent().getExtras());
+//           startActivity(loginIntent);
+//       }
+    SetupFirebaseNotifications();
 
         StrictMode.VmPolicy.Builder newbuilder = new StrictMode.VmPolicy.Builder();
         StrictMode.setVmPolicy(newbuilder.build());
@@ -196,6 +206,12 @@ public class MapsActivity extends FragmentActivity implements
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
+//        if(Global.preference == null || Global.preference.getValue(this, PrefConst.USERNAME, null) == null){
+//            Intent loginIntent = new Intent(this, LoginActivity.class);
+//            loginIntent.putExtra("activity", (Parcelable) getIntent());
+//            startActivity(loginIntent);
+//        }
+
         mMap = googleMap;
         showMarkerOfUsers("");
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(Global.current_user.getLatitude(), Global.current_user.getLongitude()), 12));
@@ -205,42 +221,7 @@ public class MapsActivity extends FragmentActivity implements
         this.imIn = mWindow.findViewById(R.id.iammin);
         this.infoImage = mWindow.findViewById(R.id.info_badge);
         this.viewProfile = mWindow.findViewById(R.id.view_profile_link);
-        this.infoButtonListener = new OnInfoWindowElemTouchListener(this.imIn, null, null)
-//                getResources().getDrawable(R.drawable.btn_bg), //btn_default_normal_holo_light
-//                getResources().getDrawable(R.drawable.btn_bg)) //btn_default_pressed_holo_light
-        {
-            @Override
-            protected void onClickConfirmed(View v, Marker marker) {
-                CurrentActivity activity = activities.get(marker);
-                String activityId = activity.ActivityId;
-                String token = getToken();
-                final String deviceId = Global.AndroidID;
-                ApiInterface apiService =
-                        HttpClient.getClient().create(ApiInterface.class);
-                try {
-                    NotificationRequestModel notificationRequestModel = new NotificationRequestModel(deviceId, NotificationTocken.NotificationType.AmIn, activityId);
-                    Call<Void> call = apiService.sendNotification("Bearer " + token, notificationRequestModel);
-
-                    call.enqueue(new Callback<Void>() {
-                        @Override
-                        public void onResponse(Call<Void> call, Response<Void> response) {
-                            if (response.isSuccessful()) {
-                                Toast.makeText(MapsActivity.this, "Your request has been submitted. We will let you know when accepted.", Toast.LENGTH_SHORT).show();
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(Call<Void> call, Throwable t) {
-                            Log.d("onFailure", t.toString());
-                        }
-                    });
-                } catch (Exception ex)
-                {
-                    Log.e("postActivity", ex.getMessage());
-                }
-                // Here we can perform some action triggered after clicking the button
-            }
-        };
+        SendNotification();
         this.imIn.setOnTouchListener(infoButtonListener);
 
         this.infoImageButtonListener = new OnInfoWindowElemTouchListener(this.infoImage, null, null)
@@ -264,7 +245,7 @@ public class MapsActivity extends FragmentActivity implements
             protected void onClickConfirmed(View v, Marker marker) {
                 // Here we can perform some action triggered after clicking the button
 //                Toast.makeText(MapsActivity.this, marker.getTitle() + "'s image button clicked!", Toast.LENGTH_SHORT).show();
-                LaunchViewProfile(v, activities.get(marker).DeviceId);
+                LaunchViewProfile(activities.get(marker).DeviceId);
             }
         };
         this.viewProfile.setOnTouchListener(viewProfileClickistener);
@@ -299,6 +280,103 @@ public class MapsActivity extends FragmentActivity implements
                 return mWindow;
             }
         });
+
+//        String deviceID = getIntent().getStringExtra("DeviceID");
+//        String activityId = getIntent().getStringExtra("ActivityID");
+//        NotificationType notificationType = (NotificationType) getIntent().getSerializableExtra("source");
+//        RequestStatus requestStatus = (RequestStatus) getIntent().getSerializableExtra("RequestStatus");
+
+        HandleNotifications();
+    }
+
+    private void HandleNotifications() {
+        Log.e("ActivityNotification", "checking activity notification status in Maps Activity");
+        activityNotification = getIntent().getParcelableExtra("ActivityNotification");
+        if(activityNotification != null){
+//            Toast.makeText(this, activityNotification.ActivityRequestStatus.name(), Toast.LENGTH_SHORT);
+            Log.e("ActivityNotification", "activityNotification not null");
+            switch (activityNotification.ActivityRequestStatus){
+                case ACCEPTED:
+                case REJECTED:
+                    HandleFromNotification(activityNotification.ActivityId);
+                    break;
+                case NEW:
+                    LaunchViewProfile(null);
+            }
+        }else{
+            Log.e("ActivityNotification", "activityNotification is null");
+
+        }
+    }
+
+    private void HandleFromNotification(String activityId) {
+        String token = getToken();
+        final String deviceId = Global.AndroidID;
+        ApiInterface apiService =
+                HttpClient.getClient().create(ApiInterface.class);
+        try {
+            Call<CurrentActivity> call = apiService.getActivityById("Bearer " + token, activityId);
+
+            call.enqueue(new Callback<CurrentActivity>() {
+                @Override
+                public void onResponse(Call<CurrentActivity> call, Response<CurrentActivity> response) {
+                    if (response.isSuccessful()) {
+                        final CurrentActivity location = (CurrentActivity) (response.body());
+                        Marker marker = ShowLocation(0, location, true);
+                        marker.showInfoWindow();
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 11));
+                        marker.setTag(location.ImagePath);
+                        marker.setVisible(true);
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<CurrentActivity> call, Throwable t) {
+                    Log.d("onFailure", t.toString());
+                }
+            });
+        } catch (Exception ex) {
+            Log.e("postActivity", ex.getMessage());
+        }
+    }
+
+    private void SendNotification() {
+        this.infoButtonListener = new OnInfoWindowElemTouchListener(this.imIn, null, null)
+//                getResources().getDrawable(R.drawable.btn_bg), //btn_default_normal_holo_light
+//                getResources().getDrawable(R.drawable.btn_bg)) //btn_default_pressed_holo_light
+        {
+            @Override
+            protected void onClickConfirmed(View v, Marker marker) {
+                CurrentActivity activity = activities.get(marker);
+                String activityId = activity.ActivityId;
+                String token = getToken();
+                final String deviceId = Global.AndroidID;
+                ApiInterface apiService =
+                        HttpClient.getClient().create(ApiInterface.class);
+                try {
+                    NotificationRequestModel notificationRequestModel = new NotificationRequestModel(deviceId, activity.DeviceId, NotificationType.AMIN, activityId, RequestStatus.NEW);
+                    Call<Void> call = apiService.sendNotification("Bearer " + token, notificationRequestModel);
+
+                    call.enqueue(new Callback<Void>() {
+                        @Override
+                        public void onResponse(Call<Void> call, Response<Void> response) {
+                            if (response.isSuccessful()) {
+                                Toast.makeText(MapsActivity.this, "Your request has been submitted. We will let you know when accepted.", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<Void> call, Throwable t) {
+                            Log.d("onFailure", t.toString());
+                        }
+                    });
+                } catch (Exception ex)
+                {
+                    Log.e("postActivity", ex.getMessage());
+                }
+                // Here we can perform some action triggered after clicking the button
+            }
+        };
     }
 
     @Override
@@ -310,11 +388,17 @@ public class MapsActivity extends FragmentActivity implements
         } else if (id == R.id.action_add) {
             addKeyword();
         } else if (id == R.id.menu_profile) {
-            Intent profileIntent = new Intent(this, ProfileActivity.class);
-            profileIntent.putExtra("DeviceID", CommonUtility.GetDeviceId());
-            startActivity(profileIntent);
+            LoadProfileActivity(null);
         }
 
+    }
+
+    private void LoadProfileActivity(Intent intent) {
+        if(intent == null) {
+            intent = new Intent(this, ProfileActivity.class);
+            intent.putExtra("DeviceID", CommonUtility.GetDeviceId());
+        }
+        startActivity(intent);
     }
 
     @Override
@@ -407,9 +491,16 @@ public class MapsActivity extends FragmentActivity implements
         return token;
     }
 
-    private void LaunchViewProfile(View v, String deviceID) {
+    private void LaunchViewProfile(String deviceID) {
         Intent profileIntent = new Intent(this, ProfileViewActivity.class);
-        profileIntent.putExtra("DeviceID", deviceID);
+        if(deviceID != null) {
+            profileIntent.putExtra("DeviceID", deviceID);
+        }
+        if(activityNotification != null)
+        {
+            profileIntent.putExtra("ActivityNotification", activityNotification);
+            Log.e("ActivityNotification", activityNotification.ActivityRequestStatus.toString());
+        }
         startActivity(profileIntent);
     }
 
@@ -562,55 +653,75 @@ public class MapsActivity extends FragmentActivity implements
                 if (response.isSuccessful()) {
                     final Object[] locations = (response.body().toArray());
                     for (int i = 0; i < locations.length; i++) {
-                        final String imagePath = ((CurrentActivity) locations[i]).ImagePath;
-                        LatLng pos = new LatLng(((CurrentActivity) locations[i]).latitude, ((CurrentActivity) locations[i]).longitude);
-                        final Marker marker = mMap.addMarker(new MarkerOptions()
-                                .position(pos).icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("custom_info_bubble", 1, 1)))
-                                .visible(false)
-                                .snippet(((CurrentActivity) locations[i]).description)
-                                .title(((CurrentActivity) locations[i]).Activity));
-                        markers.put(i, marker);
-                        activities.put(marker, ((CurrentActivity) locations[i]));
-                        marker.setTag(((CurrentActivity) locations[i]).ImagePath);
-                        Circle circle = mMap.addCircle(new CircleOptions()
-                                .center(pos)
-                                .radius(500)
-                                .clickable(true)
-                                .strokeColor(Color.MAGENTA)
-                                .fillColor(0x220000FF));
-                double angle = 0.0;
-                double x = Math.sin(-angle * Math.PI / 180) * 0.5 + 0.5;
-                double y = -(Math.cos(-angle * Math.PI / 180) * 0.5 - 0.5);
-//                marker.setInfoWindowAnchor((float)x, (float)(y+circle.getRadius()));
-                        if (i == 0) {
-                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(circle.getCenter(), 11));
-                        }
-                        mMap.setOnCircleClickListener(new GoogleMap.OnCircleClickListener() {
-
-                            @Override
-                            public void onCircleClick(Circle circle) {
-                                Marker marker = markers.get(circles.get(circle));
-                                marker.setVisible(true);
-                                marker.showInfoWindow();
-                                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(circle.getCenter(), 11));
-                                marker.setTag(imagePath);
-                            }
-                        });
-                        circles.put(circle, i);
+                        CurrentActivity location = (CurrentActivity) locations[i];
+                        ShowLocation(i, location, false);
                     }
                 }
-            }
-
-            public Bitmap resizeMapIcons(String iconName, int width, int height) {
-                Bitmap imageBitmap = BitmapFactory.decodeResource(getResources(), getResources().getIdentifier(iconName, "drawable", getPackageName()));
-                Bitmap resizedBitmap = Bitmap.createScaledBitmap(imageBitmap, width, height, false);
-                return resizedBitmap;
             }
 
             @Override
             public void onFailure(Call<List<CurrentActivity>> call, Throwable t) {
             }
         });
+    }
+
+    private Marker ShowLocation(int i, CurrentActivity location, boolean showFineLocation) {
+        final String imagePath = location.ImagePath;
+        LatLng pos = new LatLng(location.latitude, location.longitude);
+        final Marker marker = mMap.addMarker(new MarkerOptions()
+                .position(pos).icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("custom_info_bubble", 1, 1)))
+                .snippet(location.description)
+                .title(location.Activity));
+        markers.put(i, marker);
+        activities.put(marker, location);
+        marker.setTag(location.ImagePath);
+        if(!showFineLocation) {
+            marker.setVisible(false);
+            Circle circle = mMap.addCircle(new CircleOptions()
+                    .center(pos)
+                    .radius(500)
+                    .clickable(true)
+                    .strokeColor(Color.MAGENTA)
+                    .fillColor(0x220000FF));
+            double angle = 0.0;
+            double x = Math.sin(-angle * Math.PI / 180) * 0.5 + 0.5;
+            double y = -(Math.cos(-angle * Math.PI / 180) * 0.5 - 0.5);
+//                marker.setInfoWindowAnchor((float)x, (float)(y+circle.getRadius()));
+            if (i == 0) {
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(circle.getCenter(), 11));
+            }
+            mMap.setOnCircleClickListener(new GoogleMap.OnCircleClickListener() {
+
+                @Override
+                public void onCircleClick(Circle circle) {
+                    Marker marker = markers.get(circles.get(circle));
+                    marker.setVisible(true);
+                    marker.showInfoWindow();
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(circle.getCenter(), 11));
+                    marker.setTag(imagePath);
+                }
+            });
+            circles.put(circle, i);
+        }else{
+            mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+
+                @Override
+                public boolean onMarkerClick(Marker selectedMarker) {
+                    selectedMarker.showInfoWindow();
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(selectedMarker.getPosition(), 11));
+                    selectedMarker.setTag(imagePath);
+                    return true;
+                }
+            });
+        }
+
+        return marker;
+    }
+
+    public Bitmap resizeMapIcons(String iconName, int width, int height) {
+        Bitmap imageBitmap = BitmapFactory.decodeResource(getResources(), getResources().getIdentifier(iconName, "drawable", getPackageName()));
+        Bitmap resizedBitmap = Bitmap.createScaledBitmap(imageBitmap, width, height, false);
+        return resizedBitmap;
     }
 
     private void addKeyword() {

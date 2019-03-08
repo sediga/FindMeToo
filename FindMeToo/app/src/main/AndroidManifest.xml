@@ -55,10 +55,14 @@
         <activity
             android:name=".RegisterActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"
-            android:label="@string/title_activity_maps" />
-        <activity android:name=".ProfileActivity" />
-        <activity android:name=".ProfileViewActivity" />
-        <activity android:name=".ViewImageActivity" />
+            android:label="@string/title_activity_maps"
+            android:parentActivityName=".LoginActivity"/>
+        <activity android:name=".ProfileActivity"
+            android:parentActivityName=".MapsActivity"/>
+        <activity android:name=".ProfileViewActivity"
+            android:parentActivityName=".MapsActivity"/>
+        <activity android:name=".ViewImageActivity"
+            android:parentActivityName=".MapsActivity"/>
     </application>
 
 </manifest>

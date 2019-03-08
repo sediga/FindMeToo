@@ -17,6 +17,7 @@ public class Global {
     public static Preference preference;
     public static DeviceModel device_info;
     public static boolean has_device_registered;
+    public static boolean is_loggedin = false;
 
     public static final int PERMISSION_REQUEST_CODE = 1111;
     public static String[] select_column = new String[]{"id", "first_name", "last_name", "latitude", "longitude"};

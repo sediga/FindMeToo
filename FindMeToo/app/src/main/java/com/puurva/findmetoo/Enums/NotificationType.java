@@ -1,5 +1,7 @@
 package com.puurva.findmetoo.Enums;
 
-public enum NotificationType {
+public enum NotificationType
+{
+    NONE,
     AMIN
 }
