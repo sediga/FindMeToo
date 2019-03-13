@@ -16,9 +16,11 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 
+import com.google.android.gms.common.internal.service.Common;
 import com.puurva.findmetoo.ServiceInterfaces.ApiInterface;
 import com.puurva.findmetoo.model.ProfileModel;
 import com.puurva.findmetoo.preference.PrefConst;
+import com.puurva.findmetoo.uitls.CommonUtility;
 import com.puurva.findmetoo.uitls.Global;
 import com.puurva.findmetoo.uitls.HttpClient;
 import com.puurva.findmetoo.uitls.ImageUtility;
@@ -42,7 +44,6 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
     private String imageFilePath;
     private String deviceID;
     private Bitmap bitmap = null;
-    private final String infoWindowImagePath = Environment.getExternalStorageDirectory().getAbsolutePath() + Global.FILE_PATH_SUFFIX;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,7 +89,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         try {
-            String filePath = GetImageFileFullPath();
+            String filePath = CommonUtility.GetImageFileFullPath();
             File file = new File(filePath);
             DisplayMetrics displayMetrics = new DisplayMetrics();
             getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
@@ -266,68 +267,8 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
                 PrefConst.USERNAME, ""),
                 null, profilName, hobies, about);
 
-        ApiInterface apiService =
-                HttpClient.getClient().create(ApiInterface.class);
-        Call<Void> call = apiService.putProfile("Bearer " + token, deviceID, profileModel);
-        call.enqueue(new Callback<Void>() {
-            @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
-                if(response.isSuccessful()) {
-                    uploadImage(deviceID, token);
-                    finish();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<Void> call, Throwable t) {
-            }
-        });
-    }
-    private void uploadImage(String deviceId, String token) {
-        String tempFileName = GetImageFileFullPath();
-        if (this.bitmap != null) {
-            FileOutputStream out = null;
-            try {
-                out = new FileOutputStream(tempFileName);
-                this.bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out); // bmp is your Bitmap instance
-                // PNG is a lossless format, the compression factor (100) is ignored
-                File file = new File(tempFileName);
-//            RequestBody reqFile = RequestBody.create(MediaType.parse("image/*"), file);
-                RequestBody requestBody = RequestBody.create(MediaType.parse("multipart/form-data"), file);
-
-                MultipartBody.Part body = MultipartBody.Part.createFormData("upload", file.getName(), requestBody);
-
-                RequestBody name = RequestBody.create(MediaType.parse("text/plain"), "upload_test");
-                ApiInterface apiService =
-                        HttpClient.getClient().create(ApiInterface.class);
-                Call<Void> call = apiService.postProfileImage("Bearer " + token, deviceId, body);
-                call.enqueue(new Callback<Void>() {
-                    @Override
-                    public void onResponse(Call<Void> call, Response<Void> response) {
-                        if (response.isSuccessful()) {
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Call<Void> call, Throwable t) {
-                    }
-                });
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-
-        }
+        CommonUtility.PostProfile(token, profileModel, this.bitmap);
+        finish();
     }
 
-    private String GetImageFileFullPath() {
-        try {
-            File fileDir = new File(infoWindowImagePath);
-            if (!fileDir.exists()) {
-                fileDir.mkdir();
-            }
-        }catch (Exception ex){
-            Log.e("CreateDir", ex.getMessage(), ex);
-        }
-        return infoWindowImagePath + "/tempImagefile.jpeg";
-    }
 }

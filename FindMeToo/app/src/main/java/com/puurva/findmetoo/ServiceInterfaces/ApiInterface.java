@@ -53,4 +53,6 @@ public interface ApiInterface {
     Call<Void> putProfile(@Header("Authorization") String authorization, @Path("deviceId") String deviceId, @Body ProfileModel profile);
     @GET("JoinServer/Profile/{deviceId}")
     Call<ProfileModel> getProfile(@Header("Authorization") String authorization, @Path("deviceId") String deviceId);
+    @POST("JoinServer/profilereview")
+    Call<Void> postProfileReview(@Header("Authorization") String authorization, @Body ProfileReviewModel profileReviewModel);
 }

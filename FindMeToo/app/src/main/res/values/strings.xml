@@ -19,4 +19,5 @@
     <string name="default_notification_channel_id">findmetoo_defauld_channel</string>
     <string name="default_notification_channel_name">findmetoo</string>
     <string name="fcm_message">FindMeToo</string>
+    <string name="title_activity_review_profile">activity_review_profile</string>
 </resources>

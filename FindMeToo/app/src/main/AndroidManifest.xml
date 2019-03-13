@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.puurva.findmetoo">
-
     <!--
          The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
          Google Maps Android API v2, but you must specify either coarse or fine
@@ -13,6 +12,7 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.CAMERA" />
+
     <uses-feature android:name="android.hardware.location.gps" />
 
     <application
@@ -22,6 +22,7 @@
         android:roundIcon="@drawable/findmetoo_logo"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
         <service android:name=".NotificationsService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
@@ -56,13 +57,19 @@
             android:name=".RegisterActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:label="@string/title_activity_maps"
-            android:parentActivityName=".LoginActivity"/>
-        <activity android:name=".ProfileActivity"
-            android:parentActivityName=".MapsActivity"/>
-        <activity android:name=".ProfileViewActivity"
-            android:parentActivityName=".MapsActivity"/>
-        <activity android:name=".ViewImageActivity"
-            android:parentActivityName=".MapsActivity"/>
+            android:parentActivityName=".LoginActivity" />
+        <activity
+            android:name=".ProfileActivity"
+            android:parentActivityName=".MapsActivity" />
+        <activity
+            android:name=".ProfileViewActivity"
+            android:parentActivityName=".MapsActivity" />
+        <activity
+            android:name=".ProfileReviewActivity"
+            android:parentActivityName=".ProfileViewActivity" />
+        <activity
+            android:name=".ViewImageActivity"
+            android:parentActivityName=".MapsActivity" />
     </application>
 
 </manifest>

@@ -21,6 +21,8 @@ import android.widget.Toast;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
+import com.puurva.findmetoo.Enums.NotificationType;
+import com.puurva.findmetoo.Enums.RequestStatus;
 import com.puurva.findmetoo.ServiceInterfaces.ApiInterface;
 import com.puurva.findmetoo.ServiceInterfaces.DeviceModel;
 import com.puurva.findmetoo.model.ActivityNotification;
@@ -35,6 +37,8 @@ import com.puurva.findmetoo.uitls.SQLHelper;
 import com.puurva.findmetoo.uitls.SQLiteManager;
 import com.puurva.findmetoo.model.UserModel;
 
+import org.json.JSONObject;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -48,7 +52,17 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
+        Bundle bundle = getIntent().getExtras();
+        if (bundle != null && bundle.getString("FromDeviceId") != null &&
+                bundle.getString("ActivityId") != null &&
+                bundle.getString("NotificationRequestStatus") != null &&
+                bundle.getString("RequestNotificationType") != null) {
+            activityNotification = new ActivityNotification(bundle.getString("FromDeviceId"),
+                    bundle.getString("ActivityId"),
+                    RequestStatus.valueOf(bundle.getString("NotificationRequestStatus")),
+                    NotificationType.valueOf(bundle.getString("RequestNotificationType")));
+            getIntent().putExtra("ActivityNotification", activityNotification);
+        }
         activityNotification = getIntent().getParcelableExtra("ActivityNotification");
         if(!Global.is_loggedin) {
             findViewById(R.id.button_login).setOnClickListener(this);

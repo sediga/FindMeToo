@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/ConstraintLayout0_View"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    tools:context=".LoginActivity">
+
+    <LinearLayout
+        android:id="@+id/linearLayout2_View"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toTopOf="@+id/ConstraintLayout0_View">
+
+        <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:id="@+id/ConstraintLayout1_View"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            tools:context=".LoginActivity">
+
+            <ImageView
+                android:id="@+id/imgViewPhoto"
+                android:layout_width="150dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="0dp"
+                android:layout_marginLeft="0dp"
+                app:layout_constraintBottom_toBottomOf="@id/ConstraintLayout1_View"
+                app:layout_constraintStart_toStartOf="@id/ConstraintLayout1_View"
+                app:layout_constraintTop_toTopOf="@id/ConstraintLayout1_View"
+                tools:srcCompat="@drawable/badge_sa" />
+
+            <TextView
+                android:id="@+id/txt_view_name"
+                android:layout_width="200dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="2dp"
+                android:layout_marginLeft="2dp"
+                android:hint="Name"
+                android:singleLine="false"
+                app:layout_constraintEnd_toEndOf="@id/ConstraintLayout1_View"
+                app:layout_constraintStart_toEndOf="@id/imgViewPhoto"
+                app:layout_constraintTop_toTopOf="@id/ConstraintLayout1_View" />
+
+            <TextView
+                android:id="@+id/txt_view_hobies"
+                android:layout_width="200dp"
+                android:layout_height="100dp"
+                android:hint="Hobies"
+                android:singleLine="false"
+                app:layout_constraintBottom_toBottomOf="@id/ConstraintLayout1_View"
+                app:layout_constraintEnd_toEndOf="@id/ConstraintLayout1_View"
+                app:layout_constraintStart_toEndOf="@id/imgViewPhoto"
+                app:layout_constraintTop_toBottomOf="@id/txt_view_name" />
+        </android.support.constraint.ConstraintLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:orientation="horizontal"
+        android:id="@+id/linearLayout3_View"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout2_View"
+        tools:ignore="UnknownId">
+
+        <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:id="@+id/ConstraintLayout2_View"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            tools:context=".LoginActivity">
+
+            <RatingBar
+                android:id="@+id/edit_profile_rating"
+                style="@style/Widget.AppCompat.RatingBar.Indicator"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:isIndicator="false"
+                android:numStars="5"
+                android:orientation="horizontal"
+                android:rating="0"
+                android:stepSize="1"
+                android:visibility="visible"
+                app:layout_constraintBottom_toBottomOf="@id/ConstraintLayout2_View"
+                app:layout_constraintStart_toStartOf="@id/ConstraintLayout2_View"
+                app:layout_constraintTop_toTopOf="@id/ConstraintLayout2_View" />
+
+            <TextView
+                android:id="@+id/txt_view_reviews"
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:autoLink="web"
+                android:gravity="center"
+                android:text="reviews"
+                android:textAlignment="center"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                app:layout_constraintBottom_toBottomOf="@id/ConstraintLayout2_View"
+                app:layout_constraintEnd_toStartOf="@id/txt_view_views"
+                app:layout_constraintTop_toTopOf="@id/ConstraintLayout2_View" />
+
+            <TextView
+                android:id="@+id/txt_view_views"
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
+                android:autoLink="web"
+                android:gravity="center"
+                android:text="views"
+                android:textAlignment="center"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                app:layout_constraintBottom_toBottomOf="@id/ConstraintLayout2_View"
+                app:layout_constraintEnd_toEndOf="@id/ConstraintLayout2_View"
+                app:layout_constraintTop_toTopOf="@id/ConstraintLayout2_View" />
+
+        </android.support.constraint.ConstraintLayout>
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/txt_profile_review"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dimen_5"
+        android:hint="Write your review here"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/linearLayout3_View" />
+
+        <!--<LinearLayout-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="40dp"-->
+            <!--android:orientation="horizontal"-->
+            <!--android:id="@+id/linearLayout4_View"-->
+            <!--app:layout_constraintTop_toBottomOf="@+id/txt_about">-->
+
+            <!--<Button-->
+                <!--android:id="@+id/btn_cancel"-->
+                <!--style="@style/Widget.AppCompat.Button.Borderless"-->
+                <!--android:layout_width="0dp"-->
+                <!--android:layout_height="match_parent"-->
+                <!--android:layout_weight="0.495"-->
+                <!--android:background="@drawable/btn_bg"-->
+                <!--android:text="CANCEL" />-->
+
+            <!--<Button-->
+                <!--android:id="@+id/btn_save"-->
+                <!--style="@style/Widget.AppCompat.Button.Borderless"-->
+                <!--android:layout_width="0dp"-->
+                <!--android:layout_height="match_parent"-->
+                <!--android:layout_weight="0.495"-->
+                <!--android:background="@drawable/btn_bg"-->
+                <!--android:text="SAVE" />-->
+        <!--</LinearLayout>-->
+    <Button
+        android:id="@+id/btn_review_cancel"
+        style="@style/Widget.AppCompat.Button.ButtonBar.AlertDialog"
+        android:layout_width="198dp"
+        android:layout_height="60dp"
+        android:layout_weight="0.495"
+        android:text="Cancel"
+        android:visibility="visible"
+        app:layout_constraintRight_toLeftOf="@+id/btn_review_save"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txt_profile_review" />
+
+    <Button
+        android:id="@+id/btn_review_save"
+        style="@style/Widget.AppCompat.Button.ButtonBar.AlertDialog"
+        android:layout_width="219dp"
+        android:layout_height="58dp"
+        android:layout_weight="0.495"
+        android:text="Save"
+        android:visibility="visible"
+        app:layout_constraintLeft_toRightOf="@+id/btn_review_cancel"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txt_profile_review" />
+</android.support.constraint.ConstraintLayout>

@@ -11,11 +11,13 @@ import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,6 +28,7 @@ import com.puurva.findmetoo.ServiceInterfaces.NotificationRequestModel;
 import com.puurva.findmetoo.model.ActivityNotification;
 import com.puurva.findmetoo.model.ProfileModel;
 import com.puurva.findmetoo.preference.PrefConst;
+import com.puurva.findmetoo.uitls.CommonUtility;
 import com.puurva.findmetoo.uitls.Global;
 import com.puurva.findmetoo.uitls.HttpClient;
 import com.puurva.findmetoo.uitls.ImageUtility;
@@ -49,21 +52,36 @@ public class ProfileViewActivity extends AppCompatActivity implements View.OnCli
     private String deviceID;
 //    private String activityId;
     private ActivityNotification activityNotification;
+    ProfileModel profileModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_profile);
 
-        if(Global.preference == null || Global.preference.getValue(this, PrefConst.USERNAME, null) == null){
-            Intent loginIntent = new Intent(this, LoginActivity.class);
-            loginIntent.putExtra("activity", getIntent());
-            loginIntent.putExtras(getIntent().getExtras());
-            startActivity(loginIntent);
-        }
+//        if(Global.preference == null || Global.preference.getValue(this, PrefConst.USERNAME, null) == null){
+//            Intent loginIntent = new Intent(this, LoginActivity.class);
+//            loginIntent.putExtra("activity", getIntent());
+//            loginIntent.putExtras(getIntent().getExtras());
+//            startActivity(loginIntent);
+//        }
 
         deviceID = getIntent().getStringExtra("DeviceID");
-//        activityId = getIntent().getStringExtra("ActivityID");
+        Button acceptButton = this.findViewById(R.id.btn_profile_accept);
+        Button rejectButton = this.findViewById(R.id.btn_profile_reject);
+        acceptButton.setOnClickListener(this);
+        rejectButton.setOnClickListener(this);
+        RatingBar ratingBar = this.findViewById(R.id.edit_profile_rating);
+        ratingBar.setOnTouchListener(new View.OnTouchListener() {
+                                         @Override
+                                         public boolean onTouch(View v, MotionEvent event) {
+                                             if (event.getAction() == MotionEvent.ACTION_UP) {
+                                                 launchProfileReviewActivity();
+                                             }
+                                             return true;
+                                         }
+                                     });
+        //        activityId = getIntent().getStringExtra("ActivityID");
         Log.e("ActivityNotification", "checking activity notification status in Profile View Activity");
         activityNotification = getIntent().getParcelableExtra("ActivityNotification");
         if(activityNotification != null) {
@@ -72,13 +90,13 @@ public class ProfileViewActivity extends AppCompatActivity implements View.OnCli
             }
 //        NotificationType notificationType = (NotificationType) getIntent().getSerializableExtra("source");
             if (activityNotification.ActivityNotiicationType == NotificationType.AMIN) {
-                Button acceptButton = this.findViewById(R.id.btn_profile_accept);
-                Button rejectButton = this.findViewById(R.id.btn_profile_reject);
-                acceptButton.setOnClickListener(this);
-                rejectButton.setOnClickListener(this);
                 acceptButton.setVisibility(View.VISIBLE);
                 rejectButton.setVisibility(View.VISIBLE);
             }
+        }else{
+
+            acceptButton.setVisibility(View.INVISIBLE);
+            rejectButton.setVisibility(View.INVISIBLE);
         }
         if(deviceID != null) {
             fillProfile();
@@ -92,11 +110,16 @@ public class ProfileViewActivity extends AppCompatActivity implements View.OnCli
 
         switch (id) {
             case R.id.btn_profile_reject:
+                acceptRequest(RequestStatus.REJECTED);
                 finish();
                 break;
             case R.id.btn_profile_accept:
-                acceptRequest();
+                acceptRequest(RequestStatus.ACCEPTED);
+                finish();
                 break;
+//            case R.id.profile_rating:
+//                launchProfileReviewActivity();
+//                break;
 //            case R.id.imgPhoto:
 //                photoClicked();
 //                break;
@@ -104,12 +127,18 @@ public class ProfileViewActivity extends AppCompatActivity implements View.OnCli
 
     }
 
-    private void acceptRequest() {
+    private void launchProfileReviewActivity() {
+        Intent profileReviewIntent = new Intent(this, ProfileReviewActivity.class);
+        profileReviewIntent.putExtra("ProfileModel", profileModel);
+        startActivity(profileReviewIntent);
+    }
+
+    private void acceptRequest(RequestStatus requestStatus) {
         final String token = getToken();
         ApiInterface apiService =
                 HttpClient.getClient().create(ApiInterface.class);
         try {
-            NotificationRequestModel notificationRequestModel = new NotificationRequestModel(Global.AndroidID, deviceID, NotificationType.AMIN, activityNotification.ActivityId, RequestStatus.ACCEPTED);
+            NotificationRequestModel notificationRequestModel = new NotificationRequestModel(Global.AndroidID, deviceID, NotificationType.AMIN, activityNotification.ActivityId, requestStatus);
             Call<Void> call = apiService.sendNotification("Bearer " + token, notificationRequestModel);
 
             call.enqueue(new Callback<Void>() {
@@ -184,19 +213,31 @@ public class ProfileViewActivity extends AppCompatActivity implements View.OnCli
         final TextView txtProfileName = ((TextView) findViewById(R.id.txt_view_name));
         final TextView txtHobies = ((TextView) findViewById(R.id.txt_view_hobies));
         final TextView txtAbout = ((TextView) findViewById(R.id.txt_view_about));
+        final TextView txtReviews = ((TextView) findViewById(R.id.txt_view_reviews));
+        final TextView txtViews = ((TextView) findViewById(R.id.txt_view_views));
+        final RatingBar ratingBar = ((RatingBar) findViewById(R.id.edit_profile_rating));
         ApiInterface apiService =
                 HttpClient.getClient().create(ApiInterface.class);
         Call<ProfileModel> call = apiService.getProfile("Bearer " + token, deviceID);
         call.enqueue(new Callback<ProfileModel>() {
+
             @Override
             public void onResponse(Call<ProfileModel> call, Response<ProfileModel> response) {
                 if(response.isSuccessful()) {
-                    ProfileModel profileModel = response.body();
-                    if(profileModel!=null) {
+                    profileModel = response.body();
+                    if(profileModel !=null) {
                         txtProfileName.setText(profileModel.getProfileName());
                         txtHobies.setText(profileModel.getHobies());
                         txtAbout.setText(profileModel.getAbout());
+                        txtReviews.setText(txtReviews.getText() + " : " + ((Long) profileModel.getReviews()).toString());
+                        txtViews.setText(txtViews.getText() + " : " + ((Long) profileModel.getViews()).toString());
+                        ratingBar.setRating(profileModel.getRating());
                         downloadProfileImage(token, deviceID);
+
+                        profileModel.setViews(profileModel.getViews()+1);
+                        profileModel.setDeviceId(deviceID);
+
+                        CommonUtility.PostProfile(token, profileModel, null);
                     }
                 }
             }
@@ -254,6 +295,7 @@ public class ProfileViewActivity extends AppCompatActivity implements View.OnCli
                 image1.setMaxWidth(bmp.getWidth());
                 image1.setMaxHeight(bmp.getHeight());
                 image1.setImageBitmap(bmp);
+                profileModel.setProfilePhoto(bmp);
             }
             return true;
 

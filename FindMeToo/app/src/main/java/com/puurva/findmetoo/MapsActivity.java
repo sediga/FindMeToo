@@ -14,6 +14,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -245,7 +246,7 @@ public class MapsActivity extends FragmentActivity implements
             protected void onClickConfirmed(View v, Marker marker) {
                 // Here we can perform some action triggered after clicking the button
 //                Toast.makeText(MapsActivity.this, marker.getTitle() + "'s image button clicked!", Toast.LENGTH_SHORT).show();
-                LaunchViewProfile(activities.get(marker).DeviceId);
+                LaunchViewProfile(activities.get(marker).DeviceId, false);
             }
         };
         this.viewProfile.setOnTouchListener(viewProfileClickistener);
@@ -301,7 +302,7 @@ public class MapsActivity extends FragmentActivity implements
                     HandleFromNotification(activityNotification.ActivityId);
                     break;
                 case NEW:
-                    LaunchViewProfile(null);
+                    LaunchViewProfile(activityNotification.DeviceId, true);
             }
         }else{
             Log.e("ActivityNotification", "activityNotification is null");
@@ -491,12 +492,12 @@ public class MapsActivity extends FragmentActivity implements
         return token;
     }
 
-    private void LaunchViewProfile(String deviceID) {
+    private void LaunchViewProfile(String deviceID, boolean isFromNotification) {
         Intent profileIntent = new Intent(this, ProfileViewActivity.class);
         if(deviceID != null) {
             profileIntent.putExtra("DeviceID", deviceID);
         }
-        if(activityNotification != null)
+        if(activityNotification != null && isFromNotification)
         {
             profileIntent.putExtra("ActivityNotification", activityNotification);
             Log.e("ActivityNotification", activityNotification.ActivityRequestStatus.toString());
@@ -505,12 +506,18 @@ public class MapsActivity extends FragmentActivity implements
     }
 
     private void LaunchImageViewer(View v) {
-        Intent viewImageIntent = new Intent(this, ViewImageActivity.class);
-        ByteArrayOutputStream bStream = new ByteArrayOutputStream();
-        ((BitmapDrawable)((ImageButton)v).getDrawable()).getBitmap().compress(Bitmap.CompressFormat.PNG, 100, bStream);
-        byte[] byteArray = bStream.toByteArray();
-        viewImageIntent.putExtra("bitmap", byteArray);
-        startActivity(viewImageIntent);
+        Drawable drawable = ((ImageButton) v).getDrawable();
+        if (drawable != null) {
+            Bitmap imageBitmap = ((BitmapDrawable) drawable).getBitmap();
+            if (imageBitmap != null) {
+                Intent viewImageIntent = new Intent(this, ViewImageActivity.class);
+                ByteArrayOutputStream bStream = new ByteArrayOutputStream();
+                imageBitmap.compress(Bitmap.CompressFormat.PNG, 100, bStream);
+                byte[] byteArray = bStream.toByteArray();
+                viewImageIntent.putExtra("bitmap", byteArray);
+                startActivity(viewImageIntent);
+            }
+        }
     }
 
     private void render(final Marker marker, View view) throws IOException {
@@ -537,6 +544,9 @@ public class MapsActivity extends FragmentActivity implements
 //        final Marker tempMarker = marker;
         if(marker.getTag() != "downloaded" && marker.getTag() != "") {
             GetActivityImage(marker, token);
+        }else if (marker.getTag() == ""){
+            ImageButton image1 = ((ImageButton) mWindow.findViewById(R.id.info_badge));
+            image1.setImageResource(0);
         }
     }
 
@@ -596,10 +606,10 @@ public class MapsActivity extends FragmentActivity implements
                 int width, height;
                 ImageButton image1 = ((ImageButton) mWindow.findViewById(R.id.info_badge));
                 bmp = ImageUtility.scaleImageToResolution(this, bmp, bmp.getHeight(), bmp.getWidth());
-                image1.setMaxWidth(bmp.getWidth());
-                image1.setMaxHeight(bmp.getHeight());
-                image1.setImageBitmap(bmp);
-            }
+                    image1.setMaxWidth(bmp.getWidth());
+                    image1.setMaxHeight(bmp.getHeight());
+                    image1.setImageBitmap(bmp);
+             }
             return true;
 
         } catch (Exception e) {

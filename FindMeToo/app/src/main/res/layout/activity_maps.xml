@@ -23,7 +23,7 @@
         app:floatingSearch_searchBarMarginLeft="@dimen/dimen_5"
         app:floatingSearch_searchBarMarginRight="@dimen/dimen_5"
         app:floatingSearch_searchHint="What do you want to do today?"
-        app:floatingSearch_searchInputTextSize="4dp"
+        app:floatingSearch_searchInputTextSize="5dp"
         app:floatingSearch_suggestionsListAnimDuration="250"
         app:floatingSearch_showSearchKey="true"
         app:floatingSearch_leftActionMode="showHome"

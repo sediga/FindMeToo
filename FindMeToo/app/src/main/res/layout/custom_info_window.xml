@@ -47,7 +47,7 @@
                 android:layout_height="0dp"
                 android:layout_weight="0.15"
                 android:clickable="true"
-                android:text="View Profile"
+                android:text="Profile"
                 android:textAppearance="@style/TextAppearance.AppCompat.Button"
                 android:textColor="@color/colorAccent"
                 android:textSize="14sp" />
