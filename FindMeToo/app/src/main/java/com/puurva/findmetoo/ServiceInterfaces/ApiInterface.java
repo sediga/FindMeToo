@@ -10,7 +10,6 @@ import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
-import retrofit2.http.Headers;
 import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
@@ -31,6 +30,8 @@ public interface ApiInterface {
     Call<Token> getToken(@Field("username") String username, @Field("password") String password, @Field("grant_type") String grantType);
     @GET("JoinServer/Activity/{activity}")
     Call<List<CurrentActivity>> getMatchingActivities(@Header("Authorization") String authorization, @Path("activity") String activity);
+    @GET("JoinServer/Activity")
+    Call<List<CurrentActivity>> getAllActivities(@Header("Authorization") String authorizatio);
     @GET("JoinServer/ActivityById/{activityid}")
     Call<CurrentActivity> getActivityById(@Header("Authorization") String authorization, @Path("activityid") String activityId);
     @GET("JoinServer/Images/{deviceId}/{fileName}")
@@ -40,7 +41,9 @@ public interface ApiInterface {
     @POST("JoinServer/Location")
     Call<Void> postCurrentLocation(@Header("Authorization") String authorization, @Body CurrentActivity location);
     @POST("JoinServer/Activity")
-    Call<Void> postActivity(@Header("Authorization") String authorization, @Body ActivityModel activity);
+    Call<ActivityModel> postActivity(@Header("Authorization") String authorization, @Body ActivityModel activity);
+    @POST("JoinServer/ActivitySettings")
+    Call<Void> postActivityWithSettins(@Header("Authorization") String authorization, @Body ActivityModel activity, @Body ActivitySettingsModel activitySettings);
     @POST("JoinServer/Profile")
     Call<Void> postProfile(@Header("Authorization") String authorization, @Body ProfileModel profile);
     @Multipart
@@ -55,4 +58,6 @@ public interface ApiInterface {
     Call<ProfileModel> getProfile(@Header("Authorization") String authorization, @Path("deviceId") String deviceId);
     @POST("JoinServer/profilereview")
     Call<Void> postProfileReview(@Header("Authorization") String authorization, @Body ProfileReviewModel profileReviewModel);
+    @GET("JoinServer/profilereview/{deviceId}")
+    Call<List<ProfileReviewModel>> getProfileReviews(@Header("Authorization") String authorization, @Path("deviceId") String deviceId);
 }

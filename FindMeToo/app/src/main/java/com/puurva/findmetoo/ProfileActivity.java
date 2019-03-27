@@ -15,6 +15,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RatingBar;
+import android.widget.TextView;
 
 import com.google.android.gms.common.internal.service.Common;
 import com.puurva.findmetoo.ServiceInterfaces.ApiInterface;
@@ -178,6 +180,22 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         final EditText txtProfileName = ((EditText) findViewById(R.id.txt_name));
         final EditText txtHobies = ((EditText) findViewById(R.id.txt_hobies));
         final EditText txtAbout = ((EditText) findViewById(R.id.txt_about));
+        final TextView txtReviews = ((TextView) findViewById(R.id.txt_view_reviews));
+        final TextView txtViews = ((TextView) findViewById(R.id.txt_view_views));
+        final RatingBar ratingBar = ((RatingBar) findViewById(R.id.profile_rating));
+        txtReviews.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    Intent profileReviewsIntent = new Intent(ProfileActivity.this, ViewListActivity.class);
+                    profileReviewsIntent.putExtra("DeviceId", deviceID);
+                    startActivity(profileReviewsIntent);
+                }catch (Exception ex){
+                    Log.e("LoadProfileViews", ex.getMessage());
+                }
+            }
+        });
+
         ApiInterface apiService =
                 HttpClient.getClient().create(ApiInterface.class);
         Call<ProfileModel> call = apiService.getProfile("Bearer " + token, deviceID);
@@ -190,6 +208,9 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
                         txtProfileName.setText(profileModel.getProfileName());
                         txtHobies.setText(profileModel.getHobies());
                         txtAbout.setText(profileModel.getAbout());
+                        txtReviews.setText(txtReviews.getText() + " : " + ((Long) profileModel.getReviews()).toString());
+                        txtViews.setText(txtViews.getText() + " : " + ((Long) profileModel.getViews()).toString());
+                        ratingBar.setRating(profileModel.getRating());
                         downloadProfileImage(token, deviceID);
                     }
                 }

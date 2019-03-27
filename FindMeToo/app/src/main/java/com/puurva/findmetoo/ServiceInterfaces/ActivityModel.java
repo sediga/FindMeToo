@@ -1,6 +1,8 @@
 package com.puurva.findmetoo.ServiceInterfaces;
 
 import com.google.gson.annotations.SerializedName;
+import com.puurva.findmetoo.Enums.ActivityStatuses;
+import com.puurva.findmetoo.model.ActivitySettingsModel;
 
 public class ActivityModel {
 
@@ -12,6 +14,17 @@ public class ActivityModel {
         this.Latitude = latitude;
         this.Longitude = longitude;
         this.description = description;
+    }
+
+    public ActivityModel(String deviceID, String what, String description, String when, double latitude, double longitude, ActivitySettingsModel settings)
+    {
+        this.DeviceID = deviceID;
+        this.What = what;
+        this.When = when;
+        this.Latitude = latitude;
+        this.Longitude = longitude;
+        this.description = description;
+        this.activitySetting = settings;
     }
 
     @SerializedName("DeviceID")
@@ -26,4 +39,6 @@ public class ActivityModel {
     public double Longitude;
     @SerializedName("description")
     public String description;
+    @SerializedName("ActivitySetting")
+    public ActivitySettingsModel activitySetting;
 }

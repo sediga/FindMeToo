@@ -86,7 +86,7 @@ public class ProfileReviewActivity extends AppCompatActivity implements View.OnC
         EditText txtReview = this.findViewById(R.id.txt_profile_review);
         try {
             ProfileReviewModel profileReviewModel =
-                    new ProfileReviewModel(Global.AndroidID, profileModel.getDeviceId(), profileModel.getUserName(),
+                    new ProfileReviewModel(Global.AndroidID, profileModel.getDeviceId(), Global.current_user.getUsername(),
                             txtReview.getText().toString(), ratingBar.getRating());
             CommonUtility.PostProfileReview(token, profileReviewModel);
         } catch (Exception ex) {

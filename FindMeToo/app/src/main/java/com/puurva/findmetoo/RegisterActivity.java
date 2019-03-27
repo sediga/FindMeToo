@@ -1,13 +1,16 @@
 package com.puurva.findmetoo;
 
 import android.content.ContentValues;
+import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 
 import com.puurva.findmetoo.ServiceInterfaces.ApiInterface;
 import com.puurva.findmetoo.model.Token;
+import com.puurva.findmetoo.uitls.CommonUtility;
 import com.puurva.findmetoo.uitls.GPSTracker;
 import com.puurva.findmetoo.uitls.Global;
 import com.puurva.findmetoo.uitls.HttpClient;
@@ -66,14 +69,35 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
 //                System.out.println(response.toString());
-                if(response.isSuccessful())
-                {
+                if(response.isSuccessful()) {
                     TokenBindingModel tokenBindingModel = new TokenBindingModel(email, "password", password);
                     Call<Token> tokenCall = apiService.getToken(email, password, "password");
                     tokenCall.enqueue((new Callback<Token>() {
                         @Override
                         public void onResponse(Call<Token> call, Response<Token> response) {
                             Token token = response.body();
+                            String softwareVersion = Build.VERSION.RELEASE;
+                            DeviceModel deviceModel = new DeviceModel(Global.AndroidID, email, softwareVersion, null);
+
+                            final ApiInterface apiService =
+                                    HttpClient.getClient().create(ApiInterface.class);
+//        TokenBindingModel tokenBindingModel = new TokenBindingModel(username, "password", password);
+                            Call<Void> tokenCall = apiService.postDevice(deviceModel);
+                            tokenCall.enqueue((new Callback<Void>() {
+                                @Override
+                                public void onResponse(Call<Void> call, Response<Void> response) {
+                                    if (response.isSuccessful()) {
+                                        Global.has_device_registered = true;
+                                        finish();
+                                    }
+                                }
+
+                                @Override
+                                public void onFailure(Call<Void> call, Throwable t) {
+                                    System.out.println(t.getMessage());
+                                    Log.e("login", "Login Failed : " + t.getMessage());
+                                }
+                            }));
                         }
 
                         @Override
@@ -118,9 +142,10 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
 
         SQLHelper.Insert("t_user", values);
 
-        Global.showShortToast(this, "User registered successfully.");
         this.registerApiUser(email, password);
-        finish();
+
+        Global.showShortToast(this, "User registered successfully.");
+//        finish();
     }
 
 }

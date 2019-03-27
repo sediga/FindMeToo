@@ -1,6 +1,9 @@
 package com.puurva.findmetoo.model;
 
 import com.google.gson.annotations.SerializedName;
+import com.puurva.findmetoo.Enums.ActivityTypes;
+
+import java.util.Date;
 
 public class CurrentActivity {
 
@@ -27,4 +30,10 @@ public class CurrentActivity {
     public String ImagePath;
     @SerializedName("ActivityId")
     public String ActivityId;
+    @SerializedName("ActivityType")
+    public String ActivityType;
+    @SerializedName("ActivityStartTime")
+    public String ActivityStartTime;
+    @SerializedName("ActivityEndTime")
+    public String ActivityEndTime;
 }

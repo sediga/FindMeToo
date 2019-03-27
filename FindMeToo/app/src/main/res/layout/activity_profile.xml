@@ -89,14 +89,12 @@
                 android:orientation="horizontal"
                 android:rating="4"
                 android:stepSize="1"
-                android:visibility="visible"
-                app:layout_constraintBottom_toBottomOf="@id/ConstraintLayout2"
-                app:layout_constraintStart_toStartOf="@id/ConstraintLayout2"
-                app:layout_constraintTop_toTopOf="@id/ConstraintLayout2" />
+                android:visibility="visible" />
 
             <TextView
                 android:id="@+id/txt_view_reviews"
-                android:layout_width="100dp"
+                style="@style/Widget.AppCompat.Button.ButtonBar.AlertDialog"
+                android:layout_width="121dp"
                 android:layout_height="match_parent"
                 android:layout_marginStart="8dp"
                 android:layout_marginLeft="8dp"
@@ -106,13 +104,15 @@
                 android:textAlignment="center"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                 app:layout_constraintBottom_toBottomOf="@id/ConstraintLayout2"
-                app:layout_constraintEnd_toStartOf="@id/txt_view_views"
+                app:layout_constraintStart_toEndOf="@+id/profile_rating"
                 app:layout_constraintTop_toTopOf="@id/ConstraintLayout2" />
 
             <TextView
                 android:id="@+id/txt_view_views"
                 android:layout_width="100dp"
                 android:layout_height="match_parent"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
                 android:autoLink="web"
                 android:gravity="center"
                 android:text="views"
@@ -120,6 +120,7 @@
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                 app:layout_constraintBottom_toBottomOf="@id/ConstraintLayout2"
                 app:layout_constraintEnd_toEndOf="@id/ConstraintLayout2"
+                app:layout_constraintStart_toEndOf="@+id/txt_view_reviews"
                 app:layout_constraintTop_toTopOf="@id/ConstraintLayout2" />
 
         </android.support.constraint.ConstraintLayout>

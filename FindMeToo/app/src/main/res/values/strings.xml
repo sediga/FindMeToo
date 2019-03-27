@@ -13,11 +13,13 @@
     <string name="search">Search</string>
     <string name="add">Add</string>
     <string name="profile">Profile</string>
-    <string name="gallery">Gallery</string>
+    <string name="gallery">PICK</string>
     <string name="enter_brief_description">Enter brief description</string>
     <string name="enter_title">Enter Title</string>
     <string name="default_notification_channel_id">findmetoo_defauld_channel</string>
     <string name="default_notification_channel_name">findmetoo</string>
     <string name="fcm_message">FindMeToo</string>
     <string name="title_activity_review_profile">activity_review_profile</string>
+    <string name="activity_start_time">Start Time</string>
+    <string name="activity_end_time">End Time</string>
 </resources>

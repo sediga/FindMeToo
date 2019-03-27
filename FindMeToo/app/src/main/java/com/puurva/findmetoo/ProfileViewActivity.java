@@ -216,6 +216,18 @@ public class ProfileViewActivity extends AppCompatActivity implements View.OnCli
         final TextView txtReviews = ((TextView) findViewById(R.id.txt_view_reviews));
         final TextView txtViews = ((TextView) findViewById(R.id.txt_view_views));
         final RatingBar ratingBar = ((RatingBar) findViewById(R.id.edit_profile_rating));
+        txtReviews.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    Intent profileReviewsIntent = new Intent(ProfileViewActivity.this, ViewListActivity.class);
+                    profileReviewsIntent.putExtra("DeviceId", deviceID);
+                    startActivity(profileReviewsIntent);
+                }catch (Exception ex){
+                    Log.e("LoadProfileViews", ex.getMessage());
+                }
+            }
+        });
         ApiInterface apiService =
                 HttpClient.getClient().create(ApiInterface.class);
         Call<ProfileModel> call = apiService.getProfile("Bearer " + token, deviceID);

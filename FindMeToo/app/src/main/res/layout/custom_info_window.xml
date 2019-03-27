@@ -14,7 +14,8 @@
      limitations under the License.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
+    android:id="@+id/info_window_main"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/custom_info_bubble"
     android:gravity="center"
@@ -23,67 +24,50 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="0.8"
+        android:layout_weight="0.55"
         android:orientation="horizontal">
-
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="0.3"
-            android:orientation="vertical">
 
         <ImageButton
             android:id="@+id/info_badge"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_marginRight="5dp"
-            android:layout_weight="0.85"
-            android:adjustViewBounds="true"
-            android:onClick="onViewImageClick"></ImageButton>
-
-            <TextView
-                android:id="@+id/view_profile_link"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="0.15"
-                android:clickable="true"
-                android:text="Profile"
-                android:textAppearance="@style/TextAppearance.AppCompat.Button"
-                android:textColor="@color/colorAccent"
-                android:textSize="14sp" />
-
-        </LinearLayout>
-
-         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="0.7"
+            android:layout_marginRight="5dp"
+            android:layout_weight="0.4"
+            android:adjustViewBounds="true"
+            android:scaleType="centerCrop"
+            android:onClick="onViewImageClick"></ImageButton>
+
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.6"
             android:orientation="vertical">
 
-             <TextView
-                 android:id="@+id/title"
-                 android:layout_width="match_parent"
-                 android:layout_height="0dp"
-                 android:layout_gravity="center_horizontal"
-                 android:layout_weight="0.25"
-                 android:ellipsize="end"
-                 android:singleLine="false"
-                 android:textSize="16sp"
-                 android:textStyle="bold" />
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_gravity="center"
+                android:layout_weight="0.35"
+                android:ellipsize="end"
+                android:singleLine="false"
+                android:textSize="16sp"
+                android:textStyle="bold" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="0.1" />
+                android:layout_weight="0.05" />
 
-             <TextView
-                 android:id="@+id/snippet"
-                 android:layout_width="match_parent"
-                 android:layout_height="0dp"
-                 android:layout_weight="0.65"
-                 android:ellipsize="end"
-                 android:singleLine="false"
-                 android:textSize="14sp" />
+            <TextView
+                android:id="@+id/snippet"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="0.6"
+                android:ellipsize="end"
+                android:singleLine="false"
+                android:textSize="14sp" />
 
         </LinearLayout>
     </LinearLayout>
@@ -94,33 +78,76 @@
         android:layout_weight="0.2"
         android:orientation="horizontal">
 
+        <!--<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
+            <!--xmlns:app="http://schemas.android.com/apk/res-auto"-->
+            <!--xmlns:tools="http://schemas.android.com/tools"-->
+            <!--android:id="@+id/ConstraintLayout2_View"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:gravity="center"-->
+            <!--tools:context=".LoginActivity">-->
+
         <RatingBar
-            android:layout_width="wrap_content"
+            android:id="@+id/profile_rating_indicator"
+            style="@style/Widget.AppCompat.RatingBar.Indicator"
+            android:layout_width="0dp"
+            android:layout_weight="0.53"
             android:layout_height="match_parent"
-            android:fitsSystemWindows="true"
+            android:isIndicator="true"
             android:numStars="5"
-            android:scaleX=".5"
-            android:scaleY=".5"
-            android:transformPivotX="0dp"
-            android:transformPivotY="0dp"
-            android:stepSize="0.1" />
+            android:orientation="horizontal"
+            android:rating="0"
+            android:stepSize="1"
+            android:visibility="visible"/>
+        <!--<RatingBar-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent"-->
+            <!--style="?android:attr/ratingBarStyleIndicator"-->
+            <!--android:layout_weight="0"-->
+            <!--android:numStars="5"-->
+            <!--android:scaleY="0.5"-->
+            <!--android:scaleX="0.5"-->
+            <!--android:layout_gravity="start"-->
+            <!--android:stepSize="0.1"-->
+            <!--android:max="5"/>-->
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="0.05"
-            android:text=" "/>
+            android:layout_weight="0.47"
+            android:text="                                        " />
+         <!--</android.support.constraint.ConstraintLayout>-->
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.25"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/view_profile_link"
+            style="@style/Widget.AppCompat.Button.ButtonBar.AlertDialog"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="start"
+            android:layout_weight="0.4"
+            android:text="Profile" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.4"
+            android:text=" " />
 
         <Button
             android:id="@+id/iammin"
-            style="@style/Widget.AppCompat.Button.Borderless"
+            style="@style/Widget.AppCompat.Button.ButtonBar.AlertDialog"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="0.2"
             android:background="@color/transparent"
-            android:text="I'm In"
-            android:textAppearance="@style/TextAppearance.AppCompat.Button"
-            android:textColor="@color/colorAccent" />
+            android:text="I'm In" />
 
     </LinearLayout>
     <!--<TextView-->

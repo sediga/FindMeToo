@@ -19,6 +19,8 @@
     <group android:id="@+id/group_id">
         <item android:id="@+id/menu_profile"
             android:title="Profile"/>
+        <item android:id="@+id/menu_profile_reviews"
+            android:title="Reviews"/>
     </group>
 
 
