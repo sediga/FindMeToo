@@ -22,4 +22,5 @@
     <string name="title_activity_review_profile">activity_review_profile</string>
     <string name="activity_start_time">Start Time</string>
     <string name="activity_end_time">End Time</string>
+    <string name="title_findmetoo">FInd Me</string>
 </resources>

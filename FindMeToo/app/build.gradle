@@ -2,10 +2,18 @@ apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
 
 android {
+    signingConfigs {
+        Findmetoo1 {
+            keyAlias 'findmetoo1'
+            keyPassword 'Duogse!231'
+            storeFile file('C:/Users/goud_/StudioProjects/FindMeToo/FindMeToo/ExportedKeys/findmetoo1_key.pem')
+            storePassword 'esgoud123'
+        }
+    }
     compileSdkVersion 27
     defaultConfig {
         applicationId "com.puurva.findmetoo"
-        minSdkVersion 16
+        minSdkVersion 22
         targetSdkVersion 27
         versionCode 1
         versionName "1.0"
@@ -16,11 +24,14 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+        debug {
+        }
     }
+    dynamicFeatures = [":findmetoo"]
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
     //noinspection GradleCompatible
     implementation 'com.android.support:appcompat-v7:27.1.1'
     implementation 'com.google.android.gms:play-services-maps:15.0.1'

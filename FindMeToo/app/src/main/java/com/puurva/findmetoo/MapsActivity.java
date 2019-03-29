@@ -135,7 +135,7 @@ public class MapsActivity extends FragmentActivity implements
 
     private SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, hh:mm a", Locale.US);
     private SimpleDateFormat universalDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US);
-    LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+//    LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 
     PopupWindow mPopupWindow;
 
