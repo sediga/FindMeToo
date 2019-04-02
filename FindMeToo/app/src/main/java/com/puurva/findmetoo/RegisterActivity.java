@@ -1,13 +1,22 @@
 package com.puurva.findmetoo;
 
+import android.Manifest;
 import android.content.ContentValues;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Build;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.puurva.findmetoo.ServiceInterfaces.ApiInterface;
 import com.puurva.findmetoo.model.Token;
 import com.puurva.findmetoo.uitls.CommonUtility;
@@ -24,6 +33,8 @@ import com.puurva.findmetoo.uitls.SQLHelper;
 
 public class RegisterActivity extends AppCompatActivity implements View.OnClickListener {
 
+    private FusedLocationProviderClient fusedLocationClient;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,6 +44,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         findViewById(R.id.button_profile).setOnClickListener(this);
         findViewById(R.id.button_login).setOnClickListener(this);
 
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
     }
 
     @Override
@@ -58,8 +70,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         setContentView(R.layout.activity_profile);
     }
 
-    private void registerApiUser(final String email, final String password)
-    {
+    private void registerApiUser(final String email, final String password) {
         Token token = null;
         RegisterBindingModel registerBindingModel = new RegisterBindingModel(email, password, password);
         final ApiInterface apiService =
@@ -69,7 +80,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
 //                System.out.println(response.toString());
-                if(response.isSuccessful()) {
+                if (response.isSuccessful()) {
                     TokenBindingModel tokenBindingModel = new TokenBindingModel(email, "password", password);
                     Call<Token> tokenCall = apiService.getToken(email, password, "password");
                     tokenCall.enqueue((new Callback<Token>() {
@@ -117,8 +128,8 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
 
     private void doRegister() {
 
-        String email = ((EditText) findViewById(R.id.edit_email)).getText().toString();
-        String password = ((EditText) findViewById(R.id.edit_password)).getText().toString();
+        final String email = ((EditText) findViewById(R.id.edit_email)).getText().toString();
+        final String password = ((EditText) findViewById(R.id.edit_password)).getText().toString();
         String confirm = ((EditText) findViewById(R.id.edit_confirm)).getText().toString();
 
         if (email.isEmpty() || password.isEmpty() || confirm.isEmpty()) {
@@ -131,20 +142,39 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
             return;
         }
 
-        GPSTracker gpsTracker = new GPSTracker(this);
-        gpsTracker.getLocation();
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
 
-        ContentValues values = new ContentValues();
-        values.put("email", email);
-        values.put("password", password);
-        values.put("latitude", gpsTracker.latitude);
-        values.put("longitude", gpsTracker.longitude);
+        fusedLocationClient.getLastLocation()
+                .addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        // Got last known location. In some rare situations this can be null.
+                        if (location != null) {
+                            ContentValues values = new ContentValues();
+                            values.put("email", email);
+                            values.put("password", password);
+                            values.put("latitude", location.getLatitude());
+                            values.put("longitude", location.getLongitude());
 
-        SQLHelper.Insert("t_user", values);
+                            SQLHelper.Insert("t_user", values);
 
-        this.registerApiUser(email, password);
+                            RegisterActivity.this.registerApiUser(email, password);
 
-        Global.showShortToast(this, "User registered successfully.");
+                            Global.showShortToast(RegisterActivity.this, "User registered successfully.");                        }
+                    }
+
+                });
+
+
 //        finish();
     }
 
