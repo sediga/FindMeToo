@@ -1,12 +1,7 @@
-package com.puurva.findmetoo;
+package com.puurva.findmetoo.Activities;
 
-import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -15,25 +10,15 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.puurva.findmetoo.Enums.NotificationType;
 import com.puurva.findmetoo.Enums.RequestStatus;
-import com.puurva.findmetoo.ServiceInterfaces.ApiInterface;
-import com.puurva.findmetoo.ServiceInterfaces.NotificationRequestModel;
-import com.puurva.findmetoo.model.ActivityNotification;
-import com.puurva.findmetoo.model.ProfileModel;
-import com.puurva.findmetoo.model.ProfileReviewModel;
+import com.puurva.findmetoo.R;
+import com.puurva.findmetoo.ServiceInterfaces.model.ActivityNotification;
+import com.puurva.findmetoo.ServiceInterfaces.model.ProfileModel;
+import com.puurva.findmetoo.ServiceInterfaces.model.ProfileReviewModel;
 import com.puurva.findmetoo.preference.PrefConst;
 import com.puurva.findmetoo.uitls.CommonUtility;
 import com.puurva.findmetoo.uitls.Global;
-import com.puurva.findmetoo.uitls.HttpClient;
-import com.puurva.findmetoo.uitls.ImageUtility;
-
-import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class ProfileReviewActivity extends AppCompatActivity implements View.OnClickListener {
         //implements View.OnClickListener {

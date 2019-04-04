@@ -1,8 +1,6 @@
-package com.puurva.findmetoo.ServiceInterfaces;
+package com.puurva.findmetoo.ServiceInterfaces.model;
 
 import com.google.gson.annotations.SerializedName;
-import com.puurva.findmetoo.Enums.ActivityStatuses;
-import com.puurva.findmetoo.model.ActivitySettingsModel;
 
 public class ActivityModel {
 

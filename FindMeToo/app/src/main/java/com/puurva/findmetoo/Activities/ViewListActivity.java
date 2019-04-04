@@ -1,4 +1,4 @@
-package com.puurva.findmetoo;
+package com.puurva.findmetoo.Activities;
 
 import android.app.Activity;
 import android.database.Cursor;
@@ -6,18 +6,17 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.puurva.findmetoo.R;
 import com.puurva.findmetoo.ServiceInterfaces.ApiInterface;
-import com.puurva.findmetoo.model.ProfileReviewModel;
+import com.puurva.findmetoo.ServiceInterfaces.model.ProfileReviewModel;
 import com.puurva.findmetoo.preference.PrefConst;
 import com.puurva.findmetoo.uitls.Global;
 import com.puurva.findmetoo.uitls.HttpClient;
 import com.puurva.findmetoo.uitls.ReviewListViewAdapter;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;

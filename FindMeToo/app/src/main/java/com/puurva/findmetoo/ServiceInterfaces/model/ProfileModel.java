@@ -1,4 +1,4 @@
-package com.puurva.findmetoo.model;
+package com.puurva.findmetoo.ServiceInterfaces.model;
 
 import android.graphics.Bitmap;
 import android.os.Parcel;

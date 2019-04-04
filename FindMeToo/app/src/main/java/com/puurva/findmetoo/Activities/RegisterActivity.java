@@ -1,4 +1,4 @@
-package com.puurva.findmetoo;
+package com.puurva.findmetoo.Activities;
 
 import android.Manifest;
 import android.content.ContentValues;
@@ -14,13 +14,13 @@ import android.widget.EditText;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.puurva.findmetoo.R;
 import com.puurva.findmetoo.ServiceInterfaces.ApiInterface;
-import com.puurva.findmetoo.model.Token;
-import com.puurva.findmetoo.uitls.CommonUtility;
-import com.puurva.findmetoo.uitls.GPSTracker;
+import com.puurva.findmetoo.ServiceInterfaces.model.DeviceModel;
+import com.puurva.findmetoo.ServiceInterfaces.model.RegisterBindingModel;
+import com.puurva.findmetoo.ServiceInterfaces.model.Token;
+import com.puurva.findmetoo.ServiceInterfaces.model.TokenBindingModel;
 import com.puurva.findmetoo.uitls.Global;
 import com.puurva.findmetoo.uitls.HttpClient;
 
@@ -28,7 +28,6 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import com.puurva.findmetoo.ServiceInterfaces.*;
 import com.puurva.findmetoo.uitls.SQLHelper;
 
 public class RegisterActivity extends AppCompatActivity implements View.OnClickListener {

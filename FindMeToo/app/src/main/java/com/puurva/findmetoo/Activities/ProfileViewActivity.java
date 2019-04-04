@@ -1,4 +1,4 @@
-package com.puurva.findmetoo;
+package com.puurva.findmetoo.Activities;
 
 import android.content.Intent;
 import android.database.Cursor;
@@ -14,7 +14,6 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
@@ -22,10 +21,11 @@ import android.widget.Toast;
 
 import com.puurva.findmetoo.Enums.NotificationType;
 import com.puurva.findmetoo.Enums.RequestStatus;
+import com.puurva.findmetoo.R;
 import com.puurva.findmetoo.ServiceInterfaces.ApiInterface;
-import com.puurva.findmetoo.ServiceInterfaces.NotificationRequestModel;
-import com.puurva.findmetoo.model.ActivityNotification;
-import com.puurva.findmetoo.model.ProfileModel;
+import com.puurva.findmetoo.ServiceInterfaces.model.NotificationRequestModel;
+import com.puurva.findmetoo.ServiceInterfaces.model.ActivityNotification;
+import com.puurva.findmetoo.ServiceInterfaces.model.ProfileModel;
 import com.puurva.findmetoo.preference.PrefConst;
 import com.puurva.findmetoo.uitls.CommonUtility;
 import com.puurva.findmetoo.uitls.Global;

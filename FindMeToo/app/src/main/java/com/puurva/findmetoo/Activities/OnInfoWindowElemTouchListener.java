@@ -1,4 +1,4 @@
-package com.puurva.findmetoo;
+package com.puurva.findmetoo.Activities;
 
 import android.graphics.drawable.Drawable;
 import android.os.Handler;

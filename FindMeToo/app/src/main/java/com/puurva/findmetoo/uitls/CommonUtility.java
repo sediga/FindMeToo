@@ -1,36 +1,18 @@
 package com.puurva.findmetoo.uitls;
 
-import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Matrix;
-import android.graphics.Paint;
-import android.graphics.Rect;
-import android.media.ExifInterface;
-import android.net.Uri;
-import android.os.Build;
 import android.os.Environment;
-import android.provider.Settings;
-import android.support.annotation.Nullable;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
-import com.puurva.findmetoo.LoginActivity;
 import com.puurva.findmetoo.ServiceInterfaces.ApiInterface;
-import com.puurva.findmetoo.ServiceInterfaces.DeviceModel;
-import com.puurva.findmetoo.model.ProfileModel;
-import com.puurva.findmetoo.model.ProfileReviewModel;
-import com.puurva.findmetoo.preference.PrefConst;
+import com.puurva.findmetoo.ServiceInterfaces.model.DeviceModel;
+import com.puurva.findmetoo.ServiceInterfaces.model.ProfileModel;
+import com.puurva.findmetoo.ServiceInterfaces.model.ProfileReviewModel;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 import okhttp3.MediaType;

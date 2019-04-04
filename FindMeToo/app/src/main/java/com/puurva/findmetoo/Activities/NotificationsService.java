@@ -1,50 +1,30 @@
-package com.puurva.findmetoo;
+package com.puurva.findmetoo.Activities;
 
-import android.app.AlertDialog;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.Service;
 import android.app.TaskStackBuilder;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
-import android.os.IBinder;
 import android.provider.Settings;
-import android.renderscript.RenderScript;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
-import com.google.gson.JsonObject;
 import com.puurva.findmetoo.Enums.NotificationType;
 import com.puurva.findmetoo.Enums.RequestStatus;
-import com.puurva.findmetoo.ServiceInterfaces.ApiInterface;
-import com.puurva.findmetoo.ServiceInterfaces.DeviceModel;
-import com.puurva.findmetoo.model.ActivityNotification;
-import com.puurva.findmetoo.model.CurrentActivity;
-import com.puurva.findmetoo.model.Token;
-import com.puurva.findmetoo.preference.PrefConst;
+import com.puurva.findmetoo.R;
+import com.puurva.findmetoo.ServiceInterfaces.model.DeviceModel;
+import com.puurva.findmetoo.ServiceInterfaces.model.ActivityNotification;
 import com.puurva.findmetoo.uitls.CommonUtility;
 import com.puurva.findmetoo.uitls.Global;
-import com.puurva.findmetoo.uitls.HttpClient;
 import com.puurva.findmetoo.uitls.SQLHelper;
 
-import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.Map;
-
-import okhttp3.Request;
-import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class NotificationsService extends FirebaseMessagingService {
 

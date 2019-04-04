@@ -1,4 +1,4 @@
-package com.puurva.findmetoo.model;
+package com.puurva.findmetoo.ServiceInterfaces.model;
 
 import com.google.gson.annotations.SerializedName;
 

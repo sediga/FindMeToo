@@ -1,4 +1,4 @@
-package com.puurva.findmetoo;
+package com.puurva.findmetoo.Activities;
 
 import android.Manifest;
 import android.app.Activity;
@@ -17,8 +17,9 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
-import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -56,16 +57,17 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.puurva.findmetoo.Enums.ActivityStatuses;
 import com.puurva.findmetoo.Enums.ActivityTypes;
 import com.puurva.findmetoo.Enums.NotificationType;
 import com.puurva.findmetoo.Enums.RequestStatus;
-import com.puurva.findmetoo.model.ActivityNotification;
-import com.puurva.findmetoo.model.ActivitySettingsModel;
-import com.puurva.findmetoo.model.CurrentActivity;
+import com.puurva.findmetoo.R;
+import com.puurva.findmetoo.ServiceInterfaces.model.ActivityModel;
+import com.puurva.findmetoo.ServiceInterfaces.model.ActivityNotification;
+import com.puurva.findmetoo.ServiceInterfaces.model.ActivitySettingsModel;
+import com.puurva.findmetoo.ServiceInterfaces.model.CurrentActivity;
+import com.puurva.findmetoo.ServiceInterfaces.model.NotificationRequestModel;
 import com.puurva.findmetoo.preference.PrefConst;
-import com.puurva.findmetoo.uitls.GPSTracker;
 import com.puurva.findmetoo.uitls.Global;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -351,6 +353,21 @@ public class MapsActivity extends FragmentActivity implements
                         .build();
 
                 View addActivityConfirmPopupLayout = getLayoutInflater().inflate(R.layout.confirm_add_activity, (ViewGroup)findViewById(R.id.confirm_add_dialog_top));
+                TextView confirmAddActivityTextView = addActivityConfirmPopupLayout.findViewById(R.id.confirm_add_activity_text);
+                try {
+                    Geocoder geo = new Geocoder(MapsActivity.this.getApplicationContext(), Locale.getDefault());
+                    List<Address> addresses = geo.getFromLocation(newActivityMarker.getPosition().latitude, newActivityMarker.getPosition().longitude, 1);
+                    if (!addresses.isEmpty() && addresses.size() > 0) {
+                        confirmAddActivityTextView.setText(confirmAddActivityTextView.getText() + " at : " + addresses.get(0).getAddressLine(0) + "?");
+//                            confirmAddActivityTextView.setText(confirmAddActivityTextView.getText() + " at : " + addresses.get(0).getFeatureName() + ", " + addresses.get(0).getLocality() +", " + addresses.get(0).getAdminArea() + ", " + addresses.get(0).getCountryName() + "?");
+                        //Toast.makeText(getApplicationContext(), "Address:- " + addresses.get(0).getFeatureName() + addresses.get(0).getAdminArea() + addresses.get(0).getLocality(), Toast.LENGTH_LONG).show();
+                    } else {
+                        confirmAddActivityTextView.setText(confirmAddActivityTextView.getText() + "?");
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace(); // getFromLocation() may sometimes fail
+                }
+
                 mapLongClickPopupWindow = new PopupWindow(
                         addActivityConfirmPopupLayout,
                         ViewGroup.LayoutParams.MATCH_PARENT,

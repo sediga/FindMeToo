@@ -3,7 +3,7 @@ package com.puurva.findmetoo.uitls;
 import android.content.ContentValues;
 import android.database.Cursor;
 
-import com.puurva.findmetoo.ServiceInterfaces.DeviceModel;
+import com.puurva.findmetoo.ServiceInterfaces.model.DeviceModel;
 
 import java.util.Calendar;
 

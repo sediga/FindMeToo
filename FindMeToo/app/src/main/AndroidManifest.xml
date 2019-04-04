@@ -28,7 +28,7 @@
         android:roundIcon="@drawable/findmetoo_logo"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <service android:name=".NotificationsService">
+        <service android:name=".Activities.NotificationsService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
@@ -46,11 +46,11 @@
             android:value="@string/google_maps_key" />
 
         <activity
-            android:name=".MapsActivity"
+            android:name=".Activities.MapsActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:label="@string/title_activity_maps" />
         <activity
-            android:name=".LoginActivity"
+            android:name=".Activities.LoginActivity"
             android:label="@string/title_activity_maps">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -59,25 +59,25 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".RegisterActivity"
+            android:name=".Activities.RegisterActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:label="@string/title_activity_maps"
-            android:parentActivityName=".LoginActivity" />
+            android:parentActivityName=".Activities.LoginActivity" />
         <activity
-            android:name=".ProfileActivity"
-            android:parentActivityName=".MapsActivity" />
+            android:name=".Activities.ProfileActivity"
+            android:parentActivityName=".Activities.MapsActivity" />
         <activity
-            android:name=".ProfileViewActivity"
-            android:parentActivityName=".MapsActivity" />
+            android:name=".Activities.ProfileViewActivity"
+            android:parentActivityName=".Activities.MapsActivity" />
         <activity
-            android:name=".ProfileReviewActivity"
-            android:parentActivityName=".ProfileViewActivity" />
+            android:name=".Activities.ProfileReviewActivity"
+            android:parentActivityName=".Activities.ProfileViewActivity" />
         <activity
-            android:name=".ViewImageActivity"
-            android:parentActivityName=".MapsActivity" />
+            android:name=".Activities.ViewImageActivity"
+            android:parentActivityName=".Activities.MapsActivity" />
         <activity
-            android:name=".ViewListActivity"
-            android:parentActivityName=".MapsActivity" />
+            android:name=".Activities.ViewListActivity"
+            android:parentActivityName=".Activities.MapsActivity" />
     </application>
 
 </manifest>

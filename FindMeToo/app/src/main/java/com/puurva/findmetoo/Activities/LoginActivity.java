@@ -1,14 +1,12 @@
-package com.puurva.findmetoo;
+package com.puurva.findmetoo.Activities;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.os.Build;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -23,10 +21,11 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 import com.puurva.findmetoo.Enums.NotificationType;
 import com.puurva.findmetoo.Enums.RequestStatus;
+import com.puurva.findmetoo.R;
 import com.puurva.findmetoo.ServiceInterfaces.ApiInterface;
-import com.puurva.findmetoo.ServiceInterfaces.DeviceModel;
-import com.puurva.findmetoo.model.ActivityNotification;
-import com.puurva.findmetoo.model.Token;
+import com.puurva.findmetoo.ServiceInterfaces.model.DeviceModel;
+import com.puurva.findmetoo.ServiceInterfaces.model.ActivityNotification;
+import com.puurva.findmetoo.ServiceInterfaces.model.Token;
 import com.puurva.findmetoo.preference.PrefConst;
 import com.puurva.findmetoo.preference.Preference;
 import com.puurva.findmetoo.uitls.CallBackHelper;
@@ -35,9 +34,7 @@ import com.puurva.findmetoo.uitls.Global;
 import com.puurva.findmetoo.uitls.HttpClient;
 import com.puurva.findmetoo.uitls.SQLHelper;
 import com.puurva.findmetoo.uitls.SQLiteManager;
-import com.puurva.findmetoo.model.UserModel;
-
-import org.json.JSONObject;
+import com.puurva.findmetoo.ServiceInterfaces.model.UserModel;
 
 import retrofit2.Call;
 import retrofit2.Callback;

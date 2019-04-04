@@ -1,6 +1,15 @@
 package com.puurva.findmetoo.ServiceInterfaces;
 
-import com.puurva.findmetoo.model.*;
+import com.puurva.findmetoo.ServiceInterfaces.model.ActivityModel;
+import com.puurva.findmetoo.ServiceInterfaces.model.ActivitySettingsModel;
+import com.puurva.findmetoo.ServiceInterfaces.model.CurrentActivity;
+import com.puurva.findmetoo.ServiceInterfaces.model.DeviceModel;
+import com.puurva.findmetoo.ServiceInterfaces.model.NotificationRequestModel;
+import com.puurva.findmetoo.ServiceInterfaces.model.ProfileModel;
+import com.puurva.findmetoo.ServiceInterfaces.model.ProfileReviewModel;
+import com.puurva.findmetoo.ServiceInterfaces.model.RegisterBindingModel;
+import com.puurva.findmetoo.ServiceInterfaces.model.Token;
+import com.puurva.findmetoo.ServiceInterfaces.model.*;
 
 import okhttp3.MultipartBody;
 import okhttp3.ResponseBody;

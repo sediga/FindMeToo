@@ -9,7 +9,7 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 
 import com.puurva.findmetoo.R;
-import com.puurva.findmetoo.model.ProfileReviewModel;
+import com.puurva.findmetoo.ServiceInterfaces.model.ProfileReviewModel;
 
 public class ReviewListViewAdapter  extends ArrayAdapter<ProfileReviewModel> {
     private final Context context;

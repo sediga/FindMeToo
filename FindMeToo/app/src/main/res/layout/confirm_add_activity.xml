@@ -28,10 +28,11 @@
     android:orientation="vertical"
     android:background="@drawable/custom_info_bubble">
     <TextView
+        android:id="@+id/confirm_add_activity_text"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="0.5"
-        android:text="Add activity here?"
+        android:text="Add activity here"
         android:gravity="center"/>
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
