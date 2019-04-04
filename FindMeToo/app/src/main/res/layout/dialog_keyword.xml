@@ -21,25 +21,31 @@
 <!--android:orientation="horizontal">-->
 <!--android:background="@drawable/custom_info_bubble"-->
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/add_dialog_top"
-        xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/add_dialog_top"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/custom_info_bubble"
+    android:baselineAligned="false"
+    android:gravity="center"
+    android:isScrollContainer="true"
+    android:nestedScrollingEnabled="true"
+    android:orientation="vertical"
+    android:overScrollMode="always"
+    android:scrollbars="vertical">
+
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:background="@drawable/custom_info_bubble"
-        android:baselineAligned="false">
+        android:layout_height="0dp"
+        android:layout_weight="0.65"
+        android:orientation="horizontal">
+
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:orientation="horizontal"
-            android:layout_weight="0.65">
-           <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:layout_weight="0.4">
+            android:layout_weight="0.4"
+            android:orientation="vertical">
 
             <ImageView
                 android:id="@+id/edit_activity_badge"
@@ -49,8 +55,8 @@
                 android:layout_marginRight="5dp"
                 android:layout_weight="0.75"
                 android:adjustViewBounds="true"
-                android:scaleType="centerCrop"
-                android:contentDescription="Upload Image" />
+                android:contentDescription="Upload Image"
+                android:scaleType="centerCrop" />
 
             <Button
                 android:id="@+id/button_pick"
@@ -60,11 +66,12 @@
                 android:layout_weight="0.25"
                 android:text="@string/gallery" />
         </LinearLayout>
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:layout_weight="0.6">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.6"
+            android:orientation="vertical">
 
             <EditText
                 android:id="@+id/edit_activity_title"
@@ -90,98 +97,104 @@
                 android:textColor="#ff7f7f7f" />
 
         </LinearLayout>
-        </LinearLayout>
-        <LinearLayout
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.35"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/btn_activity_settings"
+            style="@style/Widget.AppCompat.Button.ButtonBar.AlertDialog"
             android:layout_width="match_parent"
             android:layout_height="0dp"
+            android:layout_gravity="right"
             android:layout_weight="0.35"
-            android:orientation="vertical">
+            android:gravity="end"
+            android:text="MORE"
+            android:visibility="visible" />
 
-                <Button
-                    android:id="@+id/btn_activity_settings"
-                    style="@style/Widget.AppCompat.Button.ButtonBar.AlertDialog"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="0.35"
-                    android:layout_gravity="right"
-                    android:gravity="end"
-                    android:text="MORE"
-                    android:visibility="visible" />
+        <LinearLayout
+            android:id="@+id/activity_settings"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.65"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <Switch
+                android:id="@+id/activity_is_private"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="0.15"
+                android:gravity="center"
+                android:text="Show location only for accepted users"
+                android:textSize="@dimen/dimen_10" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="0.05"
+                android:inputType="datetime"
+                android:textSize="@dimen/dimen_10"
+                android:visibility="invisible" />
 
             <LinearLayout
-                android:id="@+id/activity_settings"
-                android:layout_height="0dp"
-                android:layout_weight="0.65"
-                android:orientation="vertical"
                 android:layout_width="match_parent"
-                android:visibility="gone">
+                android:layout_height="0dp"
+                android:layout_weight="0.8"
+                android:orientation="horizontal">
 
-                <Switch
-                    android:id="@+id/activity_is_private"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="0.15"
-                    android:text="Show location only for accepted users"
-                    android:textSize="@dimen/dimen_10"
-                    android:gravity="center"/>
+                <android.support.design.widget.TextInputLayout
+                    android:id="@+id/text_input_layout_startdate"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.5"
+                    android:hint="Startdate">
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="0.05"
-                    android:inputType="datetime"
-                    android:textSize="@dimen/dimen_10"
-                    android:visibility="invisible"/>
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="0.8"
-                    android:orientation="horizontal">
-                    <android.support.design.widget.TextInputLayout
-                        android:id="@+id/text_input_layout_startdate"
-                        android:layout_width="0dp"
-                        android:layout_weight="0.5"
-                        android:layout_height="wrap_content"
-                        android:hint="Startdate">
-                        <EditText
-                            android:id="@+id/activity_start_date"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:inputType="datetime"
-                            android:textSize="@dimen/dimen_10"
-                            android:clickable="true"/>
-                    </android.support.design.widget.TextInputLayout>
-                    <android.support.design.widget.TextInputLayout
-                        android:id="@+id/text_input_layout_enddate"
-                        android:layout_width="0dp"
-                        android:layout_weight="0.5"
-                        android:layout_height="wrap_content"
-                        android:hint="Enddate">
-                        <EditText
-                            android:id="@+id/activity_end_date"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:inputType="datetime"
-                            android:textSize="@dimen/dimen_10"
-                            android:clickable="true"/>
-                    </android.support.design.widget.TextInputLayout>
-                </LinearLayout>
+                    <EditText
+                        android:id="@+id/activity_start_date"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:clickable="true"
+                        android:inputType="datetime"
+                        android:textSize="@dimen/dimen_10" />
+                </android.support.design.widget.TextInputLayout>
 
-                <!--<android.support.design.widget.TextInputLayout-->
-                    <!--android:id="@+id/text_input_layout_comments"-->
-                    <!--android:layout_width="match_parent"-->
-                    <!--android:layout_weight="0.35"-->
-                    <!--android:layout_height="0dp"-->
-                    <!--android:hint="Tags (keywords separated by , )">-->
-                    <!--<EditText-->
-                        <!--android:id="@+id/activity_comments"-->
-                        <!--android:layout_width="match_parent"-->
-                        <!--android:layout_height="match_parent"-->
-                        <!--android:inputType="textCapWords"-->
-                        <!--android:textSize="@dimen/dimen_10"-->
-                        <!--android:clickable="true"/>-->
-                <!--</android.support.design.widget.TextInputLayout>-->
+                <android.support.design.widget.TextInputLayout
+                    android:id="@+id/text_input_layout_enddate"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.5"
+                    android:hint="Enddate">
 
-    </LinearLayout>
+                    <EditText
+                        android:id="@+id/activity_end_date"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:clickable="true"
+                        android:inputType="datetime"
+                        android:textSize="@dimen/dimen_10" />
+                </android.support.design.widget.TextInputLayout>
+            </LinearLayout>
+
+            <!--<android.support.design.widget.TextInputLayout-->
+            <!--android:id="@+id/text_input_layout_comments"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_weight="0.35"-->
+            <!--android:layout_height="0dp"-->
+            <!--android:hint="Tags (keywords separated by , )">-->
+            <!--<EditText-->
+            <!--android:id="@+id/activity_comments"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:inputType="textCapWords"-->
+            <!--android:textSize="@dimen/dimen_10"-->
+            <!--android:clickable="true"/>-->
+            <!--</android.support.design.widget.TextInputLayout>-->
+
+        </LinearLayout>
     </LinearLayout>
 </LinearLayout>

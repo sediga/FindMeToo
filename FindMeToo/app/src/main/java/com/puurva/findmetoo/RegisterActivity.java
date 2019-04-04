@@ -159,13 +159,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                     public void onSuccess(Location location) {
                         // Got last known location. In some rare situations this can be null.
                         if (location != null) {
-                            ContentValues values = new ContentValues();
-                            values.put("email", email);
-                            values.put("password", password);
-                            values.put("latitude", location.getLatitude());
-                            values.put("longitude", location.getLongitude());
-
-                            SQLHelper.Insert("t_user", values);
+                            InsertUser(location, email, password);
 
                             RegisterActivity.this.registerApiUser(email, password);
 
@@ -176,6 +170,16 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
 
 
 //        finish();
+    }
+
+    private void InsertUser(Location location, String email, String password) {
+        ContentValues values = new ContentValues();
+        values.put("email", email);
+        values.put("password", password);
+        values.put("latitude", location.getLatitude());
+        values.put("longitude", location.getLongitude());
+
+        SQLHelper.Insert("t_user", values);
     }
 
 }

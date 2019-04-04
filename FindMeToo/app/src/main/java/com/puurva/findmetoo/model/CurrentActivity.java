@@ -16,6 +16,16 @@ public class CurrentActivity {
         this.ActivityId = activityId;
     }
 
+    public CurrentActivity(String deviceId, String activity, double latitude, double longitude, String description, String activityId, String activityRequestStatus){
+        this.DeviceId = deviceId;
+        this.Activity = activity;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.description = description;
+        this.ActivityId = activityId;
+        this.ActivityRequestStatus = activityRequestStatus;
+    }
+
     @SerializedName("DeviceID")
     public String DeviceId;
     @SerializedName("Activity")
@@ -36,4 +46,6 @@ public class CurrentActivity {
     public String ActivityStartTime;
     @SerializedName("ActivityEndTime")
     public String ActivityEndTime;
+    @SerializedName("ActivityRequestStatus")
+    public String ActivityRequestStatus;
 }

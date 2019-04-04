@@ -1,22 +1,21 @@
 package com.puurva.findmetoo;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -33,13 +32,8 @@ import com.puurva.findmetoo.uitls.Global;
 import com.puurva.findmetoo.uitls.HttpClient;
 import com.puurva.findmetoo.uitls.ImageUtility;
 
-import org.w3c.dom.Text;
+import java.io.ByteArrayOutputStream;
 
-import java.io.File;
-
-import okhttp3.MediaType;
-import okhttp3.MultipartBody;
-import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -66,9 +60,14 @@ public class ProfileViewActivity extends AppCompatActivity implements View.OnCli
 //            startActivity(loginIntent);
 //        }
 
+        LoadProfileView();
+    }
+
+    private void LoadProfileView() {
         deviceID = getIntent().getStringExtra("DeviceID");
         Button acceptButton = this.findViewById(R.id.btn_profile_accept);
         Button rejectButton = this.findViewById(R.id.btn_profile_reject);
+        ImageView profileImage = this.findViewById(R.id.imgViewPhoto);
         acceptButton.setOnClickListener(this);
         rejectButton.setOnClickListener(this);
         RatingBar ratingBar = this.findViewById(R.id.edit_profile_rating);
@@ -103,6 +102,13 @@ public class ProfileViewActivity extends AppCompatActivity implements View.OnCli
         }
     }
 
+//    @Override
+//    public void onResume()
+//    {  // After a pause OR at startup
+//        super.onResume();
+//        LoadProfileView();
+//    }
+
     @Override
     public void onClick(View v) {
 
@@ -110,19 +116,19 @@ public class ProfileViewActivity extends AppCompatActivity implements View.OnCli
 
         switch (id) {
             case R.id.btn_profile_reject:
-                acceptRequest(RequestStatus.REJECTED);
+                handleRequest(RequestStatus.REJECTED);
                 finish();
                 break;
             case R.id.btn_profile_accept:
-                acceptRequest(RequestStatus.ACCEPTED);
+                handleRequest(RequestStatus.ACCEPTED);
                 finish();
                 break;
 //            case R.id.profile_rating:
 //                launchProfileReviewActivity();
 //                break;
-//            case R.id.imgPhoto:
-//                photoClicked();
-//                break;
+            case R.id.imgViewPhoto:
+                photoClicked(v);
+                break;
         }
 
     }
@@ -131,9 +137,10 @@ public class ProfileViewActivity extends AppCompatActivity implements View.OnCli
         Intent profileReviewIntent = new Intent(this, ProfileReviewActivity.class);
         profileReviewIntent.putExtra("ProfileModel", profileModel);
         startActivity(profileReviewIntent);
+        finish();
     }
 
-    private void acceptRequest(RequestStatus requestStatus) {
+    private void handleRequest(RequestStatus requestStatus) {
         final String token = getToken();
         ApiInterface apiService =
                 HttpClient.getClient().create(ApiInterface.class);
@@ -160,11 +167,23 @@ public class ProfileViewActivity extends AppCompatActivity implements View.OnCli
         }
     }
 
-    private  void photoClicked()
+    private  void photoClicked(View v)
     {
-        Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
-        photoPickerIntent.setType("image/*");
-        startActivityForResult(photoPickerIntent, 1);
+        Drawable drawable = ((ImageView) v).getDrawable();
+        if (drawable != null) {
+            Bitmap imageBitmap = ((BitmapDrawable) drawable).getBitmap();
+            if (imageBitmap != null) {
+                Intent viewImageIntent = new Intent(this, ViewImageActivity.class);
+                ByteArrayOutputStream bStream = new ByteArrayOutputStream();
+                imageBitmap.compress(Bitmap.CompressFormat.PNG, 100, bStream);
+                byte[] byteArray = bStream.toByteArray();
+                viewImageIntent.putExtra("bitmap", byteArray);
+                startActivity(viewImageIntent);
+            }
+        }
+//        Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
+//        photoPickerIntent.setType("image/*");
+//        startActivityForResult(photoPickerIntent, 1);
     }
 
 

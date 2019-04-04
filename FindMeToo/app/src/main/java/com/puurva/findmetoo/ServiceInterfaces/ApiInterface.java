@@ -28,10 +28,10 @@ public interface ApiInterface {
     @FormUrlEncoded
     @POST("JoinServer/token")
     Call<Token> getToken(@Field("username") String username, @Field("password") String password, @Field("grant_type") String grantType);
-    @GET("JoinServer/Activity/{activity}")
-    Call<List<CurrentActivity>> getMatchingActivities(@Header("Authorization") String authorization, @Path("activity") String activity);
-    @GET("JoinServer/Activity")
-    Call<List<CurrentActivity>> getAllActivities(@Header("Authorization") String authorizatio);
+    @GET("JoinServer/Activity/{device}/{activity}")
+    Call<List<CurrentActivity>> getMatchingActivities(@Header("Authorization") String authorization, @Path("device") String device, @Path("activity") String activity);
+    @GET("JoinServer/Activity/{device}")
+    Call<List<CurrentActivity>> getAllActivities(@Header("Authorization") String authorization, @Path("device") String device);
     @GET("JoinServer/ActivityById/{activityid}")
     Call<CurrentActivity> getActivityById(@Header("Authorization") String authorization, @Path("activityid") String activityId);
     @GET("JoinServer/Images/{deviceId}/{fileName}")

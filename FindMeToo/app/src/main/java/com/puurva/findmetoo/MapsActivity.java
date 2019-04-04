@@ -288,6 +288,8 @@ public class MapsActivity extends FragmentActivity implements
                 if (image.getTag(R.id.info_badge) == "loaded") {
                     image.setTag(R.id.info_badge, "DontReload");
                 }
+                Button imIn = mWindow.findViewById(R.id.iammin);
+                imIn.setVisibility(View.INVISIBLE);
                 return mWindow;
             }
         });
@@ -406,6 +408,9 @@ public class MapsActivity extends FragmentActivity implements
                     break;
                 case NEW:
                     LaunchViewProfile(activityNotification.DeviceId, true);
+                case REJECTED:
+                    showMarkerOfUsers("");
+                    break;
             }
         }else{
             showMarkerOfUsers("");
@@ -808,9 +813,9 @@ public class MapsActivity extends FragmentActivity implements
                 HttpClient.getClient().create(ApiInterface.class);
         Call<List<CurrentActivity>> call;
         if(search_text != null && search_text.trim().length() > 0) {
-            call = apiService.getMatchingActivities("Bearer " + token, search_text);
+            call = apiService.getMatchingActivities("Bearer " + token, Global.AndroidID, search_text);
         }else{
-            call = apiService.getAllActivities("Bearer " + token);
+            call = apiService.getAllActivities("Bearer " + token, Global.AndroidID);
         }
         call.enqueue(new Callback<List<CurrentActivity>>() {
             @Override
@@ -820,7 +825,11 @@ public class MapsActivity extends FragmentActivity implements
                         final Object[] locations = (response.body().toArray());
                         for (int i = 0; i < locations.length; i++) {
                             CurrentActivity location = (CurrentActivity) locations[i];
-                            ShowLocation(i, location, ActivityTypes.valueOf(location.ActivityType) == ActivityTypes.ONREQUEST ? false : true);
+                            boolean showFineLocation = ActivityTypes.valueOf(location.ActivityType) == ActivityTypes.ONREQUEST ? false : true;
+                            if(showFineLocation == false) {
+                                showFineLocation = RequestStatus.valueOf(location.ActivityRequestStatus) == RequestStatus.ACCEPTED ? true : false;
+                            }
+                            ShowLocation(i, location, showFineLocation);
                         }
                     }catch (Exception ex){
                         Log.e("GetMatchingLocations", ex.getMessage());
@@ -946,6 +955,10 @@ public class MapsActivity extends FragmentActivity implements
             mPopupWindow.showAtLocation(mRelativeLayout, Gravity.BOTTOM, 0, 0);
             mWindow.setTag(circle);
             infoButtonListener.setMarker(marker);
+            infoImageButtonListener.setMarker(marker);
+            viewProfileClickistener.setMarker(marker);
+            Button imIn = mWindow.findViewById(R.id.iammin);
+            imIn.setVisibility(View.VISIBLE);
             circle.setFillColor(R.color.black);
         }catch (Exception ex){
             Log.e("popup", ex.getMessage());
@@ -1194,6 +1207,9 @@ public class MapsActivity extends FragmentActivity implements
                     if(newActivityModel != null) {
                         uploadImage(deviceId, newActivityModel.activitySetting.ActivityId, token);
                         Log.e("PostActivity", "success returned");
+                        finish();
+                        startActivity(getIntent());
+//                        GetMatchingActivitiesByKeyword(token, activity.What);
                     }
                 }
             }
