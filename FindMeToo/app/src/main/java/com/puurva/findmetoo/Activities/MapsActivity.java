@@ -45,6 +45,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
+import android.widget.RatingBar;
 import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -56,9 +57,11 @@ import com.arlib.floatingsearchview.suggestions.model.SearchSuggestion;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.VisibleRegion;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.puurva.findmetoo.Enums.ActivityStatuses;
 import com.puurva.findmetoo.Enums.ActivityTypes;
+import com.puurva.findmetoo.Enums.ListViewTypes;
 import com.puurva.findmetoo.Enums.NotificationType;
 import com.puurva.findmetoo.Enums.RequestStatus;
 import com.puurva.findmetoo.R;
@@ -522,9 +525,12 @@ public class MapsActivity extends FragmentActivity implements
             case R.id.menu_profile:
                 LoadProfileActivity(null);
                 break;
-                case R.id.menu_profile_reviews:
-                    LoadProfileReviews();
-                    break;
+            case R.id.menu_profile_reviews:
+                LoadProfileReviews();
+                break;
+            case R.id.menu_view_my_activities:
+                LoadMyActivities();
+                break;
         }
     }
 
@@ -532,7 +538,19 @@ public class MapsActivity extends FragmentActivity implements
         try {
             Intent profileReviewsIntent = new Intent(this, ViewListActivity.class);
             profileReviewsIntent.putExtra("DeviceId", CommonUtility.GetDeviceId());
+            profileReviewsIntent.putExtra("ListSource", ListViewTypes.PROFILEREVIEWS);
             startActivity(profileReviewsIntent);
+        }catch (Exception ex){
+            Log.e("LoadProfileViews", ex.getMessage());
+        }
+    }
+
+    private void LoadMyActivities() {
+        try {
+            Intent myActivitiesIntent = new Intent(this, ViewListActivity.class);
+            myActivitiesIntent.putExtra("DeviceId", CommonUtility.GetDeviceId());
+            myActivitiesIntent.putExtra("ListSource", ListViewTypes.MYACTIVITIES);
+            startActivity(myActivitiesIntent);
         }catch (Exception ex){
             Log.e("LoadProfileViews", ex.getMessage());
         }
@@ -666,6 +684,7 @@ public class MapsActivity extends FragmentActivity implements
 
     private void render(final Marker marker, View view) throws IOException {
         String title = marker.getTitle();
+        CurrentActivity activity = activities.get(marker);
         TextView titleUi = view.findViewById(R.id.title);
         if (title != null) {
             // Spannable string allows us to edit the formatting of the text.
@@ -682,6 +701,10 @@ public class MapsActivity extends FragmentActivity implements
             snippetUi.setText(snippetText);
         } else {
             snippetUi.setText("");
+        }
+
+        if(activity != null){
+            ((RatingBar) view.findViewById(R.id.profile_rating_indicator)).setRating(activity.ProfileRating);
         }
 
         String token = getToken();
@@ -826,38 +849,41 @@ public class MapsActivity extends FragmentActivity implements
     }
 
     private void GetMatchingActivitiesByKeyword(String search_text, String token) {
+        final VisibleRegion visibleRegion = mMap.getProjection().getVisibleRegion();
         ApiInterface apiService =
                 HttpClient.getClient().create(ApiInterface.class);
-        Call<List<CurrentActivity>> call;
-        if(search_text != null && search_text.trim().length() > 0) {
-            call = apiService.getMatchingActivities("Bearer " + token, Global.AndroidID, search_text);
-        }else{
-            call = apiService.getAllActivities("Bearer " + token, Global.AndroidID);
-        }
-        call.enqueue(new Callback<List<CurrentActivity>>() {
-            @Override
-            public void onResponse(Call<List<CurrentActivity>> call, Response<List<CurrentActivity>> response) {
-                if (response.isSuccessful()) {
-                    try {
+        try {
+            Call<List<CurrentActivity>> call;
+            if (search_text != null && search_text.trim().length() > 0) {
+                call = apiService.getMatchingActivities("Bearer " + token, Global.AndroidID, search_text, visibleRegion.farLeft.latitude,
+                        visibleRegion.nearLeft.latitude, visibleRegion.farLeft.longitude, visibleRegion.farRight.longitude);
+            } else {
+                call = apiService.getAllActivities("Bearer " + token, Global.AndroidID, visibleRegion.farLeft.latitude,
+                        visibleRegion.nearLeft.latitude, visibleRegion.farLeft.longitude, visibleRegion.farRight.longitude);
+            }
+            call.enqueue(new Callback<List<CurrentActivity>>() {
+                @Override
+                public void onResponse(Call<List<CurrentActivity>> call, Response<List<CurrentActivity>> response) {
+                    if (response.isSuccessful()) {
                         final Object[] locations = (response.body().toArray());
                         for (int i = 0; i < locations.length; i++) {
                             CurrentActivity location = (CurrentActivity) locations[i];
                             boolean showFineLocation = ActivityTypes.valueOf(location.ActivityType) == ActivityTypes.ONREQUEST ? false : true;
-                            if(showFineLocation == false) {
+                            if (showFineLocation == false) {
                                 showFineLocation = RequestStatus.valueOf(location.ActivityRequestStatus) == RequestStatus.ACCEPTED ? true : false;
                             }
                             ShowLocation(i, location, showFineLocation);
                         }
-                    }catch (Exception ex){
-                        Log.e("GetMatchingLocations", ex.getMessage());
                     }
                 }
-            }
 
-            @Override
-            public void onFailure(Call<List<CurrentActivity>> call, Throwable t) {
-            }
-        });
+                @Override
+                public void onFailure(Call<List<CurrentActivity>> call, Throwable t) {
+                }
+            });
+        } catch (Exception ex) {
+            Log.e("GetMatchingLocations", ex.getMessage());
+        }
     }
 
     private float previousZoomLevel = -1.0f;
@@ -869,8 +895,9 @@ public class MapsActivity extends FragmentActivity implements
 
             @Override
             public void onCameraChange(CameraPosition position) {
-                Log.d("Zoom", "Zoom: " + position.zoom);
+//                Log.d("Zoom", "Zoom: " + position.zoom);
 
+                showMarkerOfUsers(mSearchView.getQuery());
                 if(previousZoomLevel != position.zoom)
                 {
                     isZooming = true;
@@ -883,7 +910,7 @@ public class MapsActivity extends FragmentActivity implements
                 }
                 previousZoomLevel = position.zoom;
 
-                Log.d("zoomLevel : ", String.valueOf(previousZoomLevel));
+//                Log.d("zoomLevel : ", String.valueOf(previousZoomLevel));
             }
         };
     }

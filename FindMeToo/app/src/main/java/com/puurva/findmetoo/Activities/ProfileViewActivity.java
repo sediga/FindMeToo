@@ -19,6 +19,7 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.puurva.findmetoo.Enums.ListViewTypes;
 import com.puurva.findmetoo.Enums.NotificationType;
 import com.puurva.findmetoo.Enums.RequestStatus;
 import com.puurva.findmetoo.R;
@@ -136,6 +137,7 @@ public class ProfileViewActivity extends AppCompatActivity implements View.OnCli
     private void launchProfileReviewActivity() {
         Intent profileReviewIntent = new Intent(this, ProfileReviewActivity.class);
         profileReviewIntent.putExtra("ProfileModel", profileModel);
+        profileReviewIntent.putExtra("ListSource", ListViewTypes.PROFILEREVIEWS);
         startActivity(profileReviewIntent);
         finish();
     }
@@ -241,6 +243,7 @@ public class ProfileViewActivity extends AppCompatActivity implements View.OnCli
                 try {
                     Intent profileReviewsIntent = new Intent(ProfileViewActivity.this, ViewListActivity.class);
                     profileReviewsIntent.putExtra("DeviceId", deviceID);
+                    profileReviewsIntent.putExtra("ListSource", ListViewTypes.PROFILEREVIEWS);
                     startActivity(profileReviewsIntent);
                 }catch (Exception ex){
                     Log.e("LoadProfileViews", ex.getMessage());

@@ -64,6 +64,9 @@
             android:label="@string/title_activity_maps"
             android:parentActivityName=".Activities.LoginActivity" />
         <activity
+            android:name=".Activities.ResetPassword"
+            android:parentActivityName=".Activities.LoginActivity" />
+        <activity
             android:name=".Activities.ProfileActivity"
             android:parentActivityName=".Activities.MapsActivity" />
         <activity

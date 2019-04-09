@@ -17,6 +17,7 @@ import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
+import com.puurva.findmetoo.Enums.ListViewTypes;
 import com.puurva.findmetoo.R;
 import com.puurva.findmetoo.ServiceInterfaces.ApiInterface;
 import com.puurva.findmetoo.ServiceInterfaces.model.ProfileModel;
@@ -183,6 +184,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
                 try {
                     Intent profileReviewsIntent = new Intent(ProfileActivity.this, ViewListActivity.class);
                     profileReviewsIntent.putExtra("DeviceId", deviceID);
+                    profileReviewsIntent.putExtra("ListSource", ListViewTypes.PROFILEREVIEWS);
                     startActivity(profileReviewsIntent);
                 }catch (Exception ex){
                     Log.e("LoadProfileViews", ex.getMessage());

@@ -34,13 +34,19 @@ public interface ApiInterface {
     Call<Void> postDevice(@Body() DeviceModel device);
     @POST("JoinServer/api/Account/Register")
     Call<Void> registerExternal(@Body() RegisterBindingModel activity);
+    @POST("JoinServer/api/Account/SetPassword")
+    Call<Void> setPassword(@Header("Authorization") String authorization, @Body() SetPasswordBindingModel setPasswordBindingModel);
     @FormUrlEncoded
     @POST("JoinServer/token")
     Call<Token> getToken(@Field("username") String username, @Field("password") String password, @Field("grant_type") String grantType);
-    @GET("JoinServer/Activity/{device}/{activity}")
-    Call<List<CurrentActivity>> getMatchingActivities(@Header("Authorization") String authorization, @Path("device") String device, @Path("activity") String activity);
-    @GET("JoinServer/Activity/{device}")
-    Call<List<CurrentActivity>> getAllActivities(@Header("Authorization") String authorization, @Path("device") String device);
+    @GET("JoinServer/Activity/{device}/{activity}/{toplat}/{bottomlat}/{leftlng}/{rightlng}/")
+    Call<List<CurrentActivity>> getMatchingActivities(@Header("Authorization") String authorization, @Path("device") String device, @Path("activity") String activity,
+                                                      @Path("toplat") double topLat, @Path("bottomlat") double bottomLat,
+                                                      @Path("leftlng") double leftLng, @Path("rightlng") double rightLng);
+    @GET("JoinServer/Activity/{device}/{toplat}/{bottomlat}/{leftlng}/{rightlng}/")
+    Call<List<CurrentActivity>> getAllActivities(@Header("Authorization") String authorization, @Path("device") String device,
+                                                 @Path("toplat") double topLat, @Path("bottomlat") double bottomLat,
+                                                 @Path("leftlng") double leftLng, @Path("rightlng") double rightLng);
     @GET("JoinServer/ActivityById/{activityid}")
     Call<CurrentActivity> getActivityById(@Header("Authorization") String authorization, @Path("activityid") String activityId);
     @GET("JoinServer/Images/{deviceId}/{fileName}")
@@ -69,4 +75,6 @@ public interface ApiInterface {
     Call<Void> postProfileReview(@Header("Authorization") String authorization, @Body ProfileReviewModel profileReviewModel);
     @GET("JoinServer/profilereview/{deviceId}")
     Call<List<ProfileReviewModel>> getProfileReviews(@Header("Authorization") String authorization, @Path("deviceId") String deviceId);
+    @GET("JoinServer/MyActivities/{device}")
+    Call<List<CurrentActivity>> geMyActivities(@Header("Authorization") String authorization, @Path("device") String device);
 }

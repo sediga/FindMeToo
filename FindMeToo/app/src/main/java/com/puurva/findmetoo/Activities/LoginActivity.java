@@ -1,7 +1,9 @@
 package com.puurva.findmetoo.Activities;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -12,6 +14,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -64,6 +67,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         if(!Global.is_loggedin) {
             findViewById(R.id.button_login).setOnClickListener(this);
             findViewById(R.id.button_register).setOnClickListener(this);
+            findViewById(R.id.button_change_password).setOnClickListener(this);
 
             while (!confirmationPermission()) ;
         }else{
@@ -73,7 +77,15 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     }
 
+    @Override
+    public void onResume(){
+        findViewById(R.id.button_login).setOnClickListener(this);
+        findViewById(R.id.button_register).setOnClickListener(this);
+        findViewById(R.id.button_change_password).setOnClickListener(this);
+        super.onResume();
+        // put your code here...
 
+    }
     private void DoPostPermissionOperations() {
         Global.preference = Preference.getInstance();
         final String username = Global.preference.getValue(this, PrefConst.USERNAME, "");
@@ -188,6 +200,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             case R.id.button_register:
                 startActivity(new Intent(this, RegisterActivity.class));
                 break;
+            case  R.id.button_change_password:
+                startActivity(new Intent(this, ResetPassword.class));
+                break;
         }
     }
 
@@ -211,13 +226,36 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     Global.is_loggedin = true;
                     LoadActivity();
 //                    finish();
+                } else if(response.raw().code() == 400) {
+                    android.app.AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
+                    View view = LayoutInflater.from(LoginActivity.this).inflate(R.layout.dialog_keyword, null);
+                    builder.setTitle("Login failed")
+                            .setMessage("Email or Password is wrong, please try again. If you do not have account, you need to creat one.")
+                            .setCancelable(false)
+                            .setPositiveButton("OK", null);
+                    builder.show();
+                } else {
+                    android.app.AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
+                    View view = LayoutInflater.from(LoginActivity.this).inflate(R.layout.dialog_keyword, null);
+                    builder.setTitle("Login failed")
+                            .setMessage("Oops! Something went wrong, please try again")
+                            .setCancelable(false)
+                            .setPositiveButton("OK", null);
+                    builder.show();
                 }
             }
 
             @Override
             public void onFailure(Call<Token> call, Throwable t) {
                 System.out.println(t.getMessage());
-                Toast.makeText(LoginActivity.this   ,"Login Failed" + t.getMessage(), Toast.LENGTH_SHORT );
+                android.app.AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
+                View view = LayoutInflater.from(LoginActivity.this).inflate(R.layout.dialog_keyword, null);
+                builder.setTitle("Login failed")
+                        .setMessage("Oops! Something went wrong, please try again")
+                        .setCancelable(false)
+                        .setPositiveButton("OK", null);
+                builder.show();
+//                Toast.makeText(LoginActivity.this   ,"Login Failed" + t.getMessage(), Toast.LENGTH_SHORT );
                 Log.e("login", "Login Failed : " + t.getMessage());
             }
         }));
@@ -295,3 +333,4 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         }
     }
 }
+  
