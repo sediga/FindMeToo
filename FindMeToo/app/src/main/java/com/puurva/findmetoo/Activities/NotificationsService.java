@@ -18,6 +18,7 @@ import com.google.firebase.messaging.RemoteMessage;
 import com.puurva.findmetoo.Enums.NotificationType;
 import com.puurva.findmetoo.Enums.RequestStatus;
 import com.puurva.findmetoo.R;
+import com.puurva.findmetoo.ServiceInterfaces.model.ActivityModel;
 import com.puurva.findmetoo.ServiceInterfaces.model.DeviceModel;
 import com.puurva.findmetoo.ServiceInterfaces.model.ActivityNotification;
 import com.puurva.findmetoo.uitls.CommonUtility;
@@ -35,6 +36,7 @@ public class NotificationsService extends FirebaseMessagingService {
 //    NotificationType notificationType = null;
 
     private ActivityNotification activityNotification = null;
+    private ActivityModel activityModel = null;
 
     /**
      * Called when message is received.
@@ -61,17 +63,23 @@ public class NotificationsService extends FirebaseMessagingService {
         // [END_EXCLUDE]
         // TODO(developer): Handle FCM messages here.
         // Not getting messages here? See why this may be: https://goo.gl/39bRNJ
-        Log.d(TAG, "From: " + remoteMessage.getFrom());
         // Check if message contains a data payload.
         if (remoteMessage.getData().size() > 0) {
-            Log.d(TAG, "Message data payload: " + remoteMessage.getData());
-
             try {
-                JSONObject jObject = new JSONObject(remoteMessage.getData()) ;
-                activityNotification = new ActivityNotification(jObject.get("FromDeviceId").toString(),
-                        jObject.get("ActivityId").toString(),
-                        RequestStatus.valueOf(jObject.get("NotificationRequestStatus").toString()),
-                        NotificationType.valueOf(jObject.get("RequestNotificationType").toString()));
+                JSONObject jObject = new JSONObject(remoteMessage.getData());
+                if (jObject != null) {
+                    if (jObject.has("FromDeviceId")) {
+                        activityNotification = new ActivityNotification(jObject.get("FromDeviceId").toString(),
+                                jObject.get("ActivityId").toString(),
+                                RequestStatus.valueOf(jObject.get("NotificationRequestStatus").toString()),
+                                NotificationType.valueOf(jObject.get("RequestNotificationType").toString()));
+                    }
+                    if (jObject.has("What")) {
+                        activityModel = new ActivityModel(null, jObject.get("DeviceID").toString(),
+                                jObject.get("What").toString(), jObject.get("description").toString(), jObject.get("When").toString(),
+                                Double.parseDouble(jObject.get("Lat").toString()), Double.parseDouble(jObject.get("Long").toString()));
+                    }
+                }
 //                deviceID = jObject.get("FromDeviceId").toString();
 //                activityID = jObject.get("ActivityId").toString();
 //                requestStatus = RequestStatus.valueOf(jObject.get("NotificationRequestStatus").toString());
@@ -92,7 +100,7 @@ public class NotificationsService extends FirebaseMessagingService {
         // Check if message contains a notification payload.
         if (remoteMessage.getNotification() != null) {
             Log.d(TAG, "Message Notification Body: " + remoteMessage.getNotification().getBody());
-            if(activityNotification != null) {
+            if(activityNotification != null || activityModel != null) {
                 sendNotification(remoteMessage.getNotification().getBody());
         }
 //            Toast.makeText(this, remoteMessage.getNotification().getBody(), Toast.LENGTH_SHORT).show();

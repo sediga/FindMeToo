@@ -1,18 +1,22 @@
 package com.puurva.findmetoo.Activities;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ImageButton;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.puurva.findmetoo.Enums.ListViewTypes;
 import com.puurva.findmetoo.R;
 import com.puurva.findmetoo.ServiceInterfaces.ApiInterface;
+import com.puurva.findmetoo.ServiceInterfaces.model.ActivityModel;
 import com.puurva.findmetoo.ServiceInterfaces.model.CurrentActivity;
+import com.puurva.findmetoo.ServiceInterfaces.model.ProfileModel;
 import com.puurva.findmetoo.ServiceInterfaces.model.ProfileReviewModel;
 import com.puurva.findmetoo.preference.PrefConst;
 import com.puurva.findmetoo.uitls.ActivitiesAdapter;
@@ -29,29 +33,41 @@ import retrofit2.Response;
 public class ViewListActivity extends Activity {
     // Array of strings...
     ProfileReviewModel[] profileReviewModels = null;
-    CurrentActivity[] currentActivities = null;
+    ActivityModel[] activityModels = null;
+    ProfileModel[] activitySubscribers = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_view);
 
+        LoadList();
+    }
+
+    private void LoadList() {
         String deviceId = getIntent().getStringExtra("DeviceId");
         ListViewTypes listViewTypes = ListViewTypes.valueOf(getIntent().getSerializableExtra("ListSource").toString());
 
-        if(deviceId != null && deviceId.length() > 0) {
-            if(listViewTypes != null) {
-                switch (listViewTypes){
-                    case PROFILEREVIEWS:
+        if (listViewTypes != null) {
+            switch (listViewTypes) {
+                case PROFILEREVIEWS:
+                    if (deviceId != null && deviceId.length() > 0) {
                         LoadProfileReviews(deviceId);
-                        break;
-                    case MYACTIVITIES:
+                    }
+                    break;
+                case MYACTIVITIES:
+                    if (deviceId != null && deviceId.length() > 0) {
                         LoadMyActivities(deviceId);
-                        break;
-                }
+                    }
+                    break;
             }
-
         }
+    }
+
+    @Override
+    protected void onResume(){
+        super.onResume();
+        LoadList();
     }
 
     private void LoadProfileReviews(String deviceId) {
@@ -75,9 +91,6 @@ public class ViewListActivity extends Activity {
                             @Override
                             public void onItemClick(AdapterView<?> parent, View view,
                                                     int position, long id) {
-                                Toast.makeText(getApplicationContext(),
-                                        "Click ListItem Number " + position, Toast.LENGTH_LONG)
-                                        .show();
                             }
                         });
                     }
@@ -96,33 +109,39 @@ public class ViewListActivity extends Activity {
         final String token = getToken();
         ApiInterface apiService =
                 HttpClient.getClient().create(ApiInterface.class);
-        Call<List<CurrentActivity>> call = apiService.geMyActivities("Bearer " + token, deviceId);
+        Call<List<ActivityModel>> call = apiService.geMyActivities("Bearer " + token, deviceId);
         try {
-            call.enqueue(new Callback<List<CurrentActivity>>() {
+            call.enqueue(new Callback<List<ActivityModel>>() {
                 @Override
-                public void onResponse(Call<List<CurrentActivity>> call, Response<List<CurrentActivity>> response) {
+                public void onResponse(Call<List<ActivityModel>> call, Response<List<ActivityModel>> response) {
                     if (response.isSuccessful()) {
-                        currentActivities = new CurrentActivity[response.body().size()];
-                        response.body().toArray(currentActivities);
-                        ActivitiesAdapter adapter = new ActivitiesAdapter(ViewListActivity.this, currentActivities);
+                        activityModels = new ActivityModel[response.body().size()];
+                        response.body().toArray(activityModels);
+                        ActivitiesAdapter adapter = new ActivitiesAdapter(ViewListActivity.this, activityModels);
 
                         ListView listView = (ListView) findViewById(R.id.list_view);
                         listView.setAdapter(adapter);
-
+                        listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
                         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                             @Override
                             public void onItemClick(AdapterView<?> parent, View view,
                                                     int position, long id) {
-                                Toast.makeText(getApplicationContext(),
-                                        "Click ListItem Number " + position, Toast.LENGTH_LONG)
-                                        .show();
+                                Intent activityIntent = new Intent(ViewListActivity.this, ActivityDetails.class);
+                                activityIntent.putExtra("Activity", (ActivityModel)parent.getItemAtPosition(position));
+                                ImageButton imageButton = view.findViewById(R.id.activity_image);
+                                if(imageButton != null && imageButton.getDrawable() != null){
+                                    Global.CurrentImage = ((BitmapDrawable)imageButton.getDrawable()).getBitmap();
+                                } else {
+                                    Global.CurrentImage = null;
+                                }
+                                startActivity(activityIntent);
                             }
                         });
                     }
                 }
 
                 @Override
-                public void onFailure(Call<List<CurrentActivity>> call, Throwable t) {
+                public void onFailure(Call<List<ActivityModel>> call, Throwable t) {
                 }
             });
         }catch (Exception ex){

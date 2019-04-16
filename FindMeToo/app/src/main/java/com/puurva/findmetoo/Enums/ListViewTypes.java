@@ -3,5 +3,6 @@ public enum ListViewTypes
 
 {
     PROFILEREVIEWS,
-    MYACTIVITIES
+    MYACTIVITIES,
+    MYREQUEASTS
 }

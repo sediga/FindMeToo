@@ -7,25 +7,24 @@
     android:layout_height="match_parent"
     android:layout_margin="@dimen/dimen_20"
     android:gravity="center"
-    tools:context=".Activities.LoginActivity"
+    android:background="@drawable/custom_info_bubble"
+    android:descendantFocusability="blocksDescendants"
     tools:layout_editor_absoluteX="30dp"
     tools:layout_editor_absoluteY="55dp">
 
     <RatingBar
         android:id="@+id/edit_profile_rating"
-        style="@style/Widget.AppCompat.RatingBar.Indicator"
         android:layout_width="wrap_content"
-        android:layout_height="39dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:isIndicator="false"
+        android:layout_height="wrap_content"
+        android:isIndicator="true"
         android:numStars="5"
         android:orientation="horizontal"
         android:rating="0"
         android:stepSize="1"
+        android:scaleX="0.5"
+        android:scaleY="0.5"
         android:visibility="visible"
+        android:foregroundGravity="right"
         app:layout_constraintBottom_toBottomOf="@id/ConstraintLayout2_View"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/textUserName"
@@ -33,27 +32,19 @@
 
     <TextView
         android:id="@+id/textUserName"
-        style="@style/Widget.AppCompat.Button.ButtonBar.AlertDialog"
-        android:layout_width="158dp"
-        android:layout_height="36dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginTop="8dp"
-        android:text="TextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="start"
+        app:layout_constraintBottom_toTopOf="@+id/textReview"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/textReview"
-        android:layout_width="342dp"
-        android:layout_height="67dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:text="TextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.285"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textUserName" />
+        app:layout_constraintTop_toBottomOf="@+id/edit_profile_rating" />
 </android.support.constraint.ConstraintLayout>

@@ -50,4 +50,21 @@ public class SQLHelper {
 
         return true;
     }
+
+    public static String getToken(String username) {
+        String token = null;
+        Cursor c = Global.mdb.rawQuery(
+                "SELECT *    " +
+                        "FROM apiuser " +
+                        "WHERE deviceid = '" + username + "' " +
+                        "LIMIT 1",
+                null);
+
+        if (c != null || c.getCount() > 0) {
+            c.moveToFirst();
+            token = c.getString(2);
+        }
+        return token;
+    }
+
 }

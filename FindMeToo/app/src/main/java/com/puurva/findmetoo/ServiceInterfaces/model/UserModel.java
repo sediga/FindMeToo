@@ -10,9 +10,9 @@ public class UserModel {
     private String username;
     @SerializedName("password")
     private String password;
-    @SerializedName("latitude")
+    @SerializedName("Lat")
     private double latitude;
-    @SerializedName("longitude")
+    @SerializedName("Long")
     private double longitude;
 
     public UserModel(int id, String first_name, String last_name, double latitude, double longitude) {

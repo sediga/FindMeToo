@@ -32,7 +32,7 @@ public class ProfileModel implements Parcelable {
         this.About = about;
     }
 
-    @SerializedName("DeviceId")
+    @SerializedName("DeviceID")
     private String DeviceId;
 
     @SerializedName("UserName")

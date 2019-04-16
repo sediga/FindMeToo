@@ -15,6 +15,7 @@ import okhttp3.MultipartBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
@@ -57,6 +58,10 @@ public interface ApiInterface {
     Call<Void> postCurrentLocation(@Header("Authorization") String authorization, @Body CurrentActivity location);
     @POST("JoinServer/Activity")
     Call<ActivityModel> postActivity(@Header("Authorization") String authorization, @Body ActivityModel activity);
+    @PUT("JoinServer/Activity")
+    Call<ActivityModel> putActivity(@Header("Authorization") String authorization, @Body ActivityModel activity);
+    @DELETE("JoinServer/Activity/{activityid}")
+    Call<Void> deleteActivity(@Header("Authorization") String authorization, @Path("activityid") String activityId);
     @POST("JoinServer/ActivitySettings")
     Call<Void> postActivityWithSettins(@Header("Authorization") String authorization, @Body ActivityModel activity, @Body ActivitySettingsModel activitySettings);
     @POST("JoinServer/Profile")
@@ -76,5 +81,7 @@ public interface ApiInterface {
     @GET("JoinServer/profilereview/{deviceId}")
     Call<List<ProfileReviewModel>> getProfileReviews(@Header("Authorization") String authorization, @Path("deviceId") String deviceId);
     @GET("JoinServer/MyActivities/{device}")
-    Call<List<CurrentActivity>> geMyActivities(@Header("Authorization") String authorization, @Path("device") String device);
+    Call<List<ActivityModel>> geMyActivities(@Header("Authorization") String authorization, @Path("device") String device);
+    @GET("JoinServer/ActivityById/{activityid}/Subscribers")
+    Call<List<ProfileModel>> getActivitySubscribers(@Header("Authorization") String authorization, @Path("activityid") String activityId);
 }

@@ -328,8 +328,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private void saveToken(String token) {
 
         String savedToken = Global.preference.getValue(this, PrefConst.TOKEN, "");
-        if (savedToken == null || savedToken == "") {
+        if (savedToken != null && !savedToken.isEmpty()) {
                 Global.preference.put(this, PrefConst.TOKEN, token);
+                Global.TOKEN = token;
         }
     }
 }

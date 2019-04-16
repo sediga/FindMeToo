@@ -38,7 +38,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="0.65"
+        android:layout_weight="0.3"
         android:orientation="horizontal">
 
         <LinearLayout
@@ -91,7 +91,7 @@
                 android:layout_height="0dp"
                 android:layout_weight="0.6"
                 android:hint="@string/enter_brief_description"
-                android:inputType="text"
+                android:inputType="textMultiLine"
                 android:maxLength="58"
                 android:singleLine="false"
                 android:textColor="#ff7f7f7f" />
@@ -100,9 +100,9 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/more_settings"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.35"
+        android:layout_height="wrap_content"
         android:orientation="vertical">
 
         <Button
@@ -113,7 +113,7 @@
             android:layout_gravity="right"
             android:layout_weight="0.35"
             android:gravity="end"
-            android:text="MORE"
+            android:text="SETTINGS"
             android:visibility="visible" />
 
         <LinearLayout
@@ -196,5 +196,69 @@
             <!--</android.support.design.widget.TextInputLayout>-->
 
         </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/activity_edit_actions"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.1"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <Button
+            android:id="@+id/btn_activity_delete"
+            style="@style/Widget.AppCompat.Button.ButtonBar.AlertDialog"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:layout_weight="0.3"
+            android:gravity="end"
+            android:text="DELETE"
+            android:visibility="visible" />
+
+        <Button
+            android:id="@+id/btn_activity_cancel"
+            style="@style/Widget.AppCompat.Button.ButtonBar.AlertDialog"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:layout_weight="0.4"
+            android:gravity="end"
+            android:text="CANCEL"
+            android:visibility="visible" />
+
+        <Button
+            android:id="@+id/btn_activity_update"
+            style="@style/Widget.AppCompat.Button.ButtonBar.AlertDialog"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:layout_weight="0.3"
+            android:gravity="end"
+            android:text="UPDATE"
+            android:visibility="visible" />
+
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/layout_subscribers"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.4"
+        android:orientation="vertical"
+        android:background="@drawable/custom_info_bubble"
+        android:visibility="gone">
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.1"
+        android:text="People in this activity"
+        android:gravity="left"
+        android:textStyle="bold"/>
+    <ListView
+        android:id="@+id/list_view_subscribers"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.9"/>
     </LinearLayout>
 </LinearLayout>

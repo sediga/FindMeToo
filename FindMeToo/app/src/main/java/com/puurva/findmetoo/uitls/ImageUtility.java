@@ -12,7 +12,12 @@ import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.Toast;
+
+import com.puurva.findmetoo.R;
+import com.puurva.findmetoo.ServiceInterfaces.ApiInterface;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -21,10 +26,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class ImageUtility {
     private static final PictureQuality Quality = PictureQuality.High;
 
-    public static Bitmap scaleImageToResolution(Context context, Bitmap image, int dstWidth, int dstHeight) {
+    public static  Bitmap scaleImageToResolution(Bitmap image){
+        return scaleImageToResolution(image, image.getWidth(), image.getHeight());
+    }
+
+    public static Bitmap scaleImageToResolution(Bitmap image, int dstWidth, int dstHeight) {
 
         Bitmap result = null;
         if (dstHeight > 0 && dstWidth > 0 && image != null) {
@@ -49,22 +63,15 @@ public class ImageUtility {
                 result = image;
 
                 //Scale Bitmap to requested Resolution
-                result = scaleImageToResolution(context, result, scalingLogic, dstWidth, dstHeight);
+                result = scaleImageToResolution(result, scalingLogic, dstWidth, dstHeight);
 
-//                if (result != null) {
-//                    //Save Bitmap with quality
-//                    saveImageWithQuality(context, result, image);
-//                }
             } finally {
-                //Clear Memory
-//                if (result != null)
-//                    result.recycle();
             }
         }
         return result;
     }
 
-    public static Bitmap scaleImageToResolution(Context context, Bitmap image, int dstWidth, int dstHeight, File fileToWrite) {
+    public static Bitmap scaleImageToResolution(Bitmap image, int dstWidth, int dstHeight, File fileToWrite) {
 
         Bitmap result = null;
         if (dstHeight > 0 && dstWidth > 0 && image != null) {
@@ -89,25 +96,22 @@ public class ImageUtility {
                 result = image;
 
                 //Scale Bitmap to requested Resolution
-                result = scaleImageToResolution(context, result, scalingLogic, dstWidth, dstHeight);
+                result = scaleImageToResolution(result, scalingLogic, dstWidth, dstHeight);
 
                 if (result != null) {
                     //Save Bitmap with quality
-                    saveImageWithQuality(context, result, fileToWrite);
+                    saveImageWithQuality(result, fileToWrite);
                 }
             } finally {
-                //Clear Memory
-//                if (result != null)
-//                    result.recycle();
             }
         }
         return result;
     }
 
-    public static void saveImageWithQuality(Context context, Bitmap bitmap, String path) {
-        saveImageWithQuality(bitmap, path, getCompressQuality());
-    }
-
+//    public static void saveImageWithQuality(Bitmap bitmap, String path) {
+//        saveImageWithQuality(bitmap, path, getCompressQuality());
+//    }
+//
     public static void saveImageWithQuality(Bitmap bitmap, String path, int compressQuality) {
         try {
             FileOutputStream fOut;
@@ -120,7 +124,7 @@ public class ImageUtility {
         }
     }
 
-    public static void saveImageWithQuality(Context context, Bitmap bitmap, File file) {
+    public static void saveImageWithQuality(Bitmap bitmap, File file) {
         saveImageWithQuality(bitmap, file.getAbsolutePath(), getCompressQuality());
     }
 
@@ -146,7 +150,7 @@ public class ImageUtility {
         }
     }
 
-    private static Bitmap scaleImageToResolution(Context context, Bitmap unscaledBitmap, ScalingLogic scalingLogic, int dstWidth, int dstHeight) {
+    private static Bitmap scaleImageToResolution(Bitmap unscaledBitmap, ScalingLogic scalingLogic, int dstWidth, int dstHeight) {
         //Do Rectangle of original picture when crop
         Rect srcRect = calculateSrcRect(unscaledBitmap.getWidth(), unscaledBitmap.getHeight(), dstWidth, dstHeight, scalingLogic);
         //Do Rectangle to fit in the source rectangle
@@ -278,56 +282,56 @@ public class ImageUtility {
     }
 
 
-    @Nullable
-    public static ExifInterface getExifInterface(Context context, Uri uri) {
-        try {
-            String path = uri.toString();
-            if (path.startsWith("file://")) {
-                return new ExifInterface(path);
-            }
-            if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                if (path.startsWith("content://")) {
-                    InputStream inputStream = context.getContentResolver().openInputStream(uri);
-                    return new ExifInterface(inputStream);
-                }
-            }
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
+//    @Nullable
+//    public static ExifInterface getExifInterface(Context context, Uri uri) {
+//        try {
+//            String path = uri.toString();
+//            if (path.startsWith("file://")) {
+//                return new ExifInterface(path);
+//            }
+//            if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+//                if (path.startsWith("content://")) {
+//                    InputStream inputStream = context.getContentResolver().openInputStream(uri);
+//                    return new ExifInterface(inputStream);
+//                }
+//            }
+//        }
+//        catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        return null;
+//    }
 
-    public static float getExifAngle(Context context, Uri uri) {
-        try {
-            ExifInterface exifInterface = getExifInterface(context, uri);
-            if(exifInterface == null) {
-                return -1f;
-            }
-
-            int orientation = exifInterface.getAttributeInt(ExifInterface.TAG_ORIENTATION,
-                    ExifInterface.ORIENTATION_UNDEFINED);
-
-            switch (orientation) {
-                case ExifInterface.ORIENTATION_ROTATE_90:
-                    return 90f;
-                case ExifInterface.ORIENTATION_ROTATE_180:
-                    return 180f;
-                case ExifInterface.ORIENTATION_ROTATE_270:
-                    return 270f;
-                case ExifInterface.ORIENTATION_NORMAL:
-                    return 0f;
-                case ExifInterface.ORIENTATION_UNDEFINED:
-                    return -1f;
-                default:
-                    return -1f;
-            }
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            return -1f;
-        }
-    }
+//    public static float getExifAngle(Context context, Uri uri) {
+//        try {
+//            ExifInterface exifInterface = getExifInterface(context, uri);
+//            if(exifInterface == null) {
+//                return -1f;
+//            }
+//
+//            int orientation = exifInterface.getAttributeInt(ExifInterface.TAG_ORIENTATION,
+//                    ExifInterface.ORIENTATION_UNDEFINED);
+//
+//            switch (orientation) {
+//                case ExifInterface.ORIENTATION_ROTATE_90:
+//                    return 90f;
+//                case ExifInterface.ORIENTATION_ROTATE_180:
+//                    return 180f;
+//                case ExifInterface.ORIENTATION_ROTATE_270:
+//                    return 270f;
+//                case ExifInterface.ORIENTATION_NORMAL:
+//                    return 0f;
+//                case ExifInterface.ORIENTATION_UNDEFINED:
+//                    return -1f;
+//                default:
+//                    return -1f;
+//            }
+//        }
+//        catch (Exception e) {
+//            e.printStackTrace();
+//            return -1f;
+//        }
+//    }
 
     public static float getExifAngle(Context context, String filePath) {
         try {
@@ -360,12 +364,12 @@ public class ImageUtility {
         }
     }
 
-    public static Bitmap rotateImage(Bitmap source, float angle) {
-        Matrix matrix = new Matrix();
-        matrix.postRotate(angle);
-        return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(),
-                matrix, true);
-    }
+//    public static Bitmap rotateImage(Bitmap source, float angle) {
+//        Matrix matrix = new Matrix();
+//        matrix.postRotate(angle);
+//        return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(),
+//                matrix, true);
+//    }
 
     public static Bitmap rotateImage(String filePath, float angle) {
         BitmapFactory.Options options = new BitmapFactory.Options();
@@ -382,8 +386,8 @@ public class ImageUtility {
         return source;
     }
 
-    //Unused overloads. Could be useful in future.
-    public static void scaleImageToResolution(Context context, File image, int dstWidth, int dstHeight) {
+//    Unused overloads. Could be useful in future.
+    public static void scaleImageToResolution(File image, int dstWidth, int dstHeight) {
         if (dstHeight > 0 && dstWidth > 0 && image != null) {
 
             Bitmap result = null;
@@ -409,17 +413,146 @@ public class ImageUtility {
                 result = BitmapFactory.decodeFile(image.getAbsolutePath(), bmOptions);
 
                 //Scale Bitmap to requested Resolution
-                result = scaleImageToResolution(context, result, scalingLogic, dstWidth, dstHeight);
+                result = scaleImageToResolution(result, scalingLogic, dstWidth, dstHeight);
 
                 if (result != null) {
                     //Save Bitmap with quality
-                    saveImageWithQuality(context, result, image);
+                    saveImageWithQuality(result, image);
                 }
             } finally {
                 //Clear Memory
                 if (result != null)
                     result.recycle();
             }
+        }
+    }
+
+    public static void GetProfileImage(final ImageButton imageButton, String token, String deviceID, final int width, final int height) {
+            ApiInterface apiService =
+                    HttpClient.getClient().create(ApiInterface.class);
+            Call<ResponseBody> call = apiService.getProfileImage("Bearer " + token, deviceID);
+            call.enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+
+                    try {
+
+                        boolean FileDownloaded = false;
+                        if (response.body() != null) {
+                            FileDownloaded = DownloadImage(response.body(), imageButton, width, height);
+                        }
+
+                    } catch (Exception e) {
+                        Log.d("onResponse", "There is an error");
+                        e.printStackTrace();
+                    }
+
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    Log.d("onFailure", t.toString());
+                }
+            });
+    }
+
+    public static boolean GetActivityImage(final String imagePath, final ImageButton imageButton, String token, final int width, final int height) {
+        try {
+            if(imagePath != null && !imagePath.isEmpty()) {
+                String deviceId = imagePath.split("\\\\")[0];
+                final String fileName = imagePath.split("\\\\")[1];
+                ApiInterface apiService =
+                        HttpClient.getClient().create(ApiInterface.class);
+                Call<ResponseBody> call = apiService.getMatchingImages("Bearer " + token, deviceId, fileName);
+                call.enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+
+                        if (response.isSuccessful()) {
+                            Log.d("onResponse", "Response came from server");
+
+                            if (response.body() != null) {
+                                DownloadImage(response.body(), fileName, imageButton, width, height);
+                            }
+//                        marker.showInfoWindow();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        Log.d("onFailure", t.toString());
+                        return;
+                    }
+                });
+            }
+        } catch (Exception e) {
+            Log.d("onResponse", "There is an error");
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    private static boolean DownloadImage(ResponseBody body, ImageButton imageButton, int width, int height) {
+
+        try {
+            Log.d("DownloadImage", "Reading and writing file");
+            if (body != null) {
+                // display the image data in a ImageView or save it
+                Bitmap bmp = BitmapFactory.decodeStream(body.byteStream());
+
+                bmp = ImageUtility.scaleImageToResolution(bmp, width, height);
+                imageButton.setMaxWidth(bmp.getWidth());
+                imageButton.setMaxHeight(bmp.getHeight());
+                imageButton.setImageBitmap(bmp);
+            }
+            return true;
+
+        } catch (Exception e) {
+            Log.d("DownloadImage", e.toString());
+            return false;
+        }
+    }
+
+    public static boolean DownloadImage(ResponseBody body, String filename, ImageButton imageButton, int width, int height) {
+
+        try {
+            Log.d("DownloadImage", "Reading and writing file");
+            if (body != null) {
+                // display the image data in a ImageView or save it
+                Bitmap bmp = BitmapFactory.decodeStream(body.byteStream());
+
+                try  {
+                    String imagePath = CommonUtility.GetFilePath() + filename + ".png";
+                    FileOutputStream out = new FileOutputStream(imagePath);
+                    bmp.compress(Bitmap.CompressFormat.PNG, 100, out); // bmp is your Bitmap instance
+                    // PNG is a lossless format, the compression factor (100) is ignored
+                    SetImage(imagePath, imageButton, width, height);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
+            return true;
+
+        } catch (Exception e) {
+            Log.d("DownloadImage", e.toString());
+            return false;
+        }
+    }
+
+    public static boolean SetImage(String path, ImageButton imageButton, int width, int height) {
+        File imgFile = new  File(path);
+
+        if(imgFile.exists()) {
+            Bitmap bmp = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
+            bmp = ImageUtility.scaleImageToResolution(bmp, width, height);
+            imageButton.setMaxWidth(bmp.getWidth());
+            imageButton.setMaxHeight(bmp.getHeight());
+            imageButton.setImageBitmap(bmp);
+            return  true;
+        } else {
+            return false;
         }
     }
 

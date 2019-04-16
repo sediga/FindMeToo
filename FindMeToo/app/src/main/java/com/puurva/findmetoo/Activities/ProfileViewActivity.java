@@ -32,6 +32,7 @@ import com.puurva.findmetoo.uitls.CommonUtility;
 import com.puurva.findmetoo.uitls.Global;
 import com.puurva.findmetoo.uitls.HttpClient;
 import com.puurva.findmetoo.uitls.ImageUtility;
+import com.puurva.findmetoo.uitls.SQLHelper;
 
 import java.io.ByteArrayOutputStream;
 
@@ -100,6 +101,10 @@ public class ProfileViewActivity extends AppCompatActivity implements View.OnCli
         }
         if(deviceID != null) {
             fillProfile();
+        }
+        ProfileModel profileModel = (ProfileModel) getIntent().getParcelableExtra("ProfileModel");
+        if(profileModel != null){
+            fillProfile(profileModel);
         }
     }
 
@@ -204,26 +209,11 @@ public class ProfileViewActivity extends AppCompatActivity implements View.OnCli
         String username = Global.preference.getValue(this, PrefConst.USERNAME, "");
         String token = Global.preference.getValue(this, PrefConst.TOKEN, "");
         if (token == null || token == "") {
-            token = getToken(username);
-        }
-        return token;
-    }
-
-    private String getToken(String username) {
-        String token = null;
-        Cursor c = Global.mdb.rawQuery(
-                "SELECT *    " +
-                        "FROM apiuser " +
-                        "WHERE deviceid = '" + username + "' " +
-                        "LIMIT 1",
-                null);
-
-        if (c == null || c.getCount() == 0) {
-            Global.showShortToast(this, "Api User not found!");
-            finish();
-        } else {
-            c.moveToFirst();
-            token = c.getString(2);
+            token = SQLHelper.getToken(username);
+            if (token == null || token == "") {
+                Global.showShortToast(this, "Api User not found!");
+                finish();
+            }
         }
         return token;
     }
@@ -231,25 +221,6 @@ public class ProfileViewActivity extends AppCompatActivity implements View.OnCli
     private void fillProfile()
     {
         final String token = getToken();
-        final TextView txtProfileName = ((TextView) findViewById(R.id.txt_view_name));
-        final TextView txtHobies = ((TextView) findViewById(R.id.txt_view_hobies));
-        final TextView txtAbout = ((TextView) findViewById(R.id.txt_view_about));
-        final TextView txtReviews = ((TextView) findViewById(R.id.txt_view_reviews));
-        final TextView txtViews = ((TextView) findViewById(R.id.txt_view_views));
-        final RatingBar ratingBar = ((RatingBar) findViewById(R.id.edit_profile_rating));
-        txtReviews.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                try {
-                    Intent profileReviewsIntent = new Intent(ProfileViewActivity.this, ViewListActivity.class);
-                    profileReviewsIntent.putExtra("DeviceId", deviceID);
-                    profileReviewsIntent.putExtra("ListSource", ListViewTypes.PROFILEREVIEWS);
-                    startActivity(profileReviewsIntent);
-                }catch (Exception ex){
-                    Log.e("LoadProfileViews", ex.getMessage());
-                }
-            }
-        });
         ApiInterface apiService =
                 HttpClient.getClient().create(ApiInterface.class);
         Call<ProfileModel> call = apiService.getProfile("Bearer " + token, deviceID);
@@ -260,18 +231,9 @@ public class ProfileViewActivity extends AppCompatActivity implements View.OnCli
                 if(response.isSuccessful()) {
                     profileModel = response.body();
                     if(profileModel !=null) {
-                        txtProfileName.setText(profileModel.getProfileName());
-                        txtHobies.setText(profileModel.getHobies());
-                        txtAbout.setText(profileModel.getAbout());
-                        txtReviews.setText(txtReviews.getText() + " : " + ((Long) profileModel.getReviews()).toString());
-                        txtViews.setText(txtViews.getText() + " : " + ((Long) profileModel.getViews()).toString());
-                        ratingBar.setRating(profileModel.getRating());
-                        downloadProfileImage(token, deviceID);
-
-                        profileModel.setViews(profileModel.getViews()+1);
-                        profileModel.setDeviceId(deviceID);
-
-                        CommonUtility.PostProfile(token, profileModel, null);
+                        downloadProfileImage(token, profileModel.getDeviceId().trim());
+                        fillProfile(profileModel);
+//                        CommonUtility.PostProfile(token, profileModel, null);
                     }
                 }
             }
@@ -292,13 +254,12 @@ public class ProfileViewActivity extends AppCompatActivity implements View.OnCli
 
                 try {
                     if(response.isSuccessful()) {
-                        Log.d("onResponse", "Response came from server");
-
-                        boolean FileDownloaded = false;
                         if (response.body() != null) {
-                            FileDownloaded = DownloadImage(response.body());
+                            Bitmap bmp = DownloadImage(response.body());
+                            ImageView image1 = ((ImageView) findViewById(R.id.imgViewPhoto));
+                            LoadImage(image1, bmp);
+                            profileModel.setProfilePhoto(bmp);
                         }
-                        Log.d("onResponse", "Image is downloaded and saved ? " + FileDownloaded);
                     }
 
                 } catch (Exception e) {
@@ -315,28 +276,62 @@ public class ProfileViewActivity extends AppCompatActivity implements View.OnCli
         });
     }
 
-    private boolean DownloadImage(ResponseBody body) {
+    private void LoadImage(ImageView image1, Bitmap imageBitMap) {
+        image1.setMaxWidth(imageBitMap.getWidth());
+        image1.setMaxHeight(imageBitMap.getHeight());
+        image1.setImageBitmap(imageBitMap);
+    }
+
+    private Bitmap DownloadImage(ResponseBody body) {
 
         try {
-            Log.d("DownloadImage", "Reading and writing file");
             if (body != null) {
                 // display the image data in a ImageView or save it
-                Bitmap bmp = BitmapFactory.decodeStream(body.byteStream());
+                return BitmapFactory.decodeStream(body.byteStream());
 
-                int width, height;
-                ImageView image1 = ((ImageView) findViewById(R.id.imgViewPhoto));
-                bmp = ImageUtility.scaleImageToResolution(this, bmp, bmp.getHeight(), bmp.getWidth());
-                image1.setMaxWidth(bmp.getWidth());
-                image1.setMaxHeight(bmp.getHeight());
-                image1.setImageBitmap(bmp);
-                profileModel.setProfilePhoto(bmp);
             }
-            return true;
+            return null;
 
         } catch (Exception e) {
-            Log.d("DownloadImage", e.toString());
-            return false;
+            Log.e("DownloadImage", e.getMessage(), e);
+            return null;
         }
     }
 
+    private void fillProfile(final ProfileModel profileModel){
+
+        final TextView txtProfileName = ((TextView) findViewById(R.id.txt_view_name));
+        final TextView txtHobies = ((TextView) findViewById(R.id.txt_view_hobies));
+        final TextView txtAbout = ((TextView) findViewById(R.id.txt_view_about));
+        final TextView txtReviews = ((TextView) findViewById(R.id.txt_view_reviews));
+        final TextView txtViews = ((TextView) findViewById(R.id.txt_view_views));
+        final RatingBar ratingBar = ((RatingBar) findViewById(R.id.edit_profile_rating));
+        txtReviews.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    Intent profileReviewsIntent = new Intent(ProfileViewActivity.this, ViewListActivity.class);
+                    profileReviewsIntent.putExtra("DeviceId", profileModel.getDeviceId().trim());
+                    profileReviewsIntent.putExtra("ListSource", ListViewTypes.PROFILEREVIEWS);
+                    startActivity(profileReviewsIntent);
+                }catch (Exception ex){
+                    Log.e("LoadProfileViews", ex.getMessage());
+                }
+            }
+        });
+        txtProfileName.setText(profileModel.getProfileName());
+        txtHobies.setText(profileModel.getHobies());
+        txtAbout.setText(profileModel.getAbout());
+        txtReviews.setText(txtReviews.getText() + " : " + ((Long) profileModel.getReviews()).toString());
+        txtViews.setText(txtViews.getText() + " : " + ((Long) profileModel.getViews()).toString());
+        ratingBar.setRating(profileModel.getRating());
+
+        profileModel.setViews(profileModel.getViews()+1);
+        if(profileModel.getProfilePhoto() != null) {
+            ImageView image1 = ((ImageView) findViewById(R.id.imgViewPhoto));
+            LoadImage(image1, profileModel.getProfilePhoto());
+        }else {
+            downloadProfileImage(Global.TOKEN, profileModel.getDeviceId().trim());
+        }
+    }
 }

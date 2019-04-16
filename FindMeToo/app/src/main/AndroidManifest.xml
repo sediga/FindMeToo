@@ -4,7 +4,6 @@
     package="com.puurva.findmetoo">
 
     <dist:module dist:instant="false" />
-
     <!--
          The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
          Google Maps Android API v2, but you must specify either coarse or fine
@@ -28,6 +27,7 @@
         android:roundIcon="@drawable/findmetoo_logo"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
         <service android:name=".Activities.NotificationsService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
@@ -80,6 +80,12 @@
             android:parentActivityName=".Activities.MapsActivity" />
         <activity
             android:name=".Activities.ViewListActivity"
+            android:parentActivityName=".Activities.MapsActivity" />
+        <activity
+            android:name=".Activities.ActivityDetails"
+            android:parentActivityName=".Activities.ViewListActivity" />
+        <activity
+            android:name=".Activities.Requests"
             android:parentActivityName=".Activities.MapsActivity" />
     </application>
 

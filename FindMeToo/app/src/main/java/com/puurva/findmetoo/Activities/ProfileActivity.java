@@ -99,7 +99,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
                         options.inPreferredConfig = Bitmap.Config.ARGB_8888;
                         float angle = ImageUtility.getExifAngle(this, filePath);
                         bitmap = ImageUtility.rotateImage(filePath, angle);
-                        bitmap = ImageUtility.scaleImageToResolution(this, this.bitmap, 300, 200, file);
+                        bitmap = ImageUtility.scaleImageToResolution(this.bitmap, 300, 200, file);
                     }
                 }
                 break;
@@ -108,7 +108,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
                         Uri imageUri = data.getData();
                         bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
 
-                        bitmap = ImageUtility.scaleImageToResolution(this, this.bitmap, 300, 300, file);
+                        bitmap = ImageUtility.scaleImageToResolution(this.bitmap, 300, 300, file);
                     }
                 }
                 break;
@@ -261,7 +261,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
 
                 int width, height;
                 ImageView image1 = ((ImageView) findViewById(R.id.imgPhoto));
-                bmp = ImageUtility.scaleImageToResolution(this, bmp, bmp.getHeight(), bmp.getWidth());
+                bmp = ImageUtility.scaleImageToResolution(bmp, bmp.getHeight(), bmp.getWidth());
                 image1.setMaxWidth(bmp.getWidth());
                 image1.setMaxHeight(bmp.getHeight());
                 image1.setImageBitmap(bmp);

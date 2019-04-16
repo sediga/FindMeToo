@@ -4,41 +4,38 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
-import com.puurva.findmetoo.Enums.ActivityTypes;
-
-import java.util.Date;
 
 public class CurrentActivity implements Parcelable {
 
-    public CurrentActivity(String deviceId, String activity, double latitude, double longitude, String description, String activityId){
-        this.DeviceId = deviceId;
-        this.Activity = activity;
-        this.latitude = latitude;
-        this.longitude = longitude;
-        this.description = description;
-        this.ActivityId = activityId;
-    }
-
-    public CurrentActivity(String deviceId, String activity, double latitude, double longitude, String description, String activityId, String activityRequestStatus){
-        this.DeviceId = deviceId;
-        this.Activity = activity;
-        this.latitude = latitude;
-        this.longitude = longitude;
-        this.description = description;
-        this.ActivityId = activityId;
-        this.ActivityRequestStatus = activityRequestStatus;
-    }
+//    public CurrentActivity(String deviceId, String activity, double Lat, double Long, String Description, String activityId){
+//        this.DeviceId = deviceId;
+//        this.Activity = activity;
+//        this.Lat = Lat;
+//        this.Long = Long;
+//        this.Description = Description;
+//        this.ActivityId = activityId;
+//    }
+//
+//    public CurrentActivity(String deviceId, String activity, double Lat, double Long, String Description, String activityId, String activityRequestStatus){
+//        this.DeviceId = deviceId;
+//        this.Activity = activity;
+//        this.Lat = Lat;
+//        this.Long = Long;
+//        this.Description = Description;
+//        this.ActivityId = activityId;
+//        this.ActivityRequestStatus = activityRequestStatus;
+//    }
 
     @SerializedName("DeviceID")
     public String DeviceId;
     @SerializedName("Activity")
     public String Activity;
     @SerializedName("Lat")
-    public double latitude;
+    public double Lat;
     @SerializedName("Long")
-    public double longitude;
+    public double Long;
     @SerializedName("Description")
-    public String description;
+    public String Description;
     @SerializedName("ImagePath")
     public String ImagePath;
     @SerializedName("ActivityId")
@@ -54,12 +51,12 @@ public class CurrentActivity implements Parcelable {
     @SerializedName("ProfileRating")
     public float ProfileRating;
 
-    protected CurrentActivity(Parcel in) {
+    public CurrentActivity(Parcel in) {
         DeviceId = in.readString();
         Activity = in.readString();
-        latitude = in.readDouble();
-        longitude = in.readDouble();
-        description = in.readString();
+        Lat = in.readDouble();
+        Long = in.readDouble();
+        Description = in.readString();
         ImagePath = in.readString();
         ActivityId = in.readString();
         ActivityType = in.readString();
@@ -90,9 +87,9 @@ public class CurrentActivity implements Parcelable {
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeString(DeviceId);
         parcel.writeString(Activity);
-        parcel.writeDouble(latitude);
-        parcel.writeDouble(longitude);
-        parcel.writeString(description);
+        parcel.writeDouble(Lat);
+        parcel.writeDouble(Long);
+        parcel.writeString(Description);
         parcel.writeString(ImagePath);
         parcel.writeString(ActivityId);
         parcel.writeString(ActivityType);

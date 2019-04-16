@@ -136,8 +136,8 @@ public class ResetPassword extends AppCompatActivity implements View.OnClickList
         ContentValues values = new ContentValues();
         values.put("email", email);
         values.put("password", password);
-        values.put("latitude", location.getLatitude());
-        values.put("longitude", location.getLongitude());
+        values.put("Lat", location.getLatitude());
+        values.put("Long", location.getLongitude());
 
         SQLHelper.Insert("t_user", values);
     }
