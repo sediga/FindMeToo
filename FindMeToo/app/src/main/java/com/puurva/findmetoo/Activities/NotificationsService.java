@@ -163,14 +163,9 @@ public class NotificationsService extends FirebaseMessagingService {
      */
     private void sendRegistrationToServer(String token) {
         String androidId = CommonUtility.GetDeviceId();
-        if (androidId == "") {
-            Global.AndroidID = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
-        }
 
         DeviceModel deviceModel = new DeviceModel(androidId, "", android.os.Build.VERSION.RELEASE, token);
         CommonUtility.RegisterDevice(deviceModel);
-        SQLHelper.AddDevice(deviceModel);
-        Global.has_device_registered = true;
     }
 
 

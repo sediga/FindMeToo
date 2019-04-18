@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 /**
  * Created by puurva on 2017-12-22.
@@ -118,6 +119,26 @@ public class Preference {
             return pref.getLong(key, defaultValue);
         }catch (Exception e){
             return defaultValue;
+        }
+    }
+
+    public void clearAll(Context context){
+        SharedPreferences pref = context.getSharedPreferences(FILE_NAME, Activity.MODE_PRIVATE);
+        try{
+            pref.edit().clear();
+            pref.edit().commit();
+        }catch (Exception e){
+            Log.e("Preferences:", e.getMessage(), e);
+        }
+    }
+
+    public void remove(Context context, String key){
+        SharedPreferences pref = context.getSharedPreferences(FILE_NAME, Activity.MODE_PRIVATE);
+        try{
+            pref.edit().remove(key);
+            pref.edit().commit();
+        }catch (Exception e){
+            Log.e("Preferences:", e.getMessage(), e);
         }
     }
 

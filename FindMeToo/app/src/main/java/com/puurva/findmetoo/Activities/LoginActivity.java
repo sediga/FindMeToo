@@ -2,11 +2,8 @@ package com.puurva.findmetoo.Activities;
 
 import android.Manifest;
 import android.app.AlertDialog;
-import android.content.ContentValues;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.os.Build;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
@@ -37,7 +34,6 @@ import com.puurva.findmetoo.uitls.Global;
 import com.puurva.findmetoo.uitls.HttpClient;
 import com.puurva.findmetoo.uitls.SQLHelper;
 import com.puurva.findmetoo.uitls.SQLiteManager;
-import com.puurva.findmetoo.ServiceInterfaces.model.UserModel;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -88,6 +84,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     }
     private void DoPostPermissionOperations() {
         Global.preference = Preference.getInstance();
+        if(!Global.has_device_registered){
+            Global.preference.remove(this, PrefConst.USERNAME);
+            Global.preference.remove(this, PrefConst.PASSWORD);
+        }
         final String username = Global.preference.getValue(this, PrefConst.USERNAME, "");
         String password = Global.preference.getValue(this, PrefConst.PASSWORD, "");
 
@@ -109,8 +109,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     if (latestStoredDevice == null || latestStoredDevice.NotificationToken.compareTo(newToken) != 0) {
                         DeviceModel deviceModel = new DeviceModel(androidId, username, softwareVersion, newToken);
                         CommonUtility.RegisterDevice(deviceModel);
-                        SQLHelper.AddDevice(deviceModel);
-                        Global.has_device_registered = true;
                     }
                 }
             }
@@ -219,42 +217,55 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             @Override
             public void onResponse(Call<Token> call, Response<Token> response) {
                 if(response.isSuccessful()) {
-                    helper.registerToken(response.body());
-                    if (!getUser(username, password)) {
+                    helper.onCallBack(new Object[] { response.body() });
+                    if (!SQLHelper.getUser(username, password)) {
+                        android.app.AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
+                        View view = LayoutInflater.from(LoginActivity.this).inflate(R.layout.dialog_keyword, null);
+                        builder.setTitle("Login failed")
+                                .setMessage("Sorry, Email not found, try registering.")
+                                .setCancelable(false)
+                                .setPositiveButton("OK", null);
+                        builder.show();
                         return;
                     }
                     Global.is_loggedin = true;
                     LoadActivity();
 //                    finish();
                 } else if(response.raw().code() == 400) {
-                    android.app.AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
-                    View view = LayoutInflater.from(LoginActivity.this).inflate(R.layout.dialog_keyword, null);
-                    builder.setTitle("Login failed")
-                            .setMessage("Email or Password is wrong, please try again. If you do not have account, you need to creat one.")
-                            .setCancelable(false)
-                            .setPositiveButton("OK", null);
-                    builder.show();
+                    Global.showAlert(LoginActivity.this, "Login failed",
+                            "Email or Password is wrong, please try again. If you do not have account, you need to creat one.");
+//                    android.app.AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
+//                    View view = LayoutInflater.from(LoginActivity.this).inflate(R.layout.dialog_keyword, null);
+//                    builder.setTitle("Login failed")
+//                            .setMessage("Email or Password is wrong, please try again. If you do not have account, you need to creat one.")
+//                            .setCancelable(false)
+//                            .setPositiveButton("OK", null);
+//                    builder.show();
                 } else {
-                    android.app.AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
-                    View view = LayoutInflater.from(LoginActivity.this).inflate(R.layout.dialog_keyword, null);
-                    builder.setTitle("Login failed")
-                            .setMessage("Oops! Something went wrong, please try again")
-                            .setCancelable(false)
-                            .setPositiveButton("OK", null);
-                    builder.show();
+                    Global.showAlert(LoginActivity.this, "Login failed",
+                            "Oops! Something went wrong, please try again");
+
+//                    android.app.AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
+//                    View view = LayoutInflater.from(LoginActivity.this).inflate(R.layout.dialog_keyword, null);
+//                    builder.setTitle("Login failed")
+//                            .setMessage("Oops! Something went wrong, please try again")
+//                            .setCancelable(false)
+//                            .setPositiveButton("OK", null);
+//                    builder.show();
                 }
             }
 
             @Override
             public void onFailure(Call<Token> call, Throwable t) {
                 System.out.println(t.getMessage());
-                android.app.AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
-                View view = LayoutInflater.from(LoginActivity.this).inflate(R.layout.dialog_keyword, null);
-                builder.setTitle("Login failed")
-                        .setMessage("Oops! Something went wrong, please try again")
-                        .setCancelable(false)
-                        .setPositiveButton("OK", null);
-                builder.show();
+                Global.showAlert(LoginActivity.this, "Login failed", "Oops! Something went wrong, please try again");
+//                android.app.AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
+////                View view = LayoutInflater.from(LoginActivity.this).inflate(R.layout.dialog_keyword, null);
+//                builder.setTitle("Login failed")
+//                        .setMessage("Oops! Something went wrong, please try again")
+//                        .setCancelable(false)
+//                        .setPositiveButton("OK", null);
+//                builder.show();
 //                Toast.makeText(LoginActivity.this   ,"Login Failed" + t.getMessage(), Toast.LENGTH_SHORT );
                 Log.e("login", "Login Failed : " + t.getMessage());
             }
@@ -286,51 +297,23 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         CallBackHelper callBackHelper = new CallBackHelper() {
             @Override
-            public void registerToken(Token token) {
-                ContentValues values = new ContentValues();
-                values.put("deviceid", token.userName);
-                values.put("token", token.access_token);
-                SQLHelper.Insert("apiuser", values);
-                saveToken(token.access_token);
+            public void onCallBack(Object[] returnObjects) {
+                if(returnObjects !=null && returnObjects.length > 0) {
+                    Token token = (Token)returnObjects[0];
+                    SQLHelper.RegisterToken(token);
+                    saveToken(token.access_token);
+                }
             }
         };
         this.loginToAPI(username, password, callBackHelper);
 //        if (!getUser(username, password)) return;
     }
 
-    private boolean getUser(String username, String password) {
-        Cursor c = Global.mdb.rawQuery(
-                "SELECT *    " +
-                        "FROM t_user " +
-                        "WHERE email = '" + username + "' AND password = '" + password + "' " +
-                        "LIMIT 1",
-                     null);
-
-        if (c == null || c.getCount() == 0) {
-            Global.showShortToast(this, "user name or password is invalid.");
-            return false;
-        }
-
-        Global.preference.put(this, PrefConst.USERNAME, username);
-        Global.preference.put(this, PrefConst.PASSWORD, password);
-
-        c.moveToFirst();
-        Global.current_user = new UserModel(
-                c.getInt(0),
-                c.getString(1),
-                c.getString(2),
-                c.getDouble(3),
-                c.getDouble(4)
-        );
-        return true;
-    }
-
     private void saveToken(String token) {
 
-        String savedToken = Global.preference.getValue(this, PrefConst.TOKEN, "");
-        if (savedToken != null && !savedToken.isEmpty()) {
-                Global.preference.put(this, PrefConst.TOKEN, token);
-                Global.TOKEN = token;
+        if (Global.TOKEN == null || Global.TOKEN.compareTo(token) != 0) {
+            Global.preference.put(this, PrefConst.TOKEN, token);
+            Global.TOKEN = token;
         }
     }
 }

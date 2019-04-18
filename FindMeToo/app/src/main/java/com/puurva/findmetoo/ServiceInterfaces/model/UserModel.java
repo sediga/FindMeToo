@@ -15,12 +15,12 @@ public class UserModel {
     @SerializedName("Long")
     private double longitude;
 
-    public UserModel(int id, String first_name, String last_name, double latitude, double longitude) {
+    public UserModel(int id, String first_name, String last_name) {
         this.id = id;
         this.username = first_name;
         this.password = last_name;
-        this.latitude = latitude;
-        this.longitude = longitude;
+//        this.latitude = latitude;
+//        this.longitude = longitude;
     }
 
     public int getId() {
@@ -47,19 +47,19 @@ public class UserModel {
         this.password = password;
     }
 
-    public double getLatitude() {
-        return latitude;
-    }
-
-    public void setLatitude(double latitude) {
-        this.latitude = latitude;
-    }
-
-    public double getLongitude() {
-        return longitude;
-    }
-
-    public void setLongitude(double longitude) {
-        this.longitude = longitude;
-    }
+//    public double getLatitude() {
+//        return latitude;
+//    }
+//
+//    public void setLatitude(double latitude) {
+//        this.latitude = latitude;
+//    }
+//
+//    public double getLongitude() {
+//        return longitude;
+//    }
+//
+//    public void setLongitude(double longitude) {
+//        this.longitude = longitude;
+//    }
 }

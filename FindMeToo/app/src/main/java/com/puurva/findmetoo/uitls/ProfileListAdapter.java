@@ -28,7 +28,7 @@ public class ProfileListAdapter extends ArrayAdapter<ProfileModel> {
         LayoutInflater inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View rowView = inflater.inflate(R.layout.users_list, parent, false);
-        CheckBox selectBox = rowView.findViewById(R.id.checkbox_select);
+//        CheckBox selectBox = rowView.findViewById(R.id.checkbox_select);
         ImageButton profileImage = rowView.findViewById(R.id.profile_image);
         TextView profileUser = rowView.findViewById(R.id.text_profile_user);
         profileUser.setText(values[position].getUserName());

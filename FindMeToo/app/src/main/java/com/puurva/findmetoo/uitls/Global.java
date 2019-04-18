@@ -1,10 +1,12 @@
 package com.puurva.findmetoo.uitls;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.widget.Toast;
 
+import com.puurva.findmetoo.Activities.LoginActivity;
 import com.puurva.findmetoo.ServiceInterfaces.model.DeviceModel;
 import com.puurva.findmetoo.ServiceInterfaces.model.UserModel;
 import com.puurva.findmetoo.preference.Preference;
@@ -40,4 +42,13 @@ public class Global {
         Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
     }
 
+    public static void showAlert(Context context, String title, String message) {
+        android.app.AlertDialog.Builder builder = new AlertDialog.Builder(context);
+//                View view = LayoutInflater.from(LoginActivity.this).inflate(R.layout.dialog_keyword, null);
+        builder.setTitle(title)
+                .setMessage(message)
+                .setCancelable(false)
+                .setPositiveButton("OK", null);
+        builder.show();
+    }
 }

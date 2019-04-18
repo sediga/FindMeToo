@@ -26,7 +26,7 @@ public class CommonUtility {
 
     private static final String infoWindowImagePath = Environment.getExternalStorageDirectory().getAbsolutePath() + Global.FILE_PATH_SUFFIX;
 
-    public static void RegisterDevice(DeviceModel deviceModel) {
+    public static void RegisterDevice(final DeviceModel deviceModel) {
         try {
             final ApiInterface apiService =
                     HttpClient.getClient().create(ApiInterface.class);
@@ -36,13 +36,48 @@ public class CommonUtility {
                 @Override
                 public void onResponse(Call<Void> call, Response<Void> response) {
                     if (response.isSuccessful()) {
-                        Global.has_device_registered = true;
+                        if(SQLHelper.UpsertDevice(deviceModel)) {
+                            Global.has_device_registered = true;
+                        }
 //                    finish();
                     }
                 }
 
                 @Override
                 public void onFailure(Call<Void> call, Throwable t) {
+                    Global.has_device_registered = false;
+                    System.out.println(t.getMessage());
+                    Log.e("login", "Login Failed : " + t.getMessage());
+                }
+            }));
+        }catch (Exception ex){
+            Log.e("RegisterDevice", ex.getMessage());
+        }
+    }
+
+    public static void RegisterDevice(final DeviceModel deviceModel, final CallBackHelper callBackHelper) {
+        try {
+            final ApiInterface apiService =
+                    HttpClient.getClient().create(ApiInterface.class);
+//        TokenBindingModel tokenBindingModel = new TokenBindingModel(username, "password", password);
+            Call<Void> tokenCall = apiService.postDevice(deviceModel);
+            tokenCall.enqueue((new Callback<Void>() {
+                @Override
+                public void onResponse(Call<Void> call, Response<Void> response) {
+                    if (response.isSuccessful()) {
+                        if(SQLHelper.UpsertDevice(deviceModel)) {
+                            Global.has_device_registered = true;
+                            if(callBackHelper != null){
+                                callBackHelper.onCallBack(null);
+                            }
+                        }
+//                    finish();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Void> call, Throwable t) {
+                    Global.has_device_registered = false;
                     System.out.println(t.getMessage());
                     Log.e("login", "Login Failed : " + t.getMessage());
                 }

@@ -2,6 +2,7 @@ package com.puurva.findmetoo.Activities;
 
 import android.Manifest;
 import android.content.ContentValues;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
@@ -15,12 +16,17 @@ import android.widget.EditText;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import com.puurva.findmetoo.R;
 import com.puurva.findmetoo.ServiceInterfaces.ApiInterface;
 import com.puurva.findmetoo.ServiceInterfaces.model.DeviceModel;
 import com.puurva.findmetoo.ServiceInterfaces.model.RegisterBindingModel;
 import com.puurva.findmetoo.ServiceInterfaces.model.Token;
 import com.puurva.findmetoo.ServiceInterfaces.model.TokenBindingModel;
+import com.puurva.findmetoo.uitls.CallBackHelper;
+import com.puurva.findmetoo.uitls.CommonUtility;
 import com.puurva.findmetoo.uitls.Global;
 import com.puurva.findmetoo.uitls.HttpClient;
 
@@ -29,6 +35,10 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 import com.puurva.findmetoo.uitls.SQLHelper;
+
+import org.json.JSONObject;
+
+import java.io.IOException;
 
 public class RegisterActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -69,7 +79,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         setContentView(R.layout.activity_profile);
     }
 
-    private void registerApiUser(final String email, final String password) {
+    private void registerApiUser(final String email, final String password, final CallBackHelper callBackHelper) {
         Token token = null;
         RegisterBindingModel registerBindingModel = new RegisterBindingModel(email, password, password);
         final ApiInterface apiService =
@@ -86,28 +96,8 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                         @Override
                         public void onResponse(Call<Token> call, Response<Token> response) {
                             Token token = response.body();
-                            String softwareVersion = Build.VERSION.RELEASE;
-                            DeviceModel deviceModel = new DeviceModel(Global.AndroidID, email, softwareVersion, null);
-
-                            final ApiInterface apiService =
-                                    HttpClient.getClient().create(ApiInterface.class);
-//        TokenBindingModel tokenBindingModel = new TokenBindingModel(username, "password", password);
-                            Call<Void> tokenCall = apiService.postDevice(deviceModel);
-                            tokenCall.enqueue((new Callback<Void>() {
-                                @Override
-                                public void onResponse(Call<Void> call, Response<Void> response) {
-                                    if (response.isSuccessful()) {
-                                        Global.has_device_registered = true;
-                                        finish();
-                                    }
-                                }
-
-                                @Override
-                                public void onFailure(Call<Void> call, Throwable t) {
-                                    System.out.println(t.getMessage());
-                                    Log.e("login", "Login Failed : " + t.getMessage());
-                                }
-                            }));
+                            SQLHelper.RegisterToken(token);
+                            RegisterDeviceWithToken(email, callBackHelper);
                         }
 
                         @Override
@@ -115,14 +105,47 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                             System.out.println(t.getMessage());
                         }
                     }));
+                } else if (response.raw().code() == 400) {
+                    try {
+                        JsonElement jsonMessage = (JsonElement) (new JsonParser().parse(response.errorBody().string()));
+                        Global.showAlert(RegisterActivity.this, "Register", jsonMessage.toString());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
+
 
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
                 System.out.println(t.getMessage());
             }
         });
+    }
+
+    private void RegisterDeviceWithToken(String email, final CallBackHelper callBackHelper) {
+        String softwareVersion = Build.VERSION.RELEASE;
+        final DeviceModel deviceModel = new DeviceModel(Global.AndroidID, email, softwareVersion, null);
+
+        final ApiInterface apiService =
+                HttpClient.getClient().create(ApiInterface.class);
+//        TokenBindingModel tokenBindingModel = new TokenBindingModel(username, "password", password);
+        Call<Void> tokenCall = apiService.postDevice(deviceModel);
+        tokenCall.enqueue((new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    CommonUtility.RegisterDevice(deviceModel, callBackHelper);
+//                                        finish();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                System.out.println(t.getMessage());
+                Log.e("login", "Login Failed : " + t.getMessage());
+            }
+        }));
     }
 
     private void doRegister() {
@@ -152,31 +175,29 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
             return;
         }
 
-        fusedLocationClient.getLastLocation()
-                .addOnSuccessListener(this, new OnSuccessListener<Location>() {
-                    @Override
-                    public void onSuccess(Location location) {
-                        // Got last known location. In some rare situations this can be null.
-                        if (location != null) {
-                            UpsertUser(location, email, password);
+        UpsertUser(email, password);
 
-                            RegisterActivity.this.registerApiUser(email, password);
+        CallBackHelper callBackHelper = new CallBackHelper() {
+            @Override
+            public void onCallBack(Object[] returnObjects) {
+                Intent profileIntent = new Intent(RegisterActivity.this, ProfileActivity.class);
+                profileIntent.putExtra("DeviceID", Global.AndroidID);
+                startActivity(profileIntent);
+                finish();
+            }
+        };
+        registerApiUser(email, password, callBackHelper);
 
-                            Global.showShortToast(RegisterActivity.this, "User registered successfully.");                        }
-                    }
-
-                });
+    }
 
 
 //        finish();
-    }
 
-    private void UpsertUser(Location location, String email, String password) {
+
+    private void UpsertUser(String email, String password) {
         ContentValues values = new ContentValues();
         values.put("email", email);
         values.put("password", password);
-        values.put("Lat", location.getLatitude());
-        values.put("Long", location.getLongitude());
 
         SQLHelper.Insert("t_user", values);
     }

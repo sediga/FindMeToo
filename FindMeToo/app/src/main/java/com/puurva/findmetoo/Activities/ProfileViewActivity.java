@@ -209,7 +209,7 @@ public class ProfileViewActivity extends AppCompatActivity implements View.OnCli
         String username = Global.preference.getValue(this, PrefConst.USERNAME, "");
         String token = Global.preference.getValue(this, PrefConst.TOKEN, "");
         if (token == null || token == "") {
-            token = SQLHelper.getToken(username);
+            token = SQLHelper.getToken(Global.AndroidID);
             if (token == null || token == "") {
                 Global.showShortToast(this, "Api User not found!");
                 finish();

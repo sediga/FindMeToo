@@ -25,10 +25,9 @@
         android:scaleY="0.5"
         android:visibility="visible"
         android:foregroundGravity="right"
-        app:layout_constraintBottom_toBottomOf="@id/ConstraintLayout2_View"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/textUserName"
-        app:layout_constraintTop_toTopOf="@id/ConstraintLayout2_View" />
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <TextView
         android:id="@+id/textUserName"
