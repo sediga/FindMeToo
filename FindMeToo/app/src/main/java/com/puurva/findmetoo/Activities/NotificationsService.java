@@ -4,6 +4,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.media.RingtoneManager;
@@ -21,6 +22,7 @@ import com.puurva.findmetoo.R;
 import com.puurva.findmetoo.ServiceInterfaces.model.ActivityModel;
 import com.puurva.findmetoo.ServiceInterfaces.model.DeviceModel;
 import com.puurva.findmetoo.ServiceInterfaces.model.ActivityNotification;
+import com.puurva.findmetoo.uitls.CallBackHelper;
 import com.puurva.findmetoo.uitls.CommonUtility;
 import com.puurva.findmetoo.uitls.Global;
 import com.puurva.findmetoo.uitls.SQLHelper;
@@ -37,6 +39,7 @@ public class NotificationsService extends FirebaseMessagingService {
 
     private ActivityNotification activityNotification = null;
     private ActivityModel activityModel = null;
+    private String notificationId = null;
 
     /**
      * Called when message is received.
@@ -68,6 +71,10 @@ public class NotificationsService extends FirebaseMessagingService {
             try {
                 JSONObject jObject = new JSONObject(remoteMessage.getData());
                 if (jObject != null) {
+                    if (jObject.has("NotificationId")) {
+                        notificationId = jObject.get("NotificationId").toString();
+                    }
+
                     if (jObject.has("FromDeviceId")) {
                         activityNotification = new ActivityNotification(jObject.get("FromDeviceId").toString(),
                                 jObject.get("ActivityId").toString(),
@@ -75,7 +82,7 @@ public class NotificationsService extends FirebaseMessagingService {
                                 NotificationType.valueOf(jObject.get("RequestNotificationType").toString()));
                     }
                     if (jObject.has("What")) {
-                        activityModel = new ActivityModel(null, jObject.get("DeviceID").toString(),
+                        activityModel = new ActivityModel(jObject.get("ActivityID").toString(), jObject.get("DeviceID").toString(),
                                 jObject.get("What").toString(), jObject.get("description").toString(), jObject.get("When").toString(),
                                 Double.parseDouble(jObject.get("Lat").toString()), Double.parseDouble(jObject.get("Long").toString()));
                     }
@@ -100,7 +107,7 @@ public class NotificationsService extends FirebaseMessagingService {
         // Check if message contains a notification payload.
         if (remoteMessage.getNotification() != null) {
             Log.d(TAG, "Message Notification Body: " + remoteMessage.getNotification().getBody());
-            if(activityNotification != null || activityModel != null) {
+            if(activityNotification != null || activityModel != null || notificationId != null) {
                 sendNotification(remoteMessage.getNotification().getBody());
         }
 //            Toast.makeText(this, remoteMessage.getNotification().getBody(), Toast.LENGTH_SHORT).show();
@@ -168,54 +175,30 @@ public class NotificationsService extends FirebaseMessagingService {
         CommonUtility.RegisterDevice(deviceModel);
     }
 
+    private PendingIntent createOnDismissedIntent(Context context, ActivityNotification activityNotification) {
+        Intent intent = new Intent(context, NotificationDismissedReceiver.class);
+        intent.putExtra("NotificationId", 0);
 
-    /**
-     * Create and show a simple notification containing the received FCM message.
-     *
-     * @param messageBody FCM message body received.
-     */
+        PendingIntent pendingIntent =
+                PendingIntent.getBroadcast(context.getApplicationContext(),
+                        0, intent, 0);
+        return pendingIntent;
+    }
+
     private void sendNotification(String messageBody) {
-//        Class<?> intentClass = null;
-//        switch (activityNotification.ActivityRequestStatus) {
-//            case NEW:
-//                intentClass = ProfileViewActivity.class;
-//                break;
-//            case ACCEPTED:
-//            case REJECTED:
-//                intentClass = MapsActivity.class;
-//                break;
-//            default:
-//                intentClass = MapsActivity.class;
-//                break;
-//        }
         Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.putExtra("ActivityNotification", activityNotification);
-//        intent.putExtra("source", notificationType);
-//        intent.putExtra("ActivityID", activityID);
-//        intent.putExtra("RequestStatus", requestStatus);
+        if(activityModel != null) {
+            intent.putExtra("ActivityOfNotification", activityModel.ActivityID);
+        }
+        if(notificationId != null) {
+            intent.putExtra("NotificationId", notificationId);
+        }
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
         stackBuilder.addNextIntentWithParentStack(intent);
         PendingIntent pendingIntent =
                 stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-
-//        PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0 /* Request code */, intent,
-//                PendingIntent.FLAG_ONE_SHOT);
-
-//        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-//        builder.setTitle("Alert")
-//                .setCancelable(false)
-//                .setMessage("Are you sure?")
-//                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-//                    @Override
-//                    public void onClick(DialogInterface dialog, int which) {
-//                dialog.dismiss();
-////                        finish();
-//                    }
-//                })
-//                .setNegativeButton("No", null);
-//
-//        builder.show();
 
         String channelId = getString(R.string.default_notification_channel_id);
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
@@ -227,6 +210,7 @@ public class NotificationsService extends FirebaseMessagingService {
                         .setAutoCancel(true)
                         .setSound(defaultSoundUri)
                         .setContentIntent(pendingIntent)
+                        .setDeleteIntent(createOnDismissedIntent(getApplicationContext(), activityNotification))
                         .setPriority(NotificationManager.IMPORTANCE_HIGH);
 
         NotificationManager notificationManager =

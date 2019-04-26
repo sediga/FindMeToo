@@ -135,7 +135,9 @@ public class Preference {
     public void remove(Context context, String key){
         SharedPreferences pref = context.getSharedPreferences(FILE_NAME, Activity.MODE_PRIVATE);
         try{
-            pref.edit().remove(key);
+//            String stringValue = pref.getString(key, "");
+//            pref.pu
+            pref.edit().putString(key, "");
             pref.edit().commit();
         }catch (Exception e){
             Log.e("Preferences:", e.getMessage(), e);

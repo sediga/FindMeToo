@@ -32,7 +32,10 @@ public class ActivitiesAdapter extends ArrayAdapter<ActivityModel> {
         ImageButton activityImage = (ImageButton) rowView.findViewById(R.id.activity_image);
         textTitle.setText(values[position].What);
         textDescription.setText(values[position].description);
-        ImageUtility.GetActivityImage(values[position].ImagePath, activityImage, Global.TOKEN, 400, 400);
+        if (values[position].ImagePath != "" && !ImageUtility.SetImage(CommonUtility.GetFilePath() + values[position].ImagePath.toString().split("\\\\")[1] + ".png",
+                activityImage, 150, 150)) {
+            ImageUtility.GetActivityImage(values[position].ImagePath, activityImage, Global.TOKEN, 150, 150);
+        }
         return rowView;
     }
 }

@@ -4,19 +4,16 @@ import android.Manifest;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Location;
 import android.os.Build;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.EditText;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.puurva.findmetoo.R;
@@ -25,6 +22,7 @@ import com.puurva.findmetoo.ServiceInterfaces.model.DeviceModel;
 import com.puurva.findmetoo.ServiceInterfaces.model.RegisterBindingModel;
 import com.puurva.findmetoo.ServiceInterfaces.model.Token;
 import com.puurva.findmetoo.ServiceInterfaces.model.TokenBindingModel;
+import com.puurva.findmetoo.preference.PrefConst;
 import com.puurva.findmetoo.uitls.CallBackHelper;
 import com.puurva.findmetoo.uitls.CommonUtility;
 import com.puurva.findmetoo.uitls.Global;
@@ -35,8 +33,6 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 import com.puurva.findmetoo.uitls.SQLHelper;
-
-import org.json.JSONObject;
 
 import java.io.IOException;
 
@@ -50,7 +46,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         setContentView(R.layout.activity_register);
 
         findViewById(R.id.button_register).setOnClickListener(this);
-        findViewById(R.id.button_profile).setOnClickListener(this);
+//        findViewById(R.id.button_profile).setOnClickListener(this);
         findViewById(R.id.button_login).setOnClickListener(this);
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
@@ -65,9 +61,9 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
             case R.id.button_register:
                 doRegister();
                 break;
-            case R.id.button_profile:
-                addProfile();
-                break;
+//            case R.id.button_profile:
+//                addProfile();
+//                break;
             case R.id.button_login:
                 finish();
                 break;
@@ -97,7 +93,15 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                         public void onResponse(Call<Token> call, Response<Token> response) {
                             Token token = response.body();
                             SQLHelper.RegisterToken(token);
-                            RegisterDeviceWithToken(email, callBackHelper);
+                            RegisterDeviceEmail(email, callBackHelper);
+                            CheckBox rememberPassword = findViewById(R.id.checkbox_remember_password);
+                            if(rememberPassword.isChecked()){
+                                Global.preference.put( RegisterActivity.this, PrefConst.USERNAME, email);
+                                Global.preference.put( RegisterActivity.this, PrefConst.PASSWORD, password);
+                            }else {
+                                Global.preference.put( RegisterActivity.this, PrefConst.USERNAME, "");
+                                Global.preference.put( RegisterActivity.this, PrefConst.PASSWORD, "");
+                            }
                         }
 
                         @Override
@@ -123,29 +127,11 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         });
     }
 
-    private void RegisterDeviceWithToken(String email, final CallBackHelper callBackHelper) {
+    private void RegisterDeviceEmail(String email, final CallBackHelper callBackHelper) {
         String softwareVersion = Build.VERSION.RELEASE;
         final DeviceModel deviceModel = new DeviceModel(Global.AndroidID, email, softwareVersion, null);
 
-        final ApiInterface apiService =
-                HttpClient.getClient().create(ApiInterface.class);
-//        TokenBindingModel tokenBindingModel = new TokenBindingModel(username, "password", password);
-        Call<Void> tokenCall = apiService.postDevice(deviceModel);
-        tokenCall.enqueue((new Callback<Void>() {
-            @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
-                if (response.isSuccessful()) {
-                    CommonUtility.RegisterDevice(deviceModel, callBackHelper);
-//                                        finish();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<Void> call, Throwable t) {
-                System.out.println(t.getMessage());
-                Log.e("login", "Login Failed : " + t.getMessage());
-            }
-        }));
+        CommonUtility.RegisterDevice(deviceModel, callBackHelper);
     }
 
     private void doRegister() {

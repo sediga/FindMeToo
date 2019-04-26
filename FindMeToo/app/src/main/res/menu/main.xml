@@ -9,22 +9,22 @@
         android:visible="true"
         app:showAsAction="ifRoom" />
 
-    <item
-        android:id="@+id/action_add"
-        android:title="@string/add"
-        android:icon="@drawable/ic_add_black_24dp"
-        android:visible="true"
-        app:showAsAction="ifRoom" />
+    <!--<item-->
+        <!--android:id="@+id/action_add"-->
+        <!--android:title="@string/add"-->
+        <!--android:icon="@drawable/ic_add_black_24dp"-->
+        <!--android:visible="true"-->
+        <!--app:showAsAction="ifRoom" />-->
 
     <group android:id="@+id/group_id">
         <item android:id="@+id/menu_profile"
-            android:title="Profile"/>
+            android:title="Edit Profile"/>
         <item android:id="@+id/menu_profile_reviews"
             android:title="My Reviews"/>
-        <item android:id="@+id/menu_view_my_activities"
-            android:title="My Activities"/>
-        <item android:id="@+id/menu_view_my_requests"
-            android:title="My Requests"/>
+        <!--<item android:id="@+id/menu_view_my_activities"-->
+            <!--android:title="My Activities"/>-->
+        <!--<item android:id="@+id/menu_view_my_requests"-->
+            <!--android:title="My Requests"/>-->
     </group>
 
 

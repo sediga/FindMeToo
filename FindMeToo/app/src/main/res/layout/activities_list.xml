@@ -15,9 +15,9 @@
 
         <ImageButton
             android:id="@+id/activity_image"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:background="@drawable/findmetoo_logo"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="@mipmap/findmetoo_logo"
             android:focusable="false"
             android:layout_marginRight="8dp"
             app:layout_constraintLeft_toLeftOf="parent"

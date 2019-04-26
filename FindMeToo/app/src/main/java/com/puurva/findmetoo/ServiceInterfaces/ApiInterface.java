@@ -82,6 +82,10 @@ public interface ApiInterface {
     Call<List<ProfileReviewModel>> getProfileReviews(@Header("Authorization") String authorization, @Path("deviceId") String deviceId);
     @GET("JoinServer/MyActivities/{device}")
     Call<List<ActivityModel>> geMyActivities(@Header("Authorization") String authorization, @Path("device") String device);
+    @GET("JoinServer/Notification/{deviceid}")
+    Call<List<NotificationDetails>> geMyNotifications(@Header("Authorization") String authorization, @Path("deviceid") String device);
     @GET("JoinServer/ActivityById/{activityid}/Subscribers")
     Call<List<ProfileModel>> getActivitySubscribers(@Header("Authorization") String authorization, @Path("activityid") String activityId);
+    @DELETE("JoinServer/Notification/{notificationid}")
+    Call<Void> deleteNotification(@Header("Authorization") String authorization, @Path("notificationid") String notificationId);
 }

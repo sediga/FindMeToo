@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -23,6 +24,7 @@ import com.puurva.findmetoo.Enums.NotificationType;
 import com.puurva.findmetoo.Enums.RequestStatus;
 import com.puurva.findmetoo.R;
 import com.puurva.findmetoo.ServiceInterfaces.ApiInterface;
+import com.puurva.findmetoo.ServiceInterfaces.model.ActivityModel;
 import com.puurva.findmetoo.ServiceInterfaces.model.DeviceModel;
 import com.puurva.findmetoo.ServiceInterfaces.model.ActivityNotification;
 import com.puurva.findmetoo.ServiceInterfaces.model.Token;
@@ -44,22 +46,26 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private SQLiteManager dbHelper;
     private String androidId;
     private ActivityNotification activityNotification = null;
+    private String activityOfNotification = null;
+    private String notificationId = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        Bundle bundle = getIntent().getExtras();
-        if (bundle != null && bundle.getString("FromDeviceId") != null &&
-                bundle.getString("ActivityId") != null &&
-                bundle.getString("NotificationRequestStatus") != null &&
-                bundle.getString("RequestNotificationType") != null) {
-            activityNotification = new ActivityNotification(bundle.getString("FromDeviceId"),
-                    bundle.getString("ActivityId"),
-                    RequestStatus.valueOf(bundle.getString("NotificationRequestStatus")),
-                    NotificationType.valueOf(bundle.getString("RequestNotificationType")));
-            getIntent().putExtra("ActivityNotification", activityNotification);
-        }
+//        Bundle bundle = getIntent().getExtras();
+//        if (bundle != null && bundle.getString("FromDeviceId") != null &&
+//                bundle.getString("ActivityId") != null &&
+//                bundle.getString("NotificationRequestStatus") != null &&
+//                bundle.getString("RequestNotificationType") != null) {
+//            activityNotification = new ActivityNotification(bundle.getString("FromDeviceId"),
+//                    bundle.getString("ActivityId"),
+//                    RequestStatus.valueOf(bundle.getString("NotificationRequestStatus")),
+//                    NotificationType.valueOf(bundle.getString("RequestNotificationType")));
+//            getIntent().putExtra("ActivityNotification", activityNotification);
+//        }
         activityNotification = getIntent().getParcelableExtra("ActivityNotification");
+        activityOfNotification = getIntent().getStringExtra("ActivityOfNotification");
+        notificationId = getIntent().getStringExtra("NotificationId");
         if(!Global.is_loggedin) {
             findViewById(R.id.button_login).setOnClickListener(this);
             findViewById(R.id.button_register).setOnClickListener(this);
@@ -78,16 +84,25 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         findViewById(R.id.button_login).setOnClickListener(this);
         findViewById(R.id.button_register).setOnClickListener(this);
         findViewById(R.id.button_change_password).setOnClickListener(this);
+        String username = Global.preference.getValue(this, PrefConst.USERNAME, "");
+        String password = Global.preference.getValue(this, PrefConst.PASSWORD, "");
+        if (!username.isEmpty() && !password.isEmpty()) {
+            EditText edit_username = findViewById(R.id.edit_username);
+            EditText edit_password = findViewById(R.id.edit_password);
+            edit_username.setText(username);
+            edit_password.setText(password);
+//            doLogin(username, password);
+        }
         super.onResume();
         // put your code here...
 
     }
     private void DoPostPermissionOperations() {
         Global.preference = Preference.getInstance();
-        if(!Global.has_device_registered){
-            Global.preference.remove(this, PrefConst.USERNAME);
-            Global.preference.remove(this, PrefConst.PASSWORD);
-        }
+//        if(!Global.has_device_registered){
+//            Global.preference.remove(this, PrefConst.USERNAME);
+//            Global.preference.remove(this, PrefConst.PASSWORD);
+//        }
         final String username = Global.preference.getValue(this, PrefConst.USERNAME, "");
         String password = Global.preference.getValue(this, PrefConst.PASSWORD, "");
 
@@ -101,14 +116,16 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, new OnSuccessListener<InstanceIdResult>() {
             @Override
             public void onSuccess(InstanceIdResult instanceIdResult) {
-                if (!Global.has_device_registered) {
+                String newToken = instanceIdResult.getToken();
+                String existingToken = Global.preference.getValue(LoginActivity.this, "firebase_token", null);
+                if (existingToken == null || newToken.compareTo(existingToken) != 0) {
                     while (Global.mdb == null) ;
-                    String newToken = instanceIdResult.getToken();
                     String softwareVersion = Build.VERSION.RELEASE;
                     DeviceModel latestStoredDevice = SQLHelper.GetLatestDevice();
                     if (latestStoredDevice == null || latestStoredDevice.NotificationToken.compareTo(newToken) != 0) {
                         DeviceModel deviceModel = new DeviceModel(androidId, username, softwareVersion, newToken);
                         CommonUtility.RegisterDevice(deviceModel);
+                        Global.preference.put(LoginActivity.this, "firebase_token", newToken);
                     }
                 }
             }
@@ -119,7 +136,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             EditText edit_password = findViewById(R.id.edit_password);
             edit_username.setText(username);
             edit_password.setText(password);
-            doLogin(username, password);
+//            doLogin(username, password);
         }
     }
 
@@ -276,24 +293,19 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         Intent intentClass = new Intent(LoginActivity.this, MapsActivity.class);
 //        Log.e("LoginActivity", "checking activityNotificaiton");
         if(activityNotification != null) {
-//            Log.e("LoginActivity", "activityNotificaiton not null");
-//            switch (activityNotification.ActivityRequestStatus) {
-//                case NEW:
-////                    intentClass = new Intent(LoginActivity.this, ProfileViewActivity.class);
-////                    break;
-//                case REJECTED:
-//                case ACCEPTED:
-//                    intentClass = new Intent(LoginActivity.this, MapsActivity.class);
-//                    break;
-//            }
             intentClass.putExtra("ActivityNotification", activityNotification);
-        }else{
-            Log.e("LoginActivity", "activityNotificaiton is null");
         }
+        if(activityOfNotification != null) {
+            intentClass.putExtra("ActivityOfNotification", activityOfNotification);
+        }
+        if(notificationId != null) {
+            intentClass.putExtra("NotificationId", notificationId);
+        }
+
         startActivity(intentClass);
     }
 
-    private void doLogin(final String username, String password) {
+    private void doLogin(final String email, final String password) {
 
         CallBackHelper callBackHelper = new CallBackHelper() {
             @Override
@@ -302,11 +314,19 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     Token token = (Token)returnObjects[0];
                     SQLHelper.RegisterToken(token);
                     saveToken(token.access_token);
+                    CheckBox rememberPassword = findViewById(R.id.checkbox_remember_password);
+                    if(rememberPassword.isChecked()){
+                        Global.preference.put( LoginActivity.this, PrefConst.USERNAME, email);
+                        Global.preference.put( LoginActivity.this, PrefConst.PASSWORD, password);
+                    }else {
+                        Global.preference.put( LoginActivity.this, PrefConst.USERNAME, "");
+                        Global.preference.put( LoginActivity.this, PrefConst.PASSWORD, "");
+                    }
                 }
             }
         };
-        this.loginToAPI(username, password, callBackHelper);
-//        if (!getUser(username, password)) return;
+        this.loginToAPI(email, password, callBackHelper);
+//        if (!getUser(email, password)) return;
     }
 
     private void saveToken(String token) {

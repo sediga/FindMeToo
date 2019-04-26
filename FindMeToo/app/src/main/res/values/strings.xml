@@ -26,4 +26,10 @@
     <string name="forgot_password_link">Forgot password?</string>
     <string name="cancel">Cancel</string>
     <string name="resetpassword">Reset</string>
+    <string name="title_activity_welcome1">activity_welcome1</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="activity_notifications">Notifications</string>
+    <string name="add_activity">Add</string>
+    <string name="my_activies">Activies</string>
 </resources>

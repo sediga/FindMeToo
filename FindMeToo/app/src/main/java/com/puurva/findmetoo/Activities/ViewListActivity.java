@@ -16,12 +16,14 @@ import com.puurva.findmetoo.R;
 import com.puurva.findmetoo.ServiceInterfaces.ApiInterface;
 import com.puurva.findmetoo.ServiceInterfaces.model.ActivityModel;
 import com.puurva.findmetoo.ServiceInterfaces.model.CurrentActivity;
+import com.puurva.findmetoo.ServiceInterfaces.model.NotificationDetails;
 import com.puurva.findmetoo.ServiceInterfaces.model.ProfileModel;
 import com.puurva.findmetoo.ServiceInterfaces.model.ProfileReviewModel;
 import com.puurva.findmetoo.preference.PrefConst;
 import com.puurva.findmetoo.uitls.ActivitiesAdapter;
 import com.puurva.findmetoo.uitls.Global;
 import com.puurva.findmetoo.uitls.HttpClient;
+import com.puurva.findmetoo.uitls.NotificationsAdapter;
 import com.puurva.findmetoo.uitls.ReviewListViewAdapter;
 
 import java.util.List;
@@ -34,6 +36,7 @@ public class ViewListActivity extends Activity {
     // Array of strings...
     ProfileReviewModel[] profileReviewModels = null;
     ActivityModel[] activityModels = null;
+    NotificationDetails[] notificationDetails = null;
     ProfileModel[] activitySubscribers = null;
 
     @Override
@@ -58,6 +61,11 @@ public class ViewListActivity extends Activity {
                 case MYACTIVITIES:
                     if (deviceId != null && deviceId.length() > 0) {
                         LoadMyActivities(deviceId);
+                    }
+                    break;
+                case MYNOTIFICATIONS:
+                    if (deviceId != null && deviceId.length() > 0) {
+                        LoadMyNotifications(deviceId);
                     }
                     break;
             }
@@ -142,6 +150,50 @@ public class ViewListActivity extends Activity {
 
                 @Override
                 public void onFailure(Call<List<ActivityModel>> call, Throwable t) {
+                }
+            });
+        }catch (Exception ex){
+            Log.e("ReviewsDownload", ex.getMessage());
+        }
+    }
+
+    private void LoadMyNotifications(String deviceId) {
+        final String token = getToken();
+        ApiInterface apiService =
+                HttpClient.getClient().create(ApiInterface.class);
+        Call<List<NotificationDetails>> call = apiService.geMyNotifications("Bearer " + token, deviceId);
+        try {
+            call.enqueue(new Callback<List<NotificationDetails>>() {
+                @Override
+                public void onResponse(Call<List<NotificationDetails>> call, Response<List<NotificationDetails>> response) {
+                    if (response.isSuccessful()) {
+                        notificationDetails = new NotificationDetails[response.body().size()];
+                        response.body().toArray(notificationDetails);
+                        NotificationsAdapter adapter = new NotificationsAdapter(ViewListActivity.this, notificationDetails);
+
+                        ListView listView = (ListView) findViewById(R.id.list_view);
+                        listView.setAdapter(adapter);
+                        listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+                        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                            @Override
+                            public void onItemClick(AdapterView<?> parent, View view,
+                                                    int position, long id) {
+                                Intent activityIntent = new Intent(ViewListActivity.this, com.puurva.findmetoo.Activities.NotificationDetails.class);
+                                activityIntent.putExtra("Activity", (ActivityModel)parent.getItemAtPosition(position));
+                                ImageButton imageButton = view.findViewById(R.id.activity_image);
+                                if(imageButton != null && imageButton.getDrawable() != null){
+                                    Global.CurrentImage = ((BitmapDrawable)imageButton.getDrawable()).getBitmap();
+                                } else {
+                                    Global.CurrentImage = null;
+                                }
+                                startActivity(activityIntent);
+                            }
+                        });
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<List<NotificationDetails>> call, Throwable t) {
                 }
             });
         }catch (Exception ex){

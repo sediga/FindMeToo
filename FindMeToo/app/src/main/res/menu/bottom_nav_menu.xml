@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/menu_view_my_activities"
+        android:icon="@drawable/my_activities_list_red"
+        android:title="@string/my_activies"/>
+
+    <item
+        android:id="@+id/action_add"
+        android:icon="@drawable/marker_icon"
+        android:title="@string/add_activity" />
+
+    <item
+        android:id="@+id/activity_notifications"
+        android:icon="@drawable/activity_notifications_red"
+        android:title="@string/activity_notifications" />
+
+</menu>

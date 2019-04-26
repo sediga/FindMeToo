@@ -25,6 +25,8 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.StrictMode;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
+import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
@@ -142,6 +144,7 @@ public class MapsActivity extends FragmentActivity implements
     private String imageFilePath;
     private String imageFileName;
     private ActivityNotification activityNotification = null;
+    private String notificationId = null;
 
     private boolean RELOADACTIVITIES = true;
 //    LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
@@ -149,6 +152,7 @@ public class MapsActivity extends FragmentActivity implements
     PopupWindow mPopupWindow;
     PopupWindow mapLongClickPopupWindow;
     Marker newActivityMarker;
+    private String activityIdOfNotification = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -176,23 +180,59 @@ public class MapsActivity extends FragmentActivity implements
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        mWindow = getLayoutInflater().inflate(R.layout.custom_info_window, (ViewGroup)findViewById(R.id.info_window_main));
+        mWindow = getLayoutInflater().inflate(R.layout.custom_info_window, (ViewGroup) findViewById(R.id.info_window_main));
 
         mSearchView = findViewById(R.id.floating_search_view);
         mSearchView.setOnMenuItemClickListener(this);
         mSearchView.setOnSearchListener(this);
         mSearchView.setOnHomeActionClickListener(this);
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
-                == PackageManager.PERMISSION_DENIED)
-        {
-            ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.CAMERA}, 100);
+                == PackageManager.PERMISSION_DENIED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, 100);
         }
+
+        BottomNavigationView navView = findViewById(R.id.nav_view);
+        navView.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+        navView.setItemIconTintList(null);
+//        DockBottomNavigation();
     }
+
+    private void DockBottomNavigation() {
+
+        View decorView = getWindow().getDecorView();
+// Hide both the navigation bar and the status bar.
+// SYSTEM_UI_FLAG_FULLSCREEN is only available on Android 4.1 and higher, but as
+// a general rule, you should design your app to hide the status bar whenever you
+// hide the navigation bar.
+        int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_FULLSCREEN;
+        decorView.setSystemUiVisibility(uiOptions);
+    }
+
+    private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
+            = new BottomNavigationView.OnNavigationItemSelectedListener() {
+
+        @Override
+        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+            switch (item.getItemId()) {
+                case R.id.menu_view_my_activities:
+                    LoadMyActivities();
+                    return true;
+                case R.id.action_add:
+                    addActivity(null);
+                    return true;
+                case R.id.activity_notifications:
+                    LoadMyNotiifications();
+                    return true;
+            }
+            return false;
+        }
+    };
 
     private void SetupFirebaseNotifications() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             // Create channel to show notifications.
-            String channelId  = getString(R.string.default_notification_channel_id);
+            String channelId = getString(R.string.default_notification_channel_id);
             String channelName = getString(R.string.default_notification_channel_name);
             NotificationManager notificationManager =
                     getSystemService(NotificationManager.class);
@@ -259,7 +299,7 @@ public class MapsActivity extends FragmentActivity implements
 //                Toast.makeText(MapsActivity.this, marker.getTitle() + "'s image button clicked!", Toast.LENGTH_SHORT).show();
                 try {
                     LaunchViewProfile(activities.get(marker).DeviceId, false);
-                }catch (Exception ex){
+                } catch (Exception ex) {
 //                    LaunchViewProfile(circles.get(marker) activities.get(marker).DeviceId, false);
                     Log.e("ShowProfile", ex.getMessage());
                 }
@@ -287,11 +327,12 @@ public class MapsActivity extends FragmentActivity implements
                 infoImageButtonListener.setMarker(marker);
                 viewProfileClickistener.setMarker(marker);
                 mapWrapperLayout.setMarkerWithInfoWindow(marker, mWindow);
-                if (image.getTag(R.id.info_badge) == "loaded") {
-                    image.setTag(R.id.info_badge, "DontReload");
-                }
+//                if (image.getTag(R.id.info_badge) == "loaded") {
+//                    image.setTag(R.id.info_badge, "DontReload");
+//                }
                 Button imIn = mWindow.findViewById(R.id.iammin);
                 imIn.setVisibility(View.INVISIBLE);
+                Global.ISMARKERCLICKED = true;
                 return mWindow;
             }
         });
@@ -299,37 +340,38 @@ public class MapsActivity extends FragmentActivity implements
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
-                if(newActivityMarker != null){
+                if (newActivityMarker != null) {
                     newActivityMarker.remove();
                 }
-                if(mPopupWindow != null && mPopupWindow.isShowing()){
+                if (mPopupWindow != null && mPopupWindow.isShowing()) {
                     try {
                         mPopupWindow.dismiss();
                         Circle circle = (Circle) mWindow.getTag();
                         if (circle != null) {
                             circle.setFillColor(570425599);
                         }
-                    }catch (Exception ex){
+                    } catch (Exception ex) {
                         Log.e("mapclick", ex.getMessage());
                     }
                 }
-                if(mapLongClickPopupWindow != null && mapLongClickPopupWindow.isShowing()){
+                if (mapLongClickPopupWindow != null && mapLongClickPopupWindow.isShowing()) {
                     try {
                         mapLongClickPopupWindow.dismiss();
-                    }catch (Exception ex){
+                    } catch (Exception ex) {
                         Log.e("mapclick", ex.getMessage());
                     }
                 }
+                Global.ISMARKERCLICKED = false;
             }
         });
 
         mMap.setOnCameraMoveStartedListener(new GoogleMap.OnCameraMoveStartedListener() {
-                @Override
-                public void onCameraMoveStarted(int reason) {
-                    if (reason == GoogleMap.OnCameraMoveStartedListener.REASON_GESTURE) {
-                        RELOADACTIVITIES = true;
-                    }
+            @Override
+            public void onCameraMoveStarted(int reason) {
+                if (reason == GoogleMap.OnCameraMoveStartedListener.REASON_GESTURE) {
+                    RELOADACTIVITIES = true;
                 }
+            }
         });
 
         mMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
@@ -346,13 +388,24 @@ public class MapsActivity extends FragmentActivity implements
         mMap.getUiSettings().setRotateGesturesEnabled(false);
         mMap.setOnCameraChangeListener(getCameraChangeListener());
 
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
         fusedLocationClient.getLastLocation()
                 .addOnSuccessListener(this, new OnSuccessListener<Location>() {
                     @Override
                     public void onSuccess(Location location) {
                         // Got last known location. In some rare situations this can be null.
-                        if (location != null) {
+                        if (location != null && !Global.ISMARKERCLICKED) {
                             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 14));
+//                            Global.ISMARKERCLICKED = false;
                             // Logic to handle location object
                         }
                     }
@@ -365,6 +418,7 @@ public class MapsActivity extends FragmentActivity implements
         mMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
             @Override
             public void onMapLongClick(final LatLng latLng) {
+                Global.ISMARKERCLICKED = false;
                 newActivityMarker= mMap.addMarker(new MarkerOptions().position(latLng));
                 CameraPosition cameraPosition = new CameraPosition.Builder()
                         .target(latLng)
@@ -436,6 +490,8 @@ public class MapsActivity extends FragmentActivity implements
     private void HandleNotifications() {
         Log.e("ActivityNotification", "checking activity notification status in Maps Activity");
         activityNotification = getIntent().getParcelableExtra("ActivityNotification");
+        activityIdOfNotification = getIntent().getStringExtra("ActivityIdOfNotification");
+        notificationId = getIntent().getStringExtra("NotificationId");
         getIntent().removeExtra("ActivityNotification");
         if(activityNotification != null){
 //            Toast.makeText(this, activityNotification.ActivityRequestStatus.name(), Toast.LENGTH_SHORT);
@@ -443,22 +499,59 @@ public class MapsActivity extends FragmentActivity implements
             switch (activityNotification.ActivityRequestStatus){
                 case ACCEPTED:
 //                case REJECTED:
-                    HandleFromNotification(activityNotification.ActivityId);
+                    HandleFromNotification(activityNotification.ActivityId, notificationId);
+//                    if(notificationId != null){
+//                        DeleteNotification(notificationId);
+//                    }
                     break;
                 case NEW:
                     LaunchViewProfile(activityNotification.DeviceId, true);
+                    break;
                 case REJECTED:
                     showMarkerOfUsers("");
+                    if(notificationId != null){
+                        DeleteNotification(notificationId);
+                    }
                     break;
             }
-        }else{
+        }else if (activityIdOfNotification != null) {
+            HandleFromNotification(activityIdOfNotification, notificationId);
+//            if(notificationId != null){
+////                DeleteNotification(notificationId);
+//            }
+        } else {
             showMarkerOfUsers("");
             Log.e("ActivityNotification", "activityNotification is null");
-
         }
     }
 
-    private void HandleFromNotification(String activityId) {
+    private void DeleteNotification(String notificationId) {
+        String token = getToken();
+        final String deviceId = Global.AndroidID;
+        ApiInterface apiService =
+                HttpClient.getClient().create(ApiInterface.class);
+        try {
+            InitializeHashMaps();
+            Call<Void> call = apiService.deleteNotification("Bearer " + token, notificationId);
+
+            call.enqueue(new Callback<Void>() {
+                @Override
+                public void onResponse(Call<Void> call, Response<Void> response) {
+                    if (response.isSuccessful()) {
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Void> call, Throwable t) {
+                    Log.d("onFailure", t.toString());
+                }
+            });
+        } catch (Exception ex) {
+            Log.e("postActivity", ex.getMessage());
+        }
+    }
+
+    private void HandleFromNotification(String activityId, final String notificationId) {
         String token = getToken();
         final String deviceId = Global.AndroidID;
         ApiInterface apiService =
@@ -474,10 +567,13 @@ public class MapsActivity extends FragmentActivity implements
                         final CurrentActivity location = (CurrentActivity) (response.body());
 //                        mMap.clear();
                         Marker marker = ShowLocation(0, location, true);
-                        marker.showInfoWindow();
                         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 14));
                         marker.setTag(location.ImagePath);
                         marker.setVisible(true);
+                        marker.showInfoWindow();
+                        if(notificationId != null){
+                            DeleteNotification(notificationId);
+                        }
                     }
                 }
 
@@ -538,20 +634,11 @@ public class MapsActivity extends FragmentActivity implements
             case R.id.action_search:
                 showMarkerOfUsers(mSearchView.getQuery());
                 break;
-            case R.id.action_add:
-                addActivity(null);
-                break;
             case R.id.menu_profile:
                 LoadProfileActivity(null);
                 break;
             case R.id.menu_profile_reviews:
                 LoadProfileReviews();
-                break;
-            case R.id.menu_view_my_activities:
-                LoadMyActivities();
-                break;
-            case R.id.menu_view_my_requests:
-                LoadMyRequests();
                 break;
         }
     }
@@ -586,6 +673,17 @@ public class MapsActivity extends FragmentActivity implements
             startActivity(myActivitiesIntent);
         }catch (Exception ex){
             Log.e("LoadProfileViews", ex.getMessage());
+        }
+    }
+
+    private void LoadMyNotiifications() {
+        try {
+            Intent myNotificationsIntent = new Intent(this, ViewNotificationsList.class);
+            myNotificationsIntent.putExtra("DeviceId", CommonUtility.GetDeviceId());
+            myNotificationsIntent.putExtra("ListSource", ListViewTypes.MYNOTIFICATIONS);
+            startActivity(myNotificationsIntent);
+        }catch (Exception ex){
+            Log.e("LoadMYNotifications", ex.getMessage());
         }
     }
 
@@ -1032,26 +1130,27 @@ public class MapsActivity extends FragmentActivity implements
     }
 
     private void HandleMoreSettings(final EditText startDate, final EditText endDate, Switch isPrivate) {
-        final Calendar myCalendar = Calendar.getInstance();
-        String formattedFromDate =  Global.activityDateFormat.format(myCalendar.getTime());
+        final Calendar startCalendar = Calendar.getInstance();
+        final Calendar endCalendar = Calendar.getInstance();
+        String formattedFromDate =  Global.activityDateFormat.format(startCalendar.getTime());
         startDate.setText(formattedFromDate);
-        startDate.setTag(Global.universalDateFormat.format(myCalendar.getTime()));
-        myCalendar.add(Calendar.HOUR, 4);
-        String formattedToDate =  Global.activityDateFormat.format(myCalendar.getTime());
+        startDate.setTag(Global.universalDateFormat.format(startCalendar.getTime()));
+        endCalendar.add(Calendar.HOUR, 4);
+        String formattedToDate =  Global.activityDateFormat.format(endCalendar.getTime());
         endDate.setText(formattedToDate);
-        endDate.setTag(Global.universalDateFormat.format(myCalendar.getTime()));
+        endDate.setTag(Global.universalDateFormat.format(endCalendar.getTime()));
 
         Date value = new Date();
-        myCalendar.setTime(value);
+        startCalendar.setTime(value);
         final DatePickerDialog.OnDateSetListener startTimePicker = new DatePickerDialog.OnDateSetListener() {
 
             @Override
             public void onDateSet(DatePicker view, int year, int monthOfYear,
                                   int dayOfMonth) {
                 // TODO Auto-generated method stub
-                myCalendar.set(Calendar.YEAR, year);
-                myCalendar.set(Calendar.MONTH, monthOfYear);
-                myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                startCalendar.set(Calendar.YEAR, year);
+                startCalendar.set(Calendar.MONTH, monthOfYear);
+                startCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
 
                 // now show the time picker
                 new TimePickerDialog(MapsActivity.this,
@@ -1059,15 +1158,15 @@ public class MapsActivity extends FragmentActivity implements
 
                             @Override public void onTimeSet(TimePicker view,
                                                             int h, int min) {
-                                myCalendar.set(Calendar.HOUR_OF_DAY, h);
-                                myCalendar.set(Calendar.MINUTE, min);
-//                                date = myCalendar.getTime();
+                                startCalendar.set(Calendar.HOUR_OF_DAY, h);
+                                startCalendar.set(Calendar.MINUTE, min);
+//                                date = startCalendar.getTime();
 
-                                startDate.setText(Global.activityDateFormat.format(myCalendar.getTime()));
-                                startDate.setTag(Global.universalDateFormat.format(myCalendar.getTime()));
+                                startDate.setText(Global.activityDateFormat.format(startCalendar.getTime()));
+                                startDate.setTag(Global.universalDateFormat.format(startCalendar.getTime()));
                             }
-                        }, myCalendar.get(Calendar.HOUR_OF_DAY),
-                        myCalendar.get(Calendar.MINUTE), false).show();
+                        }, startCalendar.get(Calendar.HOUR_OF_DAY),
+                        startCalendar.get(Calendar.MINUTE), false).show();
 
             }
 
@@ -1079,9 +1178,9 @@ public class MapsActivity extends FragmentActivity implements
             public void onDateSet(DatePicker view, int year, int monthOfYear,
                                   int dayOfMonth) {
                 // TODO Auto-generated method stub
-                myCalendar.set(Calendar.YEAR, year);
-                myCalendar.set(Calendar.MONTH, monthOfYear);
-                myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                endCalendar.set(Calendar.YEAR, year);
+                endCalendar.set(Calendar.MONTH, monthOfYear);
+                endCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
 
                 // now show the time picker
                 new TimePickerDialog(MapsActivity.this,
@@ -1089,15 +1188,15 @@ public class MapsActivity extends FragmentActivity implements
 
                             @Override public void onTimeSet(TimePicker view,
                                                             int h, int min) {
-                                myCalendar.set(Calendar.HOUR_OF_DAY, h);
-                                myCalendar.set(Calendar.MINUTE, min);
-//                                date = myCalendar.getTime();
+                                endCalendar.set(Calendar.HOUR_OF_DAY, h);
+                                endCalendar.set(Calendar.MINUTE, min);
+//                                date = startCalendar.getTime();
 
-                                endDate.setText(Global.activityDateFormat.format(myCalendar.getTime()));
-                                endDate.setTag(Global.universalDateFormat.format(myCalendar.getTime()));
+                                endDate.setText(Global.activityDateFormat.format(endCalendar.getTime()));
+                                endDate.setTag(Global.universalDateFormat.format(endCalendar.getTime()));
                             }
-                        }, myCalendar.get(Calendar.HOUR_OF_DAY),
-                        myCalendar.get(Calendar.MINUTE), false).show();
+                        }, endCalendar.get(Calendar.HOUR_OF_DAY),
+                        endCalendar.get(Calendar.MINUTE), false).show();
 
             }
 
@@ -1108,8 +1207,8 @@ public class MapsActivity extends FragmentActivity implements
             @Override
             public void onClick(View view) {
 //                    if (hasFocus) {
-                new DatePickerDialog(MapsActivity.this, startTimePicker, myCalendar.get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
-                        myCalendar.get(Calendar.DAY_OF_MONTH)).show();
+                new DatePickerDialog(MapsActivity.this, startTimePicker, startCalendar.get(Calendar.YEAR), startCalendar.get(Calendar.MONTH),
+                        startCalendar.get(Calendar.DAY_OF_MONTH)).show();
 //                    }
             }
         });
@@ -1119,8 +1218,8 @@ public class MapsActivity extends FragmentActivity implements
             @Override
             public void onFocusChange(View view, boolean hasFocus) {
                 if (hasFocus) {
-                    new DatePickerDialog(MapsActivity.this, startTimePicker, myCalendar.get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
-                            myCalendar.get(Calendar.DAY_OF_MONTH)).show();
+                    new DatePickerDialog(MapsActivity.this, startTimePicker, startCalendar.get(Calendar.YEAR), startCalendar.get(Calendar.MONTH),
+                            startCalendar.get(Calendar.DAY_OF_MONTH)).show();
                 }
             }
         });
@@ -1128,8 +1227,8 @@ public class MapsActivity extends FragmentActivity implements
         endDate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                new DatePickerDialog(MapsActivity.this, endTimePicker, myCalendar.get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
-                        myCalendar.get(Calendar.DAY_OF_MONTH)).show();
+                new DatePickerDialog(MapsActivity.this, endTimePicker, endCalendar.get(Calendar.YEAR), endCalendar.get(Calendar.MONTH),
+                        endCalendar.get(Calendar.DAY_OF_MONTH)).show();
             }
         });
 
@@ -1139,8 +1238,8 @@ public class MapsActivity extends FragmentActivity implements
             public void onFocusChange(View view, boolean hasFocus) {
                 // TODO Auto-generated method stub
                 if (hasFocus) {
-                    new DatePickerDialog(MapsActivity.this, endTimePicker, myCalendar.get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
-                            myCalendar.get(Calendar.DAY_OF_MONTH)).show();
+                    new DatePickerDialog(MapsActivity.this, endTimePicker, endCalendar.get(Calendar.YEAR), endCalendar.get(Calendar.MONTH),
+                            endCalendar.get(Calendar.DAY_OF_MONTH)).show();
                 }
             }
         });

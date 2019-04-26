@@ -28,7 +28,7 @@
             android:id="@+id/profile_image"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:background="@drawable/findmetoo_logo"
+            android:background="@mipmap/findmetoo_logo"
             android:focusable="false"
             android:layout_marginRight="8dp"
             app:layout_constraintStart_toStartOf="parent"

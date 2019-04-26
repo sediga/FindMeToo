@@ -16,6 +16,7 @@ import java.util.Locale;
 
 public class Global {
 
+    public static boolean ISMARKERCLICKED = false;
     public static String AndroidID = null;
     public static UserModel current_user;
     public static SQLiteDatabase mdb;

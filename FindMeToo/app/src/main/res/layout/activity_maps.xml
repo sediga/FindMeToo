@@ -6,31 +6,46 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <com.puurva.findmetoo.Activities.MapWrapperLayout
-        android:id="@+id/map_relative_layout"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <fragment
-            android:id="@+id/map"
-            android:name="com.google.android.gms.maps.SupportMapFragment"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            tools:context=".Activities.MapsActivity" />
-    </com.puurva.findmetoo.Activities.MapWrapperLayout>
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
+        <com.puurva.findmetoo.Activities.MapWrapperLayout
+            android:id="@+id/map_relative_layout"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.92">
+
+            <fragment
+                android:id="@+id/map"
+                android:name="com.google.android.gms.maps.SupportMapFragment"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                tools:context=".Activities.MapsActivity" />
+        </com.puurva.findmetoo.Activities.MapWrapperLayout>
+
+        <android.support.design.widget.BottomNavigationView
+            android:id="@+id/nav_view"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_alignBottom="@id/map_relative_layout"
+            android:layout_weight="0.08"
+            android:background="@color/colorPrimaryDark"
+            app:itemTextColor="@android:color/holo_red_light"
+            app:menu="@menu/bottom_nav_menu" />
+    </LinearLayout>
     <com.arlib.floatingsearchview.FloatingSearchView
         android:id="@+id/floating_search_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:floatingSearch_searchBarMarginLeft="@dimen/dimen_5"
-        app:floatingSearch_searchBarMarginRight="@dimen/dimen_5"
         app:floatingSearch_searchHint="What do you want to do today?"
         app:floatingSearch_searchInputTextSize="5dp"
         app:floatingSearch_suggestionsListAnimDuration="250"
         app:floatingSearch_showSearchKey="true"
-        app:floatingSearch_leftActionMode="showHome"
         app:floatingSearch_showMenuAction="true"
         app:floatingSearch_menu="@menu/main"
         app:floatingSearch_close_search_on_keyboard_dismiss="true"/>
+
 
 </RelativeLayout>

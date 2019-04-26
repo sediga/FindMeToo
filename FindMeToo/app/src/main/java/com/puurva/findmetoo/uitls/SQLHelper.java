@@ -19,19 +19,27 @@ import java.util.Calendar;
 public class SQLHelper {
 
     public static boolean AddDevice(DeviceModel deviceModel){
-        ContentValues values = new ContentValues();
-        values.put("DeviceId", deviceModel.DeviceID);
-        values.put("EmailId", deviceModel.EmailID);
-        values.put("SoftwareVersion", deviceModel.SoftwareVersion);
-        values.put("NotificationToken", deviceModel.NotificationToken);
-        values.put("CreatedOn", Calendar.getInstance().getTime().toString());
-        return Insert("DeviceInfo", values);
+        boolean retValue = false;
+        try {
+            ContentValues values = new ContentValues();
+            values.put("DeviceId", deviceModel.DeviceID);
+            values.put("EmailId", deviceModel.EmailID);
+            values.put("SoftwareVersion", deviceModel.SoftwareVersion);
+            values.put("NotificationToken", deviceModel.NotificationToken);
+            values.put("CreatedOn", Calendar.getInstance().getTime().toString());
+            retValue = Insert("DeviceInfo", values);
+        }catch (Exception e){
+            Log.e("AddDevice", e.getMessage(), e);
+        }
+        return retValue;
     }
 
     public static int UpdateDevice(DeviceModel deviceModel){
         ContentValues values = new ContentValues();
 //        values.put("DeviceId", deviceModel.DeviceID);
-        values.put("EmailId", deviceModel.EmailID);
+        if(deviceModel.EmailID != null && !deviceModel.EmailID.isEmpty()) {
+            values.put("EmailId", deviceModel.EmailID);
+        }
         values.put("SoftwareVersion", deviceModel.SoftwareVersion);
         if(deviceModel.NotificationToken != null) {
             values.put("NotificationToken", deviceModel.NotificationToken);
