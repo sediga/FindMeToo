@@ -30,7 +30,6 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             buildConfigField "String", "API_BASE_URL", "\"http://findmetoo.centralus.cloudapp.azure.com/JoinServer/\""
-            resValue "string", "API_KEY", "AIzaSyAwyR1QrUpaEtyn8fHerYJXBTawuM-ewOE"
             debuggable = false
             jniDebuggable = false
             signingConfig signingConfigs.findmetoo1
@@ -41,7 +40,6 @@ android {
             jniDebuggable = true
             renderscriptDebuggable = true
             buildConfigField "String", "API_BASE_URL", "\"http://findmetoo.com/JoinServer/\""
-            resValue "string", "API_KEY", "AIzaSyDopZNHDHHgX3prHca1n9KJn4WtsQU1V4s"
         }
     }
     sourceSets { main { res.srcDirs = ['src/main/res', 'src/main/res/layout/intro'] } }
