@@ -16,6 +16,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -64,4 +65,26 @@ public class NotificationDetails extends AppCompatActivity {
 
 //        final EditText edit_title = this.findViewById(R.id.edit_activity_title);
     }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK
+                && event.getRepeatCount() == 0) {
+            event.startTracking();
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK && event.isTracking()
+                && !event.isCanceled()) {
+            setIntent(null);
+            finish();
+            return true;
+        }
+        return super.onKeyUp(keyCode, event);
+    }
+
 }

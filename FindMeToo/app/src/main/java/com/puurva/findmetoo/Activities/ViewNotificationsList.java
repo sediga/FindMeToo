@@ -7,6 +7,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.util.JsonReader;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
@@ -63,7 +64,32 @@ public class ViewNotificationsList extends Activity {
         LoadMyNotifications(deviceId);
     }
 
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK
+                && event.getRepeatCount() == 0) {
+            event.startTracking();
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK && event.isTracking()
+                && !event.isCanceled()) {
+            setIntent(null);
+            finish();
+            return true;
+        }
+        return super.onKeyUp(keyCode, event);
+    }
+
     private void LoadMyNotifications(String deviceId) {
+        GetNotifications(deviceId);
+    }
+
+    private void GetNotifications(String deviceId) {
         final String token = getToken();
         ApiInterface apiService =
                 HttpClient.getClient().create(ApiInterface.class);
@@ -104,6 +130,7 @@ public class ViewNotificationsList extends Activity {
                                     }
                                 }
                                 startActivity(intentClass);
+                                finish();
                             }
                         });
                     }

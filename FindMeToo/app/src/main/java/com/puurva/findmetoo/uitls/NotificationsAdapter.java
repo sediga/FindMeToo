@@ -28,7 +28,13 @@ public class NotificationsAdapter extends ArrayAdapter<NotificationDetails> {
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View rowView = inflater.inflate(R.layout.notification_details, parent, false);
         TextView textNotification = (TextView) rowView.findViewById(R.id.text_notification);
+        TextView textNotificationTime = (TextView) rowView.findViewById(R.id.notification_time);
+        TextView textNotificationStatus = (TextView) rowView.findViewById(R.id.notification_status);
         textNotification.setText(values[position].NotificationText);
+        textNotificationTime.setText(values[position].CreatedOn.toString());
+        if(values[position].MessageStatus != null) {
+            textNotificationStatus.setText(values[position].MessageStatus.toString());
+        }
         return rowView;
     }
 }

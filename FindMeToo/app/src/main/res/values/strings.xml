@@ -32,4 +32,6 @@
     <string name="activity_notifications">Notifications</string>
     <string name="add_activity">Add</string>
     <string name="my_activies">Activies</string>
+    <string name="i_m_in">I\'m In</string>
+    <string name="activity_image">Activity Image</string>
 </resources>

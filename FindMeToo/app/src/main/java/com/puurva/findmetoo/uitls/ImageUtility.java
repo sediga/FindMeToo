@@ -550,6 +550,7 @@ public class ImageUtility {
             imageButton.setMaxWidth(bmp.getWidth());
             imageButton.setMaxHeight(bmp.getHeight());
             imageButton.setImageBitmap(bmp);
+            imageButton.invalidate();
             return  true;
         } else {
             return false;

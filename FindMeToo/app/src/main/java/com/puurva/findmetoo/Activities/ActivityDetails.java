@@ -16,6 +16,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -142,6 +143,27 @@ public class ActivityDetails extends AppCompatActivity implements View.OnClickLi
                 }
             });
         }
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK
+                && event.getRepeatCount() == 0) {
+            event.startTracking();
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK && event.isTracking()
+                && !event.isCanceled()) {
+            setIntent(null);
+            finish();
+            return true;
+        }
+        return super.onKeyUp(keyCode, event);
     }
 
     @Override
@@ -381,9 +403,11 @@ public class ActivityDetails extends AppCompatActivity implements View.OnClickLi
                 break;
             case R.id.btn_activity_delete:
                 DeleteActivity();
+//                finish();
                 break;
             case R.id.btn_activity_update:
                 UpdateActivity();
+//                finish();
                 break;
         }
 
@@ -417,7 +441,6 @@ public class ActivityDetails extends AppCompatActivity implements View.OnClickLi
             final String currentDateandTime = Global.universalDateFormat.format(new Date());
             activity.description = description;
             ActivityTypes activityTypes = isPrivate.isChecked() ? ActivityTypes.ONREQUEST : ActivityTypes.PUBLIC;
-//            final ActivitySettingsModel activitySettings = new ActivitySettingsModel(null, startDate.getTag().toString(), endDate.getTag().toString(), activityTypes, ActivityStatuses.OPEN, 0, 0, null);
             activity.activitySetting.StartTime = startDate.getTag().toString();
             activity.activitySetting.EndTime = endDate.getTag().toString();
             activity.activitySetting.ActivityType = activityTypes;
@@ -436,8 +459,6 @@ public class ActivityDetails extends AppCompatActivity implements View.OnClickLi
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.isSuccessful()) {
                         finish();
-//                        startActivity(getIntent());
-//                        GetMatchingActivitiesByKeyword(token, activity.What);
                 }
             }
 
@@ -460,9 +481,8 @@ public class ActivityDetails extends AppCompatActivity implements View.OnClickLi
                     ActivityModel newActivityModel = response.body();
                     if(newActivityModel != null) {
                         uploadImage(newActivityModel.DeviceID, newActivityModel.ActivityID, token);
-//                        startActivity(getIntent());
-//                        GetMatchingActivitiesByKeyword(token, activity.What);
                     }
+                    finish();
                 }
             }
 
@@ -482,7 +502,6 @@ public class ActivityDetails extends AppCompatActivity implements View.OnClickLi
                 this.bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out); // bmp is your Bitmap instance
                 // PNG is a lossless format, the compression factor (100) is ignored
                 File file = new File(tempFileName);
-//            RequestBody reqFile = RequestBody.create(MediaType.parse("image/*"), file);
                 RequestBody requestBody = RequestBody.create(MediaType.parse("multipart/form-data"), file);
 
                 MultipartBody.Part body = MultipartBody.Part.createFormData("upload", file.getName(), requestBody);

@@ -51,7 +51,7 @@
         -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="@string/google_maps_key" />
+            android:value="@string/API_KEY" />
 
         <activity
             android:name=".Activities.MapsActivity"
@@ -101,6 +101,9 @@
         <activity
             android:name=".Activities.NotificationDetails"
             android:parentActivityName=".Activities.ViewNotificationsList" />
+        <activity
+            android:name=".Activities.ViewActivityFull"
+            android:parentActivityName=".Activities.MapsActivity" />
     </application>
 
 </manifest>

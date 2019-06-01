@@ -11,6 +11,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.CheckBox;
@@ -287,6 +288,27 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 Log.e("login", "Login Failed : " + t.getMessage());
             }
         }));
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK
+                && event.getRepeatCount() == 0) {
+            event.startTracking();
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK && event.isTracking()
+                && !event.isCanceled()) {
+            setIntent(null);
+            finish();
+            return true;
+        }
+        return super.onKeyUp(keyCode, event);
     }
 
     private void LoadActivity() {

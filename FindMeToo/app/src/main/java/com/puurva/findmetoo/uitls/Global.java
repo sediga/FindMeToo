@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.widget.Toast;
 
 import com.puurva.findmetoo.Activities.LoginActivity;
+import com.puurva.findmetoo.BuildConfig;
 import com.puurva.findmetoo.ServiceInterfaces.model.DeviceModel;
 import com.puurva.findmetoo.ServiceInterfaces.model.UserModel;
 import com.puurva.findmetoo.preference.Preference;
@@ -28,7 +29,7 @@ public class Global {
 
     public static final int PERMISSION_REQUEST_CODE = 1111;
     public static String[] select_column = new String[]{"id", "first_name", "last_name", "Lat", "Long"};
-    public static final String BASE_URL = "http://findmetoo.com/";
+    public static final String BASE_URL = BuildConfig.API_BASE_URL;
     public static String FILE_PATH_SUFFIX = "/.findmetoo/Files/";
     public static String TOKEN = null;
     public static SimpleDateFormat universalDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US);

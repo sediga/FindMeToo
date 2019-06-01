@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
@@ -78,6 +79,27 @@ public class ViewListActivity extends Activity {
         LoadList();
     }
 
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK
+                && event.getRepeatCount() == 0) {
+            event.startTracking();
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK && event.isTracking()
+                && !event.isCanceled()) {
+            setIntent(null);
+            finish();
+            return true;
+        }
+        return super.onKeyUp(keyCode, event);
+    }
+
     private void LoadProfileReviews(String deviceId) {
         final String token = getToken();
         ApiInterface apiService =
@@ -122,7 +144,7 @@ public class ViewListActivity extends Activity {
             call.enqueue(new Callback<List<ActivityModel>>() {
                 @Override
                 public void onResponse(Call<List<ActivityModel>> call, Response<List<ActivityModel>> response) {
-                    if (response.isSuccessful()) {
+                    if (response.isSuccessful() && response.body() != null) {
                         activityModels = new ActivityModel[response.body().size()];
                         response.body().toArray(activityModels);
                         ActivitiesAdapter adapter = new ActivitiesAdapter(ViewListActivity.this, activityModels);

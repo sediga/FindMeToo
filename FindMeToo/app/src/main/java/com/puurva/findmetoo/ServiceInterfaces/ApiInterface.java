@@ -29,63 +29,63 @@ import retrofit2.http.Path;
 import java.util.*;
 
 public interface ApiInterface {
-    @POST("JoinServer/Notification")
+    @POST("Notification")
     Call<Void> sendNotification(@Header("Authorization") String authorization, @Body NotificationRequestModel notificationRequestModel);
-    @POST("JoinServer/Device")
+    @POST("Device")
     Call<Void> postDevice(@Body() DeviceModel device);
-    @POST("JoinServer/api/Account/Register")
+    @POST("api/Account/Register")
     Call<Void> registerExternal(@Body() RegisterBindingModel activity);
-    @POST("JoinServer/api/Account/SetPassword")
+    @POST("api/Account/SetPassword")
     Call<Void> setPassword(@Header("Authorization") String authorization, @Body() SetPasswordBindingModel setPasswordBindingModel);
     @FormUrlEncoded
-    @POST("JoinServer/token")
+    @POST("token")
     Call<Token> getToken(@Field("username") String username, @Field("password") String password, @Field("grant_type") String grantType);
-    @GET("JoinServer/Activity/{device}/{activity}/{toplat}/{bottomlat}/{leftlng}/{rightlng}/")
+    @GET("Activity/{device}/{activity}/{toplat}/{bottomlat}/{leftlng}/{rightlng}/")
     Call<List<CurrentActivity>> getMatchingActivities(@Header("Authorization") String authorization, @Path("device") String device, @Path("activity") String activity,
                                                       @Path("toplat") double topLat, @Path("bottomlat") double bottomLat,
                                                       @Path("leftlng") double leftLng, @Path("rightlng") double rightLng);
-    @GET("JoinServer/Activity/{device}/{toplat}/{bottomlat}/{leftlng}/{rightlng}/")
+    @GET("Activity/{device}/{toplat}/{bottomlat}/{leftlng}/{rightlng}/")
     Call<List<CurrentActivity>> getAllActivities(@Header("Authorization") String authorization, @Path("device") String device,
                                                  @Path("toplat") double topLat, @Path("bottomlat") double bottomLat,
                                                  @Path("leftlng") double leftLng, @Path("rightlng") double rightLng);
-    @GET("JoinServer/ActivityById/{activityid}")
+    @GET("ActivityById/{activityid}")
     Call<CurrentActivity> getActivityById(@Header("Authorization") String authorization, @Path("activityid") String activityId);
-    @GET("JoinServer/Images/{deviceId}/{fileName}")
+    @GET("Images/{deviceId}/{fileName}")
     Call<ResponseBody> getMatchingImages(@Header("Authorization") String authorization, @Path("deviceId") String deviceId, @Path("fileName") String fileName);
-    @GET("JoinServer/ProfileImage/{deviceId}")
+    @GET("ProfileImage/{deviceId}")
     Call<ResponseBody> getProfileImage(@Header("Authorization") String authorization, @Path("deviceId") String deviceId);
-    @POST("JoinServer/Location")
+    @POST("Location")
     Call<Void> postCurrentLocation(@Header("Authorization") String authorization, @Body CurrentActivity location);
-    @POST("JoinServer/Activity")
+    @POST("Activity")
     Call<ActivityModel> postActivity(@Header("Authorization") String authorization, @Body ActivityModel activity);
-    @PUT("JoinServer/Activity")
+    @PUT("Activity")
     Call<ActivityModel> putActivity(@Header("Authorization") String authorization, @Body ActivityModel activity);
-    @DELETE("JoinServer/Activity/{activityid}")
+    @DELETE("Activity/{activityid}")
     Call<Void> deleteActivity(@Header("Authorization") String authorization, @Path("activityid") String activityId);
-    @POST("JoinServer/ActivitySettings")
+    @POST("ActivitySettings")
     Call<Void> postActivityWithSettins(@Header("Authorization") String authorization, @Body ActivityModel activity, @Body ActivitySettingsModel activitySettings);
-    @POST("JoinServer/Profile")
+    @POST("Profile")
     Call<Void> postProfile(@Header("Authorization") String authorization, @Body ProfileModel profile);
     @Multipart
-    @POST("JoinServer/ProfileImage/{deviceId}")
+    @POST("ProfileImage/{deviceId}")
     Call<Void> postProfileImage(@Header("Authorization") String authorization, @Path("deviceId") String deviceId, @Part MultipartBody.Part image);
     @Multipart
-    @POST("JoinServer/images/{deviceId}/{activity}")
+    @POST("images/{deviceId}/{activity}")
     Call<Void> postActivityImage(@Header("Authorization") String authorization, @Path("deviceId") String deviceId, @Path("activity") String activity, @Part MultipartBody.Part image);
-    @PUT("JoinServer/Profile/{deviceId}")
+    @PUT("Profile/{deviceId}")
     Call<Void> putProfile(@Header("Authorization") String authorization, @Path("deviceId") String deviceId, @Body ProfileModel profile);
-    @GET("JoinServer/Profile/{deviceId}")
+    @GET("Profile/{deviceId}")
     Call<ProfileModel> getProfile(@Header("Authorization") String authorization, @Path("deviceId") String deviceId);
-    @POST("JoinServer/profilereview")
+    @POST("profilereview")
     Call<Void> postProfileReview(@Header("Authorization") String authorization, @Body ProfileReviewModel profileReviewModel);
-    @GET("JoinServer/profilereview/{deviceId}")
+    @GET("profilereview/{deviceId}")
     Call<List<ProfileReviewModel>> getProfileReviews(@Header("Authorization") String authorization, @Path("deviceId") String deviceId);
-    @GET("JoinServer/MyActivities/{device}")
+    @GET("MyActivities/{device}")
     Call<List<ActivityModel>> geMyActivities(@Header("Authorization") String authorization, @Path("device") String device);
-    @GET("JoinServer/Notification/{deviceid}")
+    @GET("Notification/{deviceid}")
     Call<List<NotificationDetails>> geMyNotifications(@Header("Authorization") String authorization, @Path("deviceid") String device);
-    @GET("JoinServer/ActivityById/{activityid}/Subscribers")
+    @GET("ActivityById/{activityid}/Subscribers")
     Call<List<ProfileModel>> getActivitySubscribers(@Header("Authorization") String authorization, @Path("activityid") String activityId);
-    @DELETE("JoinServer/Notification/{notificationid}")
+    @DELETE("Notification/{notificationid}")
     Call<Void> deleteNotification(@Header("Authorization") String authorization, @Path("notificationid") String notificationId);
 }

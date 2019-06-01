@@ -9,27 +9,39 @@ android {
             storeFile file('C:/Users/goud_/StudioProjects/FindMeToo/FindMeToo/KeyStore/Findmetoo.jks')
             storePassword 'esgoud123'
         }
+        debug {
+            storeFile file('C:\\Users\\goud_\\StudioProjects\\FindMeToo\\FindMeToo\\KeyStore\\Findmetoo.jks')
+            storePassword 'esgoud123'
+            keyAlias = 'findmetoo1'
+            keyPassword 'Duogse!231'
+        }
     }
     compileSdkVersion 27
     defaultConfig {
         applicationId "com.puurva.findmetoo"
         minSdkVersion 22
         targetSdkVersion 27
-        versionCode 9
-        versionName "1.0.9"
+        versionCode 13
+        versionName "1.0.13"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            buildConfigField "String", "API_BASE_URL", "\"http://findmetoo.centralus.cloudapp.azure.com/JoinServer/\""
+            resValue "string", "API_KEY", "AIzaSyAwyR1QrUpaEtyn8fHerYJXBTawuM-ewOE"
+            debuggable = false
+            jniDebuggable = false
             signingConfig signingConfigs.findmetoo1
         }
         debug {
             debuggable true
-            signingConfig signingConfigs.findmetoo1
+//            signingConfig signingConfigs.findmetoo1
             jniDebuggable = true
             renderscriptDebuggable = true
+            buildConfigField "String", "API_BASE_URL", "\"http://findmetoo.com/JoinServer/\""
+            resValue "string", "API_KEY", "AIzaSyDopZNHDHHgX3prHca1n9KJn4WtsQU1V4s"
         }
     }
     sourceSets { main { res.srcDirs = ['src/main/res', 'src/main/res/layout/intro'] } }

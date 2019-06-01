@@ -80,7 +80,8 @@
                 android:layout_weight="0.4"
                 android:hint="@string/enter_title"
                 android:inputType="text"
-                android:maxLength="30"
+                android:maxLength="64"
+                android:scrollbars="vertical"
                 android:singleLine="false"
                 android:textColor="#ff000000"
                 android:textStyle="bold" />
@@ -92,8 +93,9 @@
                 android:layout_weight="0.6"
                 android:hint="@string/enter_brief_description"
                 android:inputType="textMultiLine"
-                android:maxLength="58"
+                android:maxLength="500"
                 android:singleLine="false"
+                android:scrollbars="vertical"
                 android:textColor="#ff7f7f7f" />
 
         </LinearLayout>

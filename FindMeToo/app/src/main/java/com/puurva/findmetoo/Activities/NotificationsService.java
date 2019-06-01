@@ -87,21 +87,10 @@ public class NotificationsService extends FirebaseMessagingService {
                                 Double.parseDouble(jObject.get("Lat").toString()), Double.parseDouble(jObject.get("Long").toString()));
                     }
                 }
-//                deviceID = jObject.get("FromDeviceId").toString();
-//                activityID = jObject.get("ActivityId").toString();
-//                requestStatus = RequestStatus.valueOf(jObject.get("NotificationRequestStatus").toString());
-//                notificationType = NotificationType.valueOf(jObject.get("RequestNotificationType").toString());
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
-//            if (/* Check if data needs to be processed by long running job */ true) {
-//                // For long-running tasks (10 seconds or more) use Firebase Job Dispatcher.
-////                scheduleJob();
-//            } else {
-//                // Handle message within 10 seconds
-//                handleNow();
-//            }
         }
 
         // Check if message contains a notification payload.
