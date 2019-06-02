@@ -1,0 +1,52 @@
+apply plugin: 'com.android.application'
+apply plugin: 'com.google.gms.google-services'
+
+android {
+    compileSdkVersion 27
+    defaultConfig {
+        applicationId "com.puurva.findmetoo"
+        minSdkVersion 22
+        targetSdkVersion 27
+        versionCode 13
+        versionName "1.0.13"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            buildConfigField "String", "API_BASE_URL", "\"http://173.75.2.112/JoinServer/\""
+            resValue "string", "API_KEY", "AIzaSyAwyR1QrUpaEtyn8fHerYJXBTawuM-ewOE"
+            debuggable = false
+            jniDebuggable = false
+        }
+        debug {
+            debuggable true
+            jniDebuggable = true
+            renderscriptDebuggable = true
+            buildConfigField "String", "API_BASE_URL", "\"http://173.75.2.112/JoinServer/\""
+            resValue "string", "API_KEY", "AIzaSyDopZNHDHHgX3prHca1n9KJn4WtsQU1V4s"
+        }
+    }
+    sourceSets { main { res.srcDirs = ['src/main/res', 'src/main/res/layout/intro'] } }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    //noinspection GradleCompatible
+    implementation 'com.android.support:appcompat-v7:27.1.1'
+    implementation 'com.google.android.gms:play-services-maps:15.0.1'
+    implementation 'com.google.android.gms:play-services-location:16.0.0'
+    implementation 'com.android.support:design:27.1.1'
+    implementation 'com.github.arimorty:floatingsearchview:2.1.1'
+    implementation 'com.squareup.retrofit2:retrofit:2.0.2'
+    implementation 'com.squareup.retrofit2:converter-gson:2.0.2'
+    implementation 'com.google.firebase:firebase-core:16.0.7'
+    implementation 'com.google.firebase:firebase-iid:17.0.4'
+    implementation 'com.google.firebase:firebase-messaging:17.3.4'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    androidTestImplementation 'com.android.support.test:rules:1.0.2'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
+}
