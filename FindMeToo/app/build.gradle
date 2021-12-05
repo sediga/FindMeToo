@@ -3,40 +3,34 @@ apply plugin: 'com.google.gms.google-services'
 
 android {
     signingConfigs {
-        findmetoo1 {
-            keyAlias 'findmetoo1'
-            keyPassword 'Duogse!231'
-            storeFile file('C:/Users/goud_/StudioProjects/FindMeToo/FindMeToo/KeyStore/Findmetoo.jks')
-            storePassword 'esgoud123'
-        }
-        debug {
-            storeFile file('C:\\Users\\goud_\\StudioProjects\\FindMeToo\\FindMeToo\\KeyStore\\Findmetoo.jks')
-            storePassword 'esgoud123'
-            keyAlias = 'findmetoo1'
-            keyPassword 'Duogse!231'
+        release {
+            storeFile file('C:\\Development\\Git\\Findmetoo\\FindMeToo\\KeyStore\\Findmetoo.jks')
+            storePassword 'Duogse!23'
+            keyAlias = 'findmetoo'
+            keyPassword 'esgoud123'
         }
     }
-    compileSdkVersion 27
+    compileSdkVersion 28
     defaultConfig {
         applicationId "com.puurva.findmetoo"
         minSdkVersion 22
-        targetSdkVersion 27
-        versionCode 13
-        versionName "1.0.13"
+        targetSdkVersion 28
+        versionCode 17
+        versionName "1.0.17"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            buildConfigField "String", "API_BASE_URL", "\"http://findmetoo.centralus.cloudapp.azure.com/JoinServer/\""
+            buildConfigField "String", "API_BASE_URL", "\"http://findmetoo.com/JoinServer/\""
             debuggable = false
             jniDebuggable = false
-            signingConfig signingConfigs.findmetoo1
+            signingConfig signingConfigs.release
         }
         debug {
             debuggable true
-//            signingConfig signingConfigs.findmetoo1
+//            signingConfig signingConfigs.findmetoo
             jniDebuggable = true
             renderscriptDebuggable = true
             buildConfigField "String", "API_BASE_URL", "\"http://findmetoo.com/JoinServer/\""
@@ -51,7 +45,7 @@ dependencies {
     implementation 'com.android.support:appcompat-v7:27.1.1'
     implementation 'com.google.android.gms:play-services-maps:15.0.1'
     implementation 'com.google.android.gms:play-services-location:16.0.0'
-    implementation 'com.android.support:design:27.1.1'
+    implementation 'com.android.support:design:28.0.0'
     implementation 'com.github.arimorty:floatingsearchview:2.1.1'
     implementation 'com.squareup.retrofit2:retrofit:2.0.2'
     implementation 'com.squareup.retrofit2:converter-gson:2.0.2'

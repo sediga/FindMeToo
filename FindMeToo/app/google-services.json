@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "1058601497589-so6mfqd5dqi7bbqo05iv243bea9s3ff6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.puurva.findmetoo",
+            "certificate_hash": "e9042a98af20a8c7e847dc927baa46b1cdd1b168"
+          }
+        },
+        {
           "client_id": "1058601497589-8ujqllk25kq95al0d5h01edk3bihddsg.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
@@ -33,20 +41,13 @@
         }
       ],
       "services": {
-        "analytics_service": {
-          "status": 1
-        },
         "appinvite_service": {
-          "status": 2,
           "other_platform_oauth_client": [
             {
               "client_id": "1058601497589-lba8q36v1aagae1dgh9hen232o767tj8.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
-        },
-        "ads_service": {
-          "status": 2
         }
       }
     }

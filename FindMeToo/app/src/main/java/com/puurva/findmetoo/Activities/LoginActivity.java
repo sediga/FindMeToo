@@ -164,9 +164,14 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             return false;
         } else {
             dbHelper = new SQLiteManager(this);
+            DoPostPermissionOperations();
+            String isFirstTime = Global.preference.getValue(LoginActivity.this, "is_firsttime", null);
+            if(isFirstTime == null){
+                dbHelper.deleteDataBase();
+                Global.preference.put(LoginActivity.this, "is_firsttime", "false");
+            }
             Global.mdb = dbHelper.openDataBase();
 
-            DoPostPermissionOperations();
             return true;
         }
     }

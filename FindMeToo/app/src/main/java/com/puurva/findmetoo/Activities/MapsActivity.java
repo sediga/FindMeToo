@@ -63,6 +63,7 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.VisibleRegion;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.puurva.findmetoo.Enums.ActivityStatuses;
 import com.puurva.findmetoo.Enums.ActivityTypes;
@@ -427,6 +428,12 @@ public class MapsActivity extends FragmentActivity implements
 //                            Global.ISMARKERCLICKED = false;
                             // Logic to handle location object
                         }
+                    }
+                })
+                .addOnFailureListener(this, new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        String test = e.getMessage();
                     }
                 });
     }

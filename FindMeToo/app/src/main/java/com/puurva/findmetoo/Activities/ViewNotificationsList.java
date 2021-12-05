@@ -123,7 +123,7 @@ public class ViewNotificationsList extends Activity {
                                 intentClass.putExtra("NotificationId",notificationDetail.NotificationId);
                                 if(notificationDetail.MessageObject != null){
                                     if(((LinkedTreeMap)notificationDetail.MessageObject).containsKey("FromDeviceId")){
-                                        activityNotification = new ActivityNotification(notificationDetail.DeviceId, notificationDetail.ActivityId, RequestStatus.valueOf(((LinkedTreeMap) notificationDetail.MessageObject).get("NotificationRequestStatus").toString()), NotificationType.valueOf(((LinkedTreeMap) notificationDetail.MessageObject).get("RequestNotificationType").toString()));
+                                        activityNotification = new ActivityNotification(((LinkedTreeMap)notificationDetail.MessageObject).get("FromDeviceId").toString(), notificationDetail.ActivityId, RequestStatus.valueOf(((LinkedTreeMap) notificationDetail.MessageObject).get("NotificationRequestStatus").toString()), NotificationType.valueOf(((LinkedTreeMap) notificationDetail.MessageObject).get("RequestNotificationType").toString()));
                                         intentClass.putExtra("ActivityNotification", activityNotification);
                                     } else if(((LinkedTreeMap)notificationDetail.MessageObject).containsKey("What")){
                                         intentClass.putExtra("ActivityIdOfNotification", ((LinkedTreeMap)notificationDetail.MessageObject).get("ActivityID").toString());

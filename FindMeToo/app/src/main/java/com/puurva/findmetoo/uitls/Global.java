@@ -27,7 +27,7 @@ public class Global {
     public static boolean is_loggedin = false;
     public static Bitmap CurrentImage = null;
 
-    public static final int PERMISSION_REQUEST_CODE = 1111;
+   public static final int PERMISSION_REQUEST_CODE = 1111;
     public static String[] select_column = new String[]{"id", "first_name", "last_name", "Lat", "Long"};
     public static final String BASE_URL = BuildConfig.API_BASE_URL;
     public static String FILE_PATH_SUFFIX = "/.findmetoo/Files/";

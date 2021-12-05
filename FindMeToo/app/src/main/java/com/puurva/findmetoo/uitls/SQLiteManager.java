@@ -5,6 +5,7 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Environment;
+import android.util.Log;
 
 import com.puurva.findmetoo.R;
 
@@ -79,6 +80,18 @@ public class SQLiteManager extends SQLiteOpenHelper {
     /**
      * get sqlite database from file of sdcard
      */
+
+    public void deleteDataBase(){
+        try{
+            File dbFile = new File(getDatabasePath());
+            if(dbFile.exists()){
+                dbFile.delete();
+            }
+        } catch (Exception ex){
+            Log.e("SQLLiteManager","error while deleting existing database", ex);
+        }
+    }
+
     public SQLiteDatabase openDataBase() throws SQLException {
         File dbFile = new File(getDatabasePath());
         if (!dbFile.exists()) {
