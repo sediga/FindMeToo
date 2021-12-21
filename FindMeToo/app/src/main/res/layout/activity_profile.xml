@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/ConstraintLayout0"
@@ -16,7 +16,7 @@
         android:orientation="horizontal"
         app:layout_constraintTop_toTopOf="@+id/ConstraintLayout0">
 
-        <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        <androidx.constraintlayout.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
             xmlns:app="http://schemas.android.com/apk/res-auto"
             xmlns:tools="http://schemas.android.com/tools"
             android:id="@+id/ConstraintLayout1"
@@ -59,7 +59,7 @@
                 app:layout_constraintEnd_toEndOf="@id/ConstraintLayout1"
                 app:layout_constraintStart_toEndOf="@id/imgPhoto"
                 app:layout_constraintTop_toBottomOf="@id/txt_name" />
-        </android.support.constraint.ConstraintLayout>
+        </androidx.constraintlayout.ConstraintLayout>
     </LinearLayout>
 
     <LinearLayout
@@ -70,7 +70,7 @@
         app:layout_constraintTop_toBottomOf="@+id/linearLayout2"
         tools:ignore="UnknownId">
 
-        <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        <androidx.constraintlayout.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
             xmlns:app="http://schemas.android.com/apk/res-auto"
             xmlns:tools="http://schemas.android.com/tools"
             android:id="@+id/ConstraintLayout2"
@@ -124,7 +124,7 @@
                 app:layout_constraintStart_toEndOf="@+id/txt_view_reviews"
                 app:layout_constraintTop_toTopOf="@id/ConstraintLayout2" />
 
-        </android.support.constraint.ConstraintLayout>
+        </androidx.constraintlayout.ConstraintLayout>
     </LinearLayout>
 
     <EditText
@@ -159,4 +159,4 @@
                 android:layout_weight="0.495"
                 android:text="SAVE" />
         </LinearLayout>
-</android.support.constraint.ConstraintLayout>
+</androidx.constraintlayout.ConstraintLayout>

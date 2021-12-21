@@ -1,25 +1,17 @@
 package com.puurva.findmetoo.Activities;
 
-import android.Manifest;
 import android.content.ContentValues;
-import android.content.pm.PackageManager;
 import android.location.Location;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
+//import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.EditText;
 
-import com.google.android.gms.tasks.OnSuccessListener;
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.puurva.findmetoo.R;
 import com.puurva.findmetoo.ServiceInterfaces.ApiInterface;
-import com.puurva.findmetoo.ServiceInterfaces.model.DeviceModel;
-import com.puurva.findmetoo.ServiceInterfaces.model.RegisterBindingModel;
 import com.puurva.findmetoo.ServiceInterfaces.model.SetPasswordBindingModel;
-import com.puurva.findmetoo.ServiceInterfaces.model.Token;
-import com.puurva.findmetoo.ServiceInterfaces.model.TokenBindingModel;
 import com.puurva.findmetoo.preference.PrefConst;
 import com.puurva.findmetoo.uitls.Global;
 import com.puurva.findmetoo.uitls.HttpClient;

@@ -8,25 +8,4 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
-    <style name="stdButton">
-        <item name="android:layout_width">@dimen/dimen_100</item>
-        <item name="android:layout_height">@dimen/dimen_30</item>
-        <item name="android:layout_marginTop">@dimen/dimen_20</item>
-        <item name="android:textColor">@android:color/white</item>
-        <item name="android:textSize">@dimen/font_13</item>
-    </style>
-
-    <style name="AppTheme.NoActionBar">
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
-    </style>
-
-    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
-
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
-
-    <style name="myCustomMenuTextAppearance" parent="@android:style/TextAppearance.Widget.IconMenu.Item">
-        <item name="android:textColor">@android:color/holo_orange_dark</item>
-    </style>
-
 </resources>

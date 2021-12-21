@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/ConstraintLayout0_View"
@@ -16,7 +16,7 @@
         android:orientation="horizontal"
         app:layout_constraintTop_toTopOf="@+id/ConstraintLayout0_View">
 
-        <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        <androidx.constraintlayout.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
             xmlns:app="http://schemas.android.com/apk/res-auto"
             xmlns:tools="http://schemas.android.com/tools"
             android:id="@+id/ConstraintLayout1_View"
@@ -58,7 +58,7 @@
                 app:layout_constraintEnd_toEndOf="@id/ConstraintLayout1_View"
                 app:layout_constraintStart_toEndOf="@id/imgViewPhoto"
                 app:layout_constraintTop_toBottomOf="@id/txt_view_name" />
-        </android.support.constraint.ConstraintLayout>
+        </androidx.constraintlayout.ConstraintLayout>
     </LinearLayout>
 
     <LinearLayout
@@ -69,7 +69,7 @@
         app:layout_constraintTop_toBottomOf="@+id/linearLayout2_View"
         tools:ignore="UnknownId">
 
-        <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        <androidx.constraintlayout.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
             xmlns:app="http://schemas.android.com/apk/res-auto"
             xmlns:tools="http://schemas.android.com/tools"
             android:id="@+id/ConstraintLayout2_View"
@@ -121,7 +121,7 @@
                 app:layout_constraintEnd_toEndOf="@id/ConstraintLayout2_View"
                 app:layout_constraintTop_toTopOf="@id/ConstraintLayout2_View" />
 
-        </android.support.constraint.ConstraintLayout>
+        </androidx.constraintlayout.ConstraintLayout>
     </LinearLayout>
 
     <EditText
@@ -181,4 +181,4 @@
         app:layout_constraintLeft_toRightOf="@+id/btn_review_cancel"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txt_profile_review" />
-</android.support.constraint.ConstraintLayout>
+</androidx.constraintlayout.ConstraintLayout>

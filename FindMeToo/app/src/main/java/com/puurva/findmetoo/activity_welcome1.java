@@ -1,11 +1,13 @@
 package com.puurva.findmetoo;
 
 import android.os.Bundle;
-import android.support.design.widget.BottomNavigationView;
-import android.support.v7.app.AppCompatActivity;
-import android.support.annotation.NonNull;
+//import android.support.design.widget.BottomNavigationView;
+//import android.support.v7.app.AppCompatActivity;
+//import android.support.annotation.NonNull;
 import android.view.MenuItem;
 import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 public class activity_welcome1 extends AppCompatActivity {
     private TextView mTextMessage;

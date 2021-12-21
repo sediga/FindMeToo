@@ -149,7 +149,7 @@
                 android:layout_weight="0.8"
                 android:orientation="horizontal">
 
-                <android.support.design.widget.TextInputLayout
+                <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/text_input_layout_startdate"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -163,9 +163,9 @@
                         android:clickable="true"
                         android:inputType="datetime"
                         android:textSize="@dimen/dimen_10" />
-                </android.support.design.widget.TextInputLayout>
+                </com.google.android.material.textfield.TextInputLayout>
 
-                <android.support.design.widget.TextInputLayout
+                <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/text_input_layout_enddate"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -179,7 +179,7 @@
                         android:clickable="true"
                         android:inputType="datetime"
                         android:textSize="@dimen/dimen_10" />
-                </android.support.design.widget.TextInputLayout>
+                </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
 
             <!--<android.support.design.widget.TextInputLayout-->

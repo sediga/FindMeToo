@@ -6,9 +6,11 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.provider.Settings;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+//import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -18,14 +20,15 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.firebase.ui.auth.AuthUI;
+import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
-import com.puurva.findmetoo.Enums.NotificationType;
-import com.puurva.findmetoo.Enums.RequestStatus;
 import com.puurva.findmetoo.R;
 import com.puurva.findmetoo.ServiceInterfaces.ApiInterface;
-import com.puurva.findmetoo.ServiceInterfaces.model.ActivityModel;
 import com.puurva.findmetoo.ServiceInterfaces.model.DeviceModel;
 import com.puurva.findmetoo.ServiceInterfaces.model.ActivityNotification;
 import com.puurva.findmetoo.ServiceInterfaces.model.Token;
@@ -33,10 +36,14 @@ import com.puurva.findmetoo.preference.PrefConst;
 import com.puurva.findmetoo.preference.Preference;
 import com.puurva.findmetoo.uitls.CallBackHelper;
 import com.puurva.findmetoo.uitls.CommonUtility;
+import com.puurva.findmetoo.uitls.DBUtils;
 import com.puurva.findmetoo.uitls.Global;
 import com.puurva.findmetoo.uitls.HttpClient;
 import com.puurva.findmetoo.uitls.SQLHelper;
 import com.puurva.findmetoo.uitls.SQLiteManager;
+
+import java.util.Arrays;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -44,15 +51,18 @@ import retrofit2.Response;
 
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
 
+    private static final int RC_SIGN_IN = 123;
     private SQLiteManager dbHelper;
     private String androidId;
     private ActivityNotification activityNotification = null;
     private String activityOfNotification = null;
     private String notificationId = null;
+    String userId;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
+            setContentView(R.layout.activity_login);
 //        Bundle bundle = getIntent().getExtras();
 //        if (bundle != null && bundle.getString("FromDeviceId") != null &&
 //                bundle.getString("ActivityId") != null &&
@@ -73,8 +83,22 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             findViewById(R.id.button_change_password).setOnClickListener(this);
 
             while (!confirmationPermission()) ;
+            FirebaseAuth auth = FirebaseAuth.getInstance();
+            if (auth.getCurrentUser() != null) {
+                InitializeAuthentication();
+//                userId = auth.getCurrentUser().getUid();
+//                DBUtils.AddNewUser(userId, auth.getCurrentUser().getDisplayName(), auth.getCurrentUser().getEmail(), 1, notificationId);
+//                currentUser = new User(userId, auth.getCurrentUser().getDisplayName(), auth.getCurrentUser().getEmail(), notificationId);
+//                DBUtils.AddOnlineUser(currentUser);
+//                Global.preference.put(this, "userid", userId);
+//            StartNextActivity();
+//            DBUtils.DeleteUserGames(userId);
+            } else {
+                InitializeAuthentication();
+            }
         }else{
-            LoadActivity();
+
+            //            LoadActivity();
         }
         // sqlite db_user setting
 
@@ -178,6 +202,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == Global.PERMISSION_REQUEST_CODE) {
             for (int grantResult : grantResults) {
                 // check permission result
@@ -362,6 +387,48 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             Global.preference.put(this, PrefConst.TOKEN, token);
             Global.TOKEN = token;
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == RC_SIGN_IN) {
+            IdpResponse response = IdpResponse.fromResultIntent(data);
+
+            if (resultCode == RESULT_OK) {
+                // Successfully signed in
+                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                // ...
+                userId = user.getUid();
+                DBUtils.AddNewUser(userId, user.getDisplayName(), user.getEmail());
+                Global.preference.put(this, "userid", userId);
+
+                Global.is_loggedin = true;
+                LoadActivity();
+                finish();
+            } else {
+                // Sign in failed. If response is null the user canceled the
+                // sign-in flow using the back button. Otherwise check
+                // response.getError().getErrorCode() and handle the error.
+                // ...
+            }
+        }
+    }
+
+    private void InitializeAuthentication(){
+// Choose authentication providers
+        List<AuthUI.IdpConfig> providers = Arrays.asList(
+                new AuthUI.IdpConfig.EmailBuilder().build(),
+                new AuthUI.IdpConfig.GoogleBuilder().build());
+
+// Create and launch sign-in intent
+        startActivityForResult(
+                AuthUI.getInstance()
+                        .createSignInIntentBuilder()
+                        .setAvailableProviders(providers)
+                        .build(),
+                RC_SIGN_IN);
+//        FirebaseAuth.getInstance().addAuthStateListener(onActivityResult);
     }
 }
   

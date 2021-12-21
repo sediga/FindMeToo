@@ -6,6 +6,10 @@ public class UserModel {
 
     @SerializedName("id")
     private int id;
+    @SerializedName("uid")
+    private String uid;
+    @SerializedName("displayname")
+    private String displayname;
     @SerializedName("username")
     private String username;
     @SerializedName("password")
@@ -19,6 +23,14 @@ public class UserModel {
         this.id = id;
         this.username = first_name;
         this.password = last_name;
+//        this.latitude = latitude;
+//        this.longitude = longitude;
+    }
+
+    public UserModel(String uid, String userName, String displayName) {
+        this.username = userName;
+        this.uid = uid;
+        this.displayname = displayName;
 //        this.latitude = latitude;
 //        this.longitude = longitude;
     }

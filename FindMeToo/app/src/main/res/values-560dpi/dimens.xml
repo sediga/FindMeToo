@@ -5,7 +5,6 @@
     <dimen name="dimen_10">15dp</dimen>
     <dimen name="dimen_20">30dp</dimen>
     <dimen name="dimen_30">45dp</dimen>
-    <dimen name="dimen_100">150dp</dimen>
 
 
     <!-- Common font size -->
